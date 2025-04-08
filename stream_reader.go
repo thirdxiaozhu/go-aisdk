@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 22:28:26
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-08 12:27:33
+ * @LastEditTime: 2025-04-08 13:43:24
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -25,7 +25,6 @@ var (
 
 // streamable 可流式传输的类型
 type streamable interface {
-	// BaiduAppBuilderIntegratedResult
 }
 
 // streamReader 流读取器
