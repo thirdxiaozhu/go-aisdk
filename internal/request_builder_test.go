@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 19:36:52
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-07 20:24:23
+ * @LastEditTime: 2025-04-08 10:21:21
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -29,7 +29,7 @@ func (fm *failingMarshaller) Marshal(_ any) ([]byte, error) {
 
 func TestRequestBuilderReturnsMarshallerErrors(t *testing.T) {
 	builder := utils.NewRequestBuilder(utils.WithMarshaller(&failingMarshaller{}))
-	if _, err := builder.Build(context.Background(), "", "", utils.SetBody(struct{}{})); !errors.Is(err, errTestMarshallerFailed) {
+	if _, err := builder.Build(context.Background(), "", "", struct{}{}, nil); !errors.Is(err, errTestMarshallerFailed) {
 		t.Fatalf("did not return error when marshaller failed: %v", err)
 	}
 }
@@ -45,7 +45,7 @@ func TestRequestBuilderReturnsRequest(t *testing.T) {
 		want, _     = http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(reqBytes))
 	)
 
-	got, _ := builder.Build(ctx, method, url, utils.SetBody(request))
+	got, _ := builder.Build(ctx, method, url, request, nil)
 	if !reflect.DeepEqual(got.Body, want.Body) ||
 		!reflect.DeepEqual(got.URL, want.URL) ||
 		!reflect.DeepEqual(got.Method, want.Method) {
@@ -61,7 +61,7 @@ func TestRequestBuilderReturnsRequestWhenRequestOfArgsIsNil(t *testing.T) {
 		want, _ = http.NewRequestWithContext(ctx, method, url, nil)
 		builder = utils.NewRequestBuilder()
 	)
-	got, _ := builder.Build(ctx, method, url)
+	got, _ := builder.Build(ctx, method, url, nil, nil)
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Build() got = %v, want = %v", got, want)
 	}

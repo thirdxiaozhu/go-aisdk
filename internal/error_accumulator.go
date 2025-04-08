@@ -43,8 +43,7 @@ func NewErrorAccumulator() (e ErrorAccumulator) {
 // Write
 func (e *DefaultErrorAccumulator) Write(p []byte) (err error) {
 	if _, err = e.Buffer.Write(p); err != nil {
-		err = fmt.Errorf("error accumulator write error, %w", err)
-		return
+		return fmt.Errorf("error accumulator write error, %w", err)
 	}
 	return
 }

@@ -51,8 +51,7 @@ func (fb *DefaultFormBuilder) CreateFormFileReader(fieldname string, r io.Reader
 // createFormFile 向表单中添加文件
 func (fb *DefaultFormBuilder) createFormFile(fieldname string, r io.Reader, filename string) (err error) {
 	if filename == "" {
-		err = fmt.Errorf("filename cannot be empty")
-		return
+		return fmt.Errorf("filename cannot be empty")
 	}
 
 	var fieldWriter io.Writer
