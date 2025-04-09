@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 18:25:49
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-07 19:45:42
+ * @LastEditTime: 2025-04-09 10:43:14
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -24,8 +24,8 @@ type ErrorAccumulator interface {
 // errorBuffer 错误 Buffer 接口
 type errorBuffer interface {
 	io.Writer
-	Len() int
-	Bytes() []byte
+	Len() (n int)
+	Bytes() (b []byte)
 }
 
 // DefaultErrorAccumulator 默认错误收集器

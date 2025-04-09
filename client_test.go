@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-08 11:32:31
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-08 13:15:31
+ * @LastEditTime: 2025-04-09 11:04:52
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -241,7 +241,7 @@ func TestNewRequest(t *testing.T) {
 			name:           "request with body",
 			method:         "POST",
 			url:            "https://api.example.com/v1/chat",
-			setters:        []requestOption{setBody(map[string]string{"key": "value"})},
+			setters:        []requestOption{withBody(map[string]string{"key": "value"})},
 			expectedBody:   `{"key":"value"}`,
 			expectedHeader: http.Header{},
 		},
@@ -249,7 +249,7 @@ func TestNewRequest(t *testing.T) {
 			name:         "request with content type",
 			method:       "POST",
 			url:          "https://api.example.com/v1/chat",
-			setters:      []requestOption{setContentType("application/json")},
+			setters:      []requestOption{withContentType("application/json")},
 			expectedBody: "",
 			expectedHeader: http.Header{
 				"Content-Type": []string{"application/json"},
@@ -445,19 +445,19 @@ func TestRequestOptions(t *testing.T) {
 	}{
 		{
 			name:           "setBody",
-			option:         setBody(map[string]string{"key": "value"}),
+			option:         withBody(map[string]string{"key": "value"}),
 			expectedHeader: http.Header{},
 			expectedBody:   map[string]string{"key": "value"},
 		},
 		{
 			name:           "setContentType",
-			option:         setContentType("application/json"),
+			option:         withContentType("application/json"),
 			expectedHeader: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody:   nil,
 		},
 		{
 			name: "setCookie",
-			option: setCookie([]*http.Cookie{
+			option: withCookie([]*http.Cookie{
 				{Name: "test", Value: "value"},
 				{Name: "test2", Value: "value2"},
 			}),
@@ -466,13 +466,13 @@ func TestRequestOptions(t *testing.T) {
 		},
 		{
 			name:           "setKeyValue",
-			option:         setKeyValue("X-Test", "test-value"),
+			option:         withKeyValue("X-Test", "test-value"),
 			expectedHeader: http.Header{"X-Test": []string{"test-value"}},
 			expectedBody:   nil,
 		},
 		{
 			name:           "addKeyValue",
-			option:         addKeyValue("X-Test", "test-value"),
+			option:         withKeyValue("X-Test", "test-value"),
 			expectedHeader: http.Header{"X-Test": []string{"test-value"}},
 			expectedBody:   nil,
 		},
@@ -495,28 +495,6 @@ func TestRequestOptions(t *testing.T) {
 				t.Errorf("Expected body %v, got %v", tt.expectedBody, reqOpts.body)
 			}
 		})
-	}
-}
-
-func TestAddAndSetKeyValue(t *testing.T) {
-	reqOpts := &requestOptions{
-		header: make(http.Header),
-	}
-
-	setKeyValue("X-Test", "value1")(reqOpts)
-	if reqOpts.header.Get("X-Test") != "value1" {
-		t.Errorf("Expected X-Test to be 'value1', got '%s'", reqOpts.header.Get("X-Test"))
-	}
-
-	setKeyValue("X-Test", "value2")(reqOpts)
-	if reqOpts.header.Get("X-Test") != "value2" {
-		t.Errorf("Expected X-Test to be 'value2', got '%s'", reqOpts.header.Get("X-Test"))
-	}
-
-	addKeyValue("X-Test", "value3")(reqOpts)
-	values := reqOpts.header.Values("X-Test")
-	if len(values) != 2 || values[0] != "value2" || values[1] != "value3" {
-		t.Errorf("Expected X-Test to have values ['value2', 'value3'], got %v", values)
 	}
 }
 

@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 18:22:33
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-08 12:18:01
+ * @LastEditTime: 2025-04-09 11:02:57
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -44,11 +44,6 @@ func (h *httpHeader) Header() (header http.Header) {
 	return http.Header(*h)
 }
 
-// GetRateLimitHeaders 获取速率限制请求头
-func (h *httpHeader) GetRateLimitHeaders() (rateLimit RateLimitHeaders) {
-	return newRateLimitHeaders(h.Header())
-}
-
 // RawResponse 原始响应
 type RawResponse struct {
 	io.ReadCloser
@@ -80,22 +75,22 @@ type requestOptions struct {
 // requestOption 请求选项配置器
 type requestOption func(reqOpts *requestOptions)
 
-// setBody 设置 HTTP 请求的主体内容
-func setBody(body any) (reqOpt requestOption) {
+// withBody 设置 HTTP 请求的主体内容
+func withBody(body any) (reqOpt requestOption) {
 	return func(reqOpts *requestOptions) {
 		reqOpts.body = body
 	}
 }
 
-// setContentType 设置 HTTP 请求头的 Content-Type 字段
-func setContentType(contentType string) (reqOpt requestOption) {
+// withContentType 设置 HTTP 请求头的 Content-Type 字段
+func withContentType(contentType string) (reqOpt requestOption) {
 	return func(reqOpts *requestOptions) {
 		reqOpts.header.Set("Content-Type", contentType)
 	}
 }
 
-// setCookie 设置 HTTP 请求头的 Cookie 字段
-func setCookie(cookies []*http.Cookie) (reqOpt requestOption) {
+// withCookie 设置 HTTP 请求头的 Cookie 字段
+func withCookie(cookies []*http.Cookie) (reqOpt requestOption) {
 	return func(reqOpts *requestOptions) {
 		cookieList := make([]string, 0, len(cookies))
 		for _, v := range cookies {
@@ -105,17 +100,10 @@ func setCookie(cookies []*http.Cookie) (reqOpt requestOption) {
 	}
 }
 
-// setKeyValue 设置 HTTP 请求头的键值对
-func setKeyValue(key, value string) (reqOpt requestOption) {
+// withKeyValue 设置 HTTP 请求头的键值对
+func withKeyValue(key, value string) (reqOpt requestOption) {
 	return func(reqOpts *requestOptions) {
 		reqOpts.header.Set(key, value)
-	}
-}
-
-// addKeyValue 添加 HTTP 请求头的键值对
-func addKeyValue(key, value string) (reqOpt requestOption) {
-	return func(reqOpts *requestOptions) {
-		reqOpts.header.Add(key, value)
 	}
 }
 
@@ -213,6 +201,7 @@ func sendRequestStream[T streamable](client *Client, req *http.Request) (stream 
 		response:           resp,
 		errAccumulator:     utils.NewErrorAccumulator(),
 		unmarshaler:        &utils.JSONUnmarshaler{},
+		httpHeader:         httpHeader(resp.Header),
 	}
 	return
 }
@@ -246,9 +235,29 @@ func decodeString(body io.Reader, output *string) (err error) {
 	return
 }
 
+// fullURLOptions 完整 URL 选项
+type fullURLOptions struct {
+	model string
+}
+
+// fullURLOption 完整 URL 选项配置器
+type fullURLOption func(args *fullURLOptions)
+
+// withModel 设置模型
+func withModel(model string) (opt fullURLOption) {
+	return func(args *fullURLOptions) {
+		args.model = model
+	}
+}
+
 // fullURL 获取完整链接
-func (c *Client) fullURL(suffix string) (url string) {
+func (c *Client) fullURL(suffix string, setters ...fullURLOption) (url string) {
 	baseURL := strings.TrimRight(c.config.BaseURL, "/")
+	args := fullURLOptions{}
+	for _, setter := range setters {
+		setter(&args)
+	}
+
 	return fmt.Sprintf("%s%s", baseURL, suffix)
 }
 

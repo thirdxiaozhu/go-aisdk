@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 22:28:26
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-08 13:43:24
+ * @LastEditTime: 2025-04-09 10:57:52
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -35,6 +35,7 @@ type streamReader[T streamable] struct {
 	response           *http.Response
 	errAccumulator     utils.ErrorAccumulator
 	unmarshaler        utils.Unmarshaler
+	httpHeader
 }
 
 // Recv 接收数据

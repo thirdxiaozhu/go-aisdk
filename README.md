@@ -1,2 +1,2 @@
 # go-openai
-Minimalist yet robust Go clients for major LLM APIs, preserving original interface semantics while providing developer-friendly utilities.
+A comprehensive Go SDK providing standardized interfaces for multiple AI model platforms, designed for seamless integration and vendor flexibility.
