@@ -2,12 +2,12 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-09 17:40:55
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-09 17:46:05
+ * @LastEditTime: 2025-04-10 13:36:04
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package core
+package openai
 
 import "encoding/json"
 

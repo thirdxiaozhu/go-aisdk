@@ -1,2 +1,46 @@
-# go-openai
-A comprehensive Go SDK providing standardized interfaces for multiple AI model platforms, designed for seamless integration and vendor flexibility.
+# go-openai: 统一大模型 API 接口
+
+go-openai 是一个用 Go 语言实现的统一大模型 API 接口库，提供了一致的接口来访问各种 AI 服务提供商的 API，包括对话、图像生成、视频生成、音频处理和向量嵌入等功能。
+
+### 设计理念
+
+go-openai 遵循以下设计原则：
+
+1. **简单性优先**：保持 API 设计简洁明了，易于理解和使用
+2. **专注核心功能**：专注于提供与 AI 模型交互的核心功能
+3. **统一接口**：提供统一的接口，隐藏不同提供商 API 的差异
+4. **类型安全**：使用强类型提高代码质量和开发体验
+
+### 特性
+
+- 统一 API 接口，支持多种 AI 提供商
+- 类型安全的请求和响应
+- 多模态内容支持（文本、图像、语音等）
+- 函数调用和工具使用支持
+- 重试机制，提高可靠性
+- 易于扩展到新的 AI 提供商
+
+### 安装
+
+```bash
+go get github.com:liusuxian/go-openai
+```
+
+## 支持的服务提供商
+
+- OpenAI
+- DeepSeek
+- Claude (Anthropic)
+- Gemini (Google)
+- Aliyunbl (阿里云百炼)
+- Midjourney
+- Vidu (生数科技)
+- Keling (可灵 AI)
+
+## 支持的功能
+
+- **聊天/文本生成**：支持各种聊天模型
+- **图像生成**：支持 DALL-E、Midjourney 等图像生成模型
+- **视频生成**：支持视频生成模型
+- **音频处理**：支持语音识别、文本转语音等
+- **向量嵌入**：支持文本嵌入模型

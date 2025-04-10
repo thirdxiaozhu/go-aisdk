@@ -2,12 +2,12 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-09 15:01:47
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-09 18:45:28
+ * @LastEditTime: 2025-04-10 13:51:31
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package core
+package openai
 
 import "context"
 
@@ -33,6 +33,7 @@ const (
 	ImageModel ModelType = "image" // 图像生成模型
 	VideoModel ModelType = "video" // 视频生成模型
 	AudioModel ModelType = "audio" // 音频处理模型
+	EmbedModel ModelType = "embed" // 嵌入模型
 )
 
 // ProviderService AI服务提供商的服务接口
