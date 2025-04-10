@@ -2,15 +2,15 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 20:54:21
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-08 10:59:22
+ * @LastEditTime: 2025-04-10 14:13:38
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package openai_test
+package aisdk_test
 
 import (
-	"github.com/liusuxian/go-openai"
+	"github.com/liusuxian/aisdk"
 	"net/http"
 	"testing"
 )
@@ -19,7 +19,7 @@ func TestDefaultConfig(t *testing.T) {
 	var (
 		baseURL   = "https://api.openai.com/v1"
 		authToken = "test-token"
-		config    = openai.DefaultConfig(baseURL, authToken)
+		config    = aisdk.DefaultConfig(baseURL, authToken)
 	)
 
 	if config.BaseURL != baseURL {
@@ -40,7 +40,7 @@ func TestDefaultConfig(t *testing.T) {
 }
 
 func TestClientConfig(t *testing.T) {
-	config := openai.ClientConfig{
+	config := aisdk.ClientConfig{
 		BaseURL:            "https://custom-api.com",
 		AuthToken:          "custom-token",
 		HTTPClient:         &http.Client{},

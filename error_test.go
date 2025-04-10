@@ -2,28 +2,28 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 21:16:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-08 13:16:51
+ * @LastEditTime: 2025-04-10 14:14:06
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package openai_test
+package aisdk_test
 
 import (
 	"errors"
-	"github.com/liusuxian/go-openai"
+	"github.com/liusuxian/aisdk"
 	"testing"
 )
 
 func TestRequestError_Error(t *testing.T) {
 	tests := []struct {
 		name          string
-		requestError  *openai.RequestError
+		requestError  *aisdk.RequestError
 		expectedError string
 	}{
 		{
 			name: "Basic error with all fields",
-			requestError: &openai.RequestError{
+			requestError: &aisdk.RequestError{
 				HTTPStatus:     "Bad Request",
 				HTTPStatusCode: 400,
 				Err:            errors.New("invalid request"),
@@ -33,7 +33,7 @@ func TestRequestError_Error(t *testing.T) {
 		},
 		{
 			name: "Error with empty body",
-			requestError: &openai.RequestError{
+			requestError: &aisdk.RequestError{
 				HTTPStatus:     "Not Found",
 				HTTPStatusCode: 404,
 				Err:            errors.New("resource not found"),
@@ -54,7 +54,7 @@ func TestRequestError_Error(t *testing.T) {
 
 func TestRequestError_Unwrap(t *testing.T) {
 	originalError := errors.New("original error")
-	requestError := &openai.RequestError{
+	requestError := &aisdk.RequestError{
 		HTTPStatus:     "Internal Server Error",
 		HTTPStatusCode: 500,
 		Err:            originalError,

@@ -2,18 +2,18 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 22:28:26
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-09 10:57:52
+ * @LastEditTime: 2025-04-10 14:14:56
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package openai
+package aisdk
 
 import (
 	"bufio"
 	"bytes"
 	"fmt"
-	utils "github.com/liusuxian/go-openai/internal"
+	utils "github.com/liusuxian/aisdk/internal"
 	"io"
 	"net/http"
 )

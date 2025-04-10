@@ -1,10 +1,10 @@
-# go-openai: 统一大模型 API 接口
+# go-aisdk: 统一大模型 API 接口
 
-go-openai 是一个用 Go 语言实现的统一大模型 API 接口库，提供了一致的接口来访问各种 AI 服务提供商的 API，包括对话、图像生成、视频生成、音频处理和向量嵌入等功能。
+go-aisdk 是一个用 Go 语言实现的统一大模型 API 接口库，提供了一致的接口来访问各种 AI 服务提供商的 API，包括对话、图像生成、视频生成、音频处理和向量嵌入等功能。
 
 ### 设计理念
 
-go-openai 遵循以下设计原则：
+go-aisdk 遵循以下设计原则：
 
 1. **简单性优先**：保持 API 设计简洁明了，易于理解和使用
 2. **专注核心功能**：专注于提供与 AI 模型交互的核心功能
@@ -23,7 +23,7 @@ go-openai 遵循以下设计原则：
 ### 安装
 
 ```bash
-go get github.com:liusuxian/go-openai
+go get github.com:liusuxian/go-aisdk
 ```
 
 ## 支持的服务提供商

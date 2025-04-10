@@ -2,12 +2,12 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-08 11:32:31
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-09 11:04:52
+ * @LastEditTime: 2025-04-10 14:10:47
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package openai
+package aisdk
 
 import (
 	"context"

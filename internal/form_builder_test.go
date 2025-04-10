@@ -2,18 +2,18 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 19:24:23
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-07 19:34:31
+ * @LastEditTime: 2025-04-10 14:15:42
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package openai_test
+package aisdk_test
 
 import (
 	"bytes"
 	"errors"
-	utils "github.com/liusuxian/go-openai/internal"
-	"github.com/liusuxian/go-openai/internal/test/checks"
+	utils "github.com/liusuxian/aisdk/internal"
+	"github.com/liusuxian/aisdk/internal/test/checks"
 	"os"
 	"testing"
 )

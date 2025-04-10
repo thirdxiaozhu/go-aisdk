@@ -2,17 +2,17 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-08 11:12:40
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-08 11:27:53
+ * @LastEditTime: 2025-04-10 14:15:21
  * @Description: Test cases for stream_reader.go
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package openai
+package aisdk
 
 import (
 	"bufio"
 	"errors"
-	utils "github.com/liusuxian/go-openai/internal"
+	utils "github.com/liusuxian/aisdk/internal"
 	"io"
 	"net/http"
 	"strings"

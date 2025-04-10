@@ -1,3 +1,3 @@
-module github.com/liusuxian/go-openai
+module github.com/liusuxian/aisdk
 
 go 1.24.0
