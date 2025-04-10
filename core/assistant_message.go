@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-09 17:39:52
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-09 20:18:29
+ * @LastEditTime: 2025-04-10 13:15:07
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -19,6 +19,8 @@ type AssistantMessage struct {
 	Name              string                      `json:"name,omitempty"`               // 参与者名称
 	Refusal           string                      `json:"refusal,omitempty"`            // 拒绝消息
 	ToolCalls         []ChatAssistantMsgToolCalls `json:"tool_calls,omitempty"`         // 工具调用
+	Prefix            bool                        `json:"prefix,omitempty"`             // (DeepSeek)设置此参数为 true，来强制模型在其回答中以此 assistant 消息中提供的前缀内容开始
+	ReasoningContent  string                      `json:"reasoning_content,omitempty"`  // (DeepSeek)用于 deepseek-reasoner 模型在对话前缀续写功能下，作为最后一条 assistant 思维链内容的输入。使用此功能时，prefix 参数必须设置为 true
 }
 
 // GetRole 获取消息角色
@@ -76,5 +78,5 @@ type ChatAssistantMsgToolFunction struct {
 type ChatAssistantMsgToolCalls struct {
 	Function *ChatAssistantMsgToolFunction `json:"function"` // 函数调用
 	ID       string                        `json:"id"`       // 工具ID
-	Type     string                        `json:"type"`     // 工具类型
+	Type     ToolType                      `json:"type"`     // 工具类型
 }

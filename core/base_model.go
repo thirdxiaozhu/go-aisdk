@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-09 16:37:40
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-09 20:17:47
+ * @LastEditTime: 2025-04-10 12:09:07
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -40,3 +40,10 @@ type BaseResponse struct {
 func (b BaseResponse) GetError() (err error) {
 	return b.Error
 }
+
+// ToolType 工具类型
+type ToolType string
+
+const (
+	ToolTypeFunction ToolType = "function" // 函数
+)
