@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-09 15:01:47
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-10 13:51:31
+ * @LastEditTime: 2025-04-11 11:02:29
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -38,6 +38,8 @@ const (
 
 // ProviderService AI服务提供商的服务接口
 type ProviderService interface {
+	GetProvider() (provider Provider) // 获取提供商
+
 	// 聊天相关
 	CreateChatCompletion(ctx context.Context, request ChatRequest) (response ChatResponse, err error)
 	// CreateChatCompletionStream(ctx context.Context, request ChatRequest) (response ChatResponseStream, err error)
