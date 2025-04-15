@@ -1,9 +1,9 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-08 11:12:40
+ * @Date: 2025-04-15 15:33:40
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-10 14:15:21
- * @Description: Test cases for stream_reader.go
+ * @LastEditTime: 2025-04-15 15:34:44
+ * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
@@ -12,7 +12,6 @@ package aisdk
 import (
 	"bufio"
 	"errors"
-	utils "github.com/liusuxian/aisdk/internal"
 	"io"
 	"net/http"
 	"strings"
@@ -43,10 +42,10 @@ func TestStreamReader_Recv(t *testing.T) {
 				Body: io.NopCloser(reader),
 			}
 
-			stream := &streamReader[map[string]any]{
+			stream := &StreamReader[map[string]any]{
 				reader:      bufio.NewReader(reader),
 				response:    response,
-				unmarshaler: &utils.JSONUnmarshaler{},
+				unmarshaler: &JSONUnmarshaler{},
 			}
 
 			_, err := stream.Recv()
@@ -87,10 +86,10 @@ func TestStreamReader_RecvRaw(t *testing.T) {
 				Body: io.NopCloser(reader),
 			}
 
-			stream := &streamReader[map[string]any]{
+			stream := &StreamReader[map[string]any]{
 				reader:      bufio.NewReader(reader),
 				response:    response,
-				unmarshaler: &utils.JSONUnmarshaler{},
+				unmarshaler: &JSONUnmarshaler{},
 			}
 
 			data, err := stream.RecvRaw()
@@ -113,10 +112,10 @@ func TestStreamReader_Close(t *testing.T) {
 		Body: io.NopCloser(reader),
 	}
 
-	stream := &streamReader[map[string]any]{
+	stream := &StreamReader[map[string]any]{
 		reader:      bufio.NewReader(reader),
 		response:    response,
-		unmarshaler: &utils.JSONUnmarshaler{},
+		unmarshaler: &JSONUnmarshaler{},
 	}
 
 	if err := stream.Close(); err != nil {
@@ -149,12 +148,12 @@ func TestStreamReader_ErrorHandling(t *testing.T) {
 				Body: io.NopCloser(reader),
 			}
 
-			stream := &streamReader[map[string]any]{
+			stream := &StreamReader[map[string]any]{
 				reader:             bufio.NewReader(reader),
 				response:           response,
-				unmarshaler:        &utils.JSONUnmarshaler{},
+				unmarshaler:        &JSONUnmarshaler{},
 				emptyMessagesLimit: 10,
-				errAccumulator:     utils.NewErrorAccumulator(),
+				errAccumulator:     NewErrorAccumulator(),
 			}
 
 			_, err := stream.Recv()

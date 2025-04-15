@@ -1,17 +1,18 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-11 16:03:46
+ * @Date: 2025-04-15 19:11:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-15 11:31:43
+ * @LastEditTime: 2025-04-15 19:13:25
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package aisdk_test
+package conf_test
 
 import (
 	"encoding/json"
-	"github.com/liusuxian/aisdk"
+	"github.com/liusuxian/aisdk/conf"
+	"github.com/liusuxian/aisdk/consts"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -37,7 +38,7 @@ func TestSDKConfigManager(t *testing.T) {
 		t.Fatalf("Failed to create empty config file: %v", err)
 	}
 	// 1. Test NewSDKConfigManager
-	manager, err := aisdk.NewSDKConfigManager(configPath)
+	manager, err := conf.NewSDKConfigManager(configPath)
 	if err != nil {
 		t.Fatalf("NewSDKConfigManager failed: %v", err)
 	}
@@ -46,8 +47,8 @@ func TestSDKConfigManager(t *testing.T) {
 	}
 	// 2. Test default configuration values
 	config := manager.GetConfig()
-	if config.DefaultProvider != aisdk.OpenAI {
-		t.Errorf("Default provider error, got: %v, want: %v", config.DefaultProvider, aisdk.OpenAI)
+	if config.DefaultProvider != consts.OpenAI {
+		t.Errorf("Default provider error, got: %v, want: %v", config.DefaultProvider, consts.OpenAI)
 	}
 	if len(config.Providers) != 0 {
 		t.Errorf("Providers should be empty initially, got: %d", len(config.Providers))
@@ -56,22 +57,22 @@ func TestSDKConfigManager(t *testing.T) {
 		t.Errorf("Default request timeout error, got: %v, want: %v", config.ConnectionOptions.RequestTimeout, 10*time.Second)
 	}
 	// 3. Test SetProviderConfig and GetProviderConfig
-	testProviderConfig := aisdk.ProviderConfig{
+	testProviderConfig := conf.ProviderConfig{
 		BaseURL: "https://api.test.com/v1",
 		APIKeys: []string{"test-key-1", "test-key-2"},
 		OrgID:   "test-org-id",
-		SupportedModels: map[aisdk.ModelType][]string{
+		SupportedModels: map[consts.ModelType][]string{
 			"chat": {"model-1", "model-2"},
 		},
-		DefaultModels: map[aisdk.ModelType]string{
+		DefaultModels: map[consts.ModelType]string{
 			"chat": "model-1",
 		},
 		Extra: map[string]string{
 			"key1": "value1",
 		},
 	}
-	manager.SetProviderConfig(aisdk.OpenAI, testProviderConfig)
-	providerConfig, err := manager.GetProviderConfig(aisdk.OpenAI)
+	manager.SetProviderConfig(consts.OpenAI, testProviderConfig)
+	providerConfig, err := manager.GetProviderConfig(consts.OpenAI)
 	if err != nil {
 		t.Fatalf("GetProviderConfig failed: %v", err)
 	}
@@ -87,7 +88,7 @@ func TestSDKConfigManager(t *testing.T) {
 	}
 	// Verify deep copy - modifying original data should not affect retrieved data
 	testProviderConfig.APIKeys[0] = "modified-key"
-	providerConfig, _ = manager.GetProviderConfig(aisdk.OpenAI)
+	providerConfig, _ = manager.GetProviderConfig(consts.OpenAI)
 	if providerConfig.APIKeys[0] == "modified-key" {
 		t.Error("GetProviderConfig should return a deep copy, should not be affected by original data changes")
 	}
@@ -97,14 +98,14 @@ func TestSDKConfigManager(t *testing.T) {
 		t.Error("GetProviderConfig should return an error for non-existent provider")
 	}
 	// 5. Test SetDefaultProvider and GetDefaultProvider
-	testProvider := aisdk.Provider("test-provider")
+	testProvider := consts.Provider("test-provider")
 	manager.SetProviderConfig(testProvider, testProviderConfig) // Ensure provider exists first
 	manager.SetDefaultProvider(testProvider)
 	if manager.GetDefaultProvider() != testProvider {
 		t.Errorf("Default provider error, got: %v, want: %v", manager.GetDefaultProvider(), testProvider)
 	}
 	// 6. Test SetConnectionOptions and GetConnectionOptions
-	testConnectionOptions := aisdk.ConnectionOptions{
+	testConnectionOptions := conf.ConnectionOptions{
 		RequestTimeout:              15 * time.Second,
 		StreamReturnIntervalTimeout: 30 * time.Second,
 		MaxRetries:                  5,
@@ -133,7 +134,7 @@ func TestSDKConfigManager(t *testing.T) {
 		t.Fatal("Config file should exist after save")
 	}
 	// Create new manager and load config
-	newManager, err := aisdk.NewSDKConfigManager(configPath)
+	newManager, err := conf.NewSDKConfigManager(configPath)
 	if err != nil {
 		t.Fatalf("NewSDKConfigManager with existing config failed: %v", err)
 	}
@@ -153,7 +154,7 @@ func TestSDKConfigManager(t *testing.T) {
 		t.Errorf("ConnectionOptions RequestTimeout after load error, got: %v, want: %v", loadedOptions.RequestTimeout, testConnectionOptions.RequestTimeout)
 	}
 	// 8. Test ConnectionOptions JSON serialization and deserialization
-	testOptions := aisdk.ConnectionOptions{
+	testOptions := conf.ConnectionOptions{
 		RequestTimeout:              20 * time.Second,
 		StreamReturnIntervalTimeout: 40 * time.Second,
 		MaxRetries:                  8,
@@ -167,7 +168,7 @@ func TestSDKConfigManager(t *testing.T) {
 		t.Fatalf("ConnectionOptions serialization failed: %v", err)
 	}
 	// Deserialize
-	var unmarshaledOptions aisdk.ConnectionOptions
+	var unmarshaledOptions conf.ConnectionOptions
 	err = json.Unmarshal(jsonData, &unmarshaledOptions)
 	if err != nil {
 		t.Fatalf("ConnectionOptions deserialization failed: %v", err)

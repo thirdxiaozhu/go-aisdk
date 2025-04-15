@@ -1,8 +1,8 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-07 21:16:05
+ * @Date: 2025-04-15 15:36:08
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-10 14:14:06
+ * @LastEditTime: 2025-04-15 17:30:45
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,19 +11,19 @@ package aisdk_test
 
 import (
 	"errors"
-	"github.com/liusuxian/aisdk"
+	utils "github.com/liusuxian/aisdk/internal"
 	"testing"
 )
 
 func TestRequestError_Error(t *testing.T) {
 	tests := []struct {
 		name          string
-		requestError  *aisdk.RequestError
+		requestError  *utils.RequestError
 		expectedError string
 	}{
 		{
 			name: "Basic error with all fields",
-			requestError: &aisdk.RequestError{
+			requestError: &utils.RequestError{
 				HTTPStatus:     "Bad Request",
 				HTTPStatusCode: 400,
 				Err:            errors.New("invalid request"),
@@ -33,7 +33,7 @@ func TestRequestError_Error(t *testing.T) {
 		},
 		{
 			name: "Error with empty body",
-			requestError: &aisdk.RequestError{
+			requestError: &utils.RequestError{
 				HTTPStatus:     "Not Found",
 				HTTPStatusCode: 404,
 				Err:            errors.New("resource not found"),
@@ -54,7 +54,7 @@ func TestRequestError_Error(t *testing.T) {
 
 func TestRequestError_Unwrap(t *testing.T) {
 	originalError := errors.New("original error")
-	requestError := &aisdk.RequestError{
+	requestError := &utils.RequestError{
 		HTTPStatus:     "Internal Server Error",
 		HTTPStatusCode: 500,
 		Err:            originalError,

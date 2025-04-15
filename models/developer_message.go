@@ -1,13 +1,13 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-09 17:05:29
+ * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-09 17:05:31
+ * @LastEditTime: 2025-04-15 18:53:14
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package aisdk
+package models
 
 import "encoding/json"
 

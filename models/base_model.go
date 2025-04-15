@@ -1,19 +1,21 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-09 16:37:40
+ * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-10 20:26:54
+ * @LastEditTime: 2025-04-15 19:05:13
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package aisdk
+package models
+
+import "github.com/liusuxian/aisdk/consts"
 
 // BaseRequest 基础请求结构
 type BaseRequest struct {
-	Model     string    `json:"model"`      // 模型名称
-	Provider  Provider  `json:"provider"`   // 提供商
-	ModelType ModelType `json:"model_type"` // 模型类型
+	Model     string           `json:"model"`      // 模型名称
+	Provider  consts.Provider  `json:"provider"`   // 提供商
+	ModelType consts.ModelType `json:"model_type"` // 模型类型
 }
 
 // GetModel 获取模型名称
@@ -22,12 +24,12 @@ func (b BaseRequest) GetModel() (model string) {
 }
 
 // GetProvider 获取提供商
-func (b BaseRequest) GetProvider() (provider Provider) {
+func (b BaseRequest) GetProvider() (provider consts.Provider) {
 	return b.Provider
 }
 
 // GetModelType 获取模型类型
-func (b BaseRequest) GetModelType() (modelType ModelType) {
+func (b BaseRequest) GetModelType() (modelType consts.ModelType) {
 	return b.ModelType
 }
 

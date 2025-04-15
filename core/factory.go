@@ -1,29 +1,30 @@
 /*
-* @Author: liusuxian 382185882@qq.com
-* @Date: 2025-04-11 10:34:55
+ * @Author: liusuxian 382185882@qq.com
+ * @Date: 2025-04-15 18:45:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-15 10:31:50
-* @Description:
-*
-* Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
-*/
-package aisdk
+ * @LastEditTime: 2025-04-15 19:16:35
+ * @Description:
+ *
+ * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
+ */
+package core
 
 import (
 	"fmt"
+	"github.com/liusuxian/aisdk/consts"
 	"sync"
 )
 
 // ProviderFactory 管理所有AI服务提供商的工厂
 type ProviderFactory struct {
-	providers map[Provider]ProviderService // 所有提供商
-	mu        sync.RWMutex                 // 读写锁
+	providers map[consts.Provider]ProviderService // 所有提供商
+	mu        sync.RWMutex                        // 读写锁
 }
 
 // NewProviderFactory 创建 ProviderFactory
 func NewProviderFactory() (factory *ProviderFactory) {
 	factory = &ProviderFactory{
-		providers: make(map[Provider]ProviderService),
+		providers: make(map[consts.Provider]ProviderService),
 	}
 	return
 }
@@ -37,7 +38,7 @@ func (f *ProviderFactory) RegisterProvider(service ProviderService) {
 }
 
 // GetProvider 获取提供商
-func (f *ProviderFactory) GetProvider(provider Provider) (service ProviderService, err error) {
+func (f *ProviderFactory) GetProvider(provider consts.Provider) (service ProviderService, err error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
@@ -48,11 +49,11 @@ func (f *ProviderFactory) GetProvider(provider Provider) (service ProviderServic
 }
 
 // ListProviders 列出所有注册的提供商
-func (f *ProviderFactory) ListProviders() (providers []Provider) {
+func (f *ProviderFactory) ListProviders() (providers []consts.Provider) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
-	providers = make([]Provider, 0, len(f.providers))
+	providers = make([]consts.Provider, 0, len(f.providers))
 	for p := range f.providers {
 		providers = append(providers, p)
 	}

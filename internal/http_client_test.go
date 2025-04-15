@@ -1,8 +1,8 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-08 11:32:31
+ * @Date: 2025-04-15 15:38:30
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-10 14:10:47
+ * @LastEditTime: 2025-04-15 17:24:27
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -30,23 +30,26 @@ func (r *testResponse) SetHeader(h http.Header) {
 	r.header = h
 }
 
-func TestNewClient(t *testing.T) {
-	baseURL := "https://api.example.com"
-	authToken := "test-token"
-
-	client := NewClient(baseURL, authToken)
+func TestNewHTTPClient(t *testing.T) {
+	var (
+		baseURL = "https://api.example.com"
+		client  = NewHTTPClient(baseURL)
+	)
 	if client.config.BaseURL != baseURL {
 		t.Errorf("Expected BaseURL %s, got %s", baseURL, client.config.BaseURL)
 	}
-	if client.config.AuthToken != authToken {
-		t.Errorf("Expected AuthToken %s, got %s", authToken, client.config.AuthToken)
-	}
 }
 
-func TestNewClientWithConfig(t *testing.T) {
-	config := DefaultConfig("https://api.example.com", "test-token")
-	client := NewClientWithConfig(config)
-
+func TestNewHTTPClientWithConfig(t *testing.T) {
+	var (
+		config = HTTPClientConfig{
+			BaseURL:            "https://api.example.com",
+			HTTPClient:         &http.Client{},
+			ResponseDecoder:    &DefaultResponseDecoder{},
+			EmptyMessagesLimit: defaultEmptyMessagesLimit,
+		}
+		client = NewHTTPClientWithConfig(config)
+	)
 	if client.config != config {
 		t.Error("Client config does not match input config")
 	}
@@ -81,15 +84,14 @@ func TestClient_sendRequest(t *testing.T) {
 			}))
 			defer server.Close()
 
-			client := NewClient(server.URL, "test-token")
+			client := NewHTTPClient(server.URL)
 			req, err := http.NewRequest("GET", server.URL, nil)
 			if err != nil {
 				t.Fatalf("Failed to create request: %v", err)
 			}
 
 			response := &testResponse{}
-
-			err = client.sendRequest(req, response)
+			err = client.SendRequest(req, response)
 			if tt.expectError {
 				if err == nil {
 					t.Error("Expected error but got nil")
@@ -113,13 +115,13 @@ func TestClient_sendRequestRaw(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClient(server.URL, "test-token")
+	client := NewHTTPClient(server.URL)
 	req, err := http.NewRequest("GET", server.URL, nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
 
-	response, err := client.sendRequestRaw(req)
+	response, err := client.SendRequestRaw(req)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -163,7 +165,7 @@ func TestClient_handleErrorResp(t *testing.T) {
 			}))
 			defer server.Close()
 
-			client := NewClient(server.URL, "test-token")
+			client := NewHTTPClient(server.URL)
 			req, err := http.NewRequest("GET", server.URL, nil)
 			if err != nil {
 				t.Fatalf("Failed to create request: %v", err)
@@ -208,8 +210,8 @@ func TestClient_fullURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := NewClient(tt.baseURL, "test-token")
-			url := client.fullURL(tt.suffix)
+			client := NewHTTPClient(tt.baseURL)
+			url := client.FullURL(tt.suffix)
 			if url != tt.expected {
 				t.Errorf("Expected URL '%s', got '%s'", tt.expected, url)
 			}
@@ -218,14 +220,14 @@ func TestClient_fullURL(t *testing.T) {
 }
 
 func TestNewRequest(t *testing.T) {
-	client := NewClient("https://api.example.com", "test-token")
+	client := NewHTTPClient("https://api.example.com")
 	ctx := context.Background()
 
 	tests := []struct {
 		name           string
 		method         string
 		url            string
-		setters        []requestOption
+		setters        []RequestOption
 		expectedBody   string
 		expectedHeader http.Header
 	}{
@@ -233,7 +235,7 @@ func TestNewRequest(t *testing.T) {
 			name:           "basic request",
 			method:         "GET",
 			url:            "https://api.example.com/v1/chat",
-			setters:        []requestOption{},
+			setters:        []RequestOption{},
 			expectedBody:   "",
 			expectedHeader: http.Header{},
 		},
@@ -241,7 +243,7 @@ func TestNewRequest(t *testing.T) {
 			name:           "request with body",
 			method:         "POST",
 			url:            "https://api.example.com/v1/chat",
-			setters:        []requestOption{withBody(map[string]string{"key": "value"})},
+			setters:        []RequestOption{WithBody(map[string]string{"key": "value"})},
 			expectedBody:   `{"key":"value"}`,
 			expectedHeader: http.Header{},
 		},
@@ -249,7 +251,7 @@ func TestNewRequest(t *testing.T) {
 			name:         "request with content type",
 			method:       "POST",
 			url:          "https://api.example.com/v1/chat",
-			setters:      []requestOption{withContentType("application/json")},
+			setters:      []RequestOption{WithContentType("application/json")},
 			expectedBody: "",
 			expectedHeader: http.Header{
 				"Content-Type": []string{"application/json"},
@@ -259,7 +261,7 @@ func TestNewRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, err := client.newRequest(ctx, tt.method, tt.url, tt.setters...)
+			req, err := client.NewRequest(ctx, tt.method, tt.url, tt.setters...)
 			if err != nil {
 				t.Fatalf("Failed to create request: %v", err)
 			}
@@ -366,10 +368,11 @@ func TestDecodeResponse(t *testing.T) {
 		},
 	}
 
+	client := NewHTTPClient("https://api.example.com")
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			reader := strings.NewReader(tt.body)
-			err := decodeResponse(reader, tt.target)
+			err := client.config.ResponseDecoder.Decode(reader, tt.target)
 
 			if tt.expectError {
 				if err == nil {
@@ -439,25 +442,25 @@ func TestDecodeString(t *testing.T) {
 func TestRequestOptions(t *testing.T) {
 	tests := []struct {
 		name           string
-		option         requestOption
+		option         RequestOption
 		expectedHeader http.Header
 		expectedBody   any
 	}{
 		{
 			name:           "setBody",
-			option:         withBody(map[string]string{"key": "value"}),
+			option:         WithBody(map[string]string{"key": "value"}),
 			expectedHeader: http.Header{},
 			expectedBody:   map[string]string{"key": "value"},
 		},
 		{
 			name:           "setContentType",
-			option:         withContentType("application/json"),
+			option:         WithContentType("application/json"),
 			expectedHeader: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody:   nil,
 		},
 		{
 			name: "setCookie",
-			option: withCookie([]*http.Cookie{
+			option: WithCookie([]*http.Cookie{
 				{Name: "test", Value: "value"},
 				{Name: "test2", Value: "value2"},
 			}),
@@ -466,13 +469,13 @@ func TestRequestOptions(t *testing.T) {
 		},
 		{
 			name:           "setKeyValue",
-			option:         withKeyValue("X-Test", "test-value"),
+			option:         WithKeyValue("X-Test", "test-value"),
 			expectedHeader: http.Header{"X-Test": []string{"test-value"}},
 			expectedBody:   nil,
 		},
 		{
 			name:           "addKeyValue",
-			option:         withKeyValue("X-Test", "test-value"),
+			option:         WithKeyValue("X-Test", "test-value"),
 			expectedHeader: http.Header{"X-Test": []string{"test-value"}},
 			expectedBody:   nil,
 		},
@@ -480,7 +483,7 @@ func TestRequestOptions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			reqOpts := &requestOptions{
+			reqOpts := &RequestOptions{
 				header: make(http.Header),
 			}
 			tt.option(reqOpts)
@@ -504,7 +507,7 @@ func TestSendRequestStream(t *testing.T) {
 		Object  string `json:"object"`
 		Created int64  `json:"created"`
 		Message string `json:"message"`
-		httpHeader
+		HttpHeader
 	}
 
 	tests := []struct {
@@ -542,7 +545,6 @@ data: [DONE]
 
 				w.Header().Set("Content-Type", "text/event-stream")
 				w.WriteHeader(tt.responseStatus)
-
 				if flusher, ok := w.(http.Flusher); ok {
 					fmt.Fprint(w, tt.responseBody)
 					flusher.Flush()
@@ -550,16 +552,14 @@ data: [DONE]
 			}))
 			defer server.Close()
 
-			client := NewClient(server.URL, "test-token")
+			client := NewHTTPClient(server.URL)
 			client.config.EmptyMessagesLimit = 10
-
 			req, err := http.NewRequest("POST", server.URL, nil)
 			if err != nil {
 				t.Fatalf("Failed to create request: %v", err)
 			}
 
-			stream, err := sendRequestStream[testStreamResponse](client, req)
-
+			stream, err := SendRequestStream[testStreamResponse](client, req)
 			if tt.expectError {
 				if err == nil {
 					t.Error("Expected to get an error, but got nil")

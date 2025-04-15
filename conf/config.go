@@ -1,17 +1,18 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-11 16:03:46
+ * @Date: 2025-04-15 19:09:15
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-15 10:29:53
+ * @LastEditTime: 2025-04-15 19:14:03
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package aisdk
+package conf
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/liusuxian/aisdk/consts"
 	"maps"
 	"os"
 	"path/filepath"
@@ -22,14 +23,14 @@ import (
 
 // ProviderConfig AI服务提供商的配置
 type ProviderConfig struct {
-	BaseURL          string                 `json:"base_url"`          // 基础URL，用于自定义API服务器的地址
-	APIKeys          []string               `json:"api_keys"`          // API密钥列表
-	OrgID            string                 `json:"org_id"`            // 组织ID，对于某些提供商可能需要
-	APIVersion       string                 `json:"api_version"`       // API版本，对于某些提供商可能需要
-	AssistantVersion string                 `json:"assistant_version"` // 助手版本，对于某些提供商可能需要
-	SupportedModels  map[ModelType][]string `json:"supported_models"`  // 支持的模型
-	DefaultModels    map[ModelType]string   `json:"default_models"`    // 默认的模型
-	Extra            map[string]string      `json:"extra"`             // 额外参数，对于某些提供商可能需要
+	BaseURL          string                        `json:"base_url"`          // 基础URL，用于自定义API服务器的地址
+	APIKeys          []string                      `json:"api_keys"`          // API密钥列表
+	OrgID            string                        `json:"org_id"`            // 组织ID，对于某些提供商可能需要
+	APIVersion       string                        `json:"api_version"`       // API版本，对于某些提供商可能需要
+	AssistantVersion string                        `json:"assistant_version"` // 助手版本，对于某些提供商可能需要
+	SupportedModels  map[consts.ModelType][]string `json:"supported_models"`  // 支持的模型
+	DefaultModels    map[consts.ModelType]string   `json:"default_models"`    // 默认的模型
+	Extra            map[string]string             `json:"extra"`             // 额外参数，对于某些提供商可能需要
 }
 
 // ConnectionOptions 连接选项
@@ -100,9 +101,9 @@ func (o *ConnectionOptions) UnmarshalJSON(data []byte) (err error) {
 
 // SDKConfig SDK整体配置
 type SDKConfig struct {
-	Providers         map[Provider]ProviderConfig `json:"providers"`          // AI服务提供商的配置
-	DefaultProvider   Provider                    `json:"default_provider"`   // 默认AI服务提供商
-	ConnectionOptions ConnectionOptions           `json:"connection_options"` // 连接选项
+	Providers         map[consts.Provider]ProviderConfig `json:"providers"`          // AI服务提供商的配置
+	DefaultProvider   consts.Provider                    `json:"default_provider"`   // 默认AI服务提供商
+	ConnectionOptions ConnectionOptions                  `json:"connection_options"` // 连接选项
 }
 
 // SDKConfigManager SDK配置管理器
@@ -117,7 +118,7 @@ func NewSDKConfigManager(configPath string) (manager *SDKConfigManager, err erro
 	if configPath == "" {
 		var homeDir string
 		if homeDir, err = os.UserHomeDir(); err != nil {
-			return
+			return nil, fmt.Errorf("failed to get user home directory: %w", err)
 		}
 		configPath = filepath.Join(homeDir, ".go-aisdk", "config.json")
 	}
@@ -125,8 +126,8 @@ func NewSDKConfigManager(configPath string) (manager *SDKConfigManager, err erro
 	manager = &SDKConfigManager{
 		configPath: configPath,
 		config: SDKConfig{
-			Providers:       make(map[Provider]ProviderConfig),
-			DefaultProvider: OpenAI,
+			Providers:       make(map[consts.Provider]ProviderConfig),
+			DefaultProvider: consts.OpenAI,
 			ConnectionOptions: ConnectionOptions{
 				RequestTimeout:              10 * time.Second,
 				StreamReturnIntervalTimeout: 20 * time.Second,
@@ -191,7 +192,7 @@ func (m *SDKConfigManager) GetConfig() (configCopy SDKConfig) {
 	defer m.mu.RUnlock()
 	// 返回配置的副本，防止外部修改
 	configCopy = SDKConfig{
-		Providers:         make(map[Provider]ProviderConfig),
+		Providers:         make(map[consts.Provider]ProviderConfig),
 		DefaultProvider:   m.config.DefaultProvider,
 		ConnectionOptions: cloneConnectionOptions(m.config.ConnectionOptions),
 	}
@@ -203,7 +204,7 @@ func (m *SDKConfigManager) GetConfig() (configCopy SDKConfig) {
 }
 
 // SetProviderConfig 设置提供商配置
-func (m *SDKConfigManager) SetProviderConfig(provider Provider, config ProviderConfig) {
+func (m *SDKConfigManager) SetProviderConfig(provider consts.Provider, config ProviderConfig) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -211,7 +212,7 @@ func (m *SDKConfigManager) SetProviderConfig(provider Provider, config ProviderC
 }
 
 // GetProviderConfig 获取提供商配置
-func (m *SDKConfigManager) GetProviderConfig(provider Provider) (config ProviderConfig, err error) {
+func (m *SDKConfigManager) GetProviderConfig(provider consts.Provider) (config ProviderConfig, err error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -224,7 +225,7 @@ func (m *SDKConfigManager) GetProviderConfig(provider Provider) (config Provider
 }
 
 // SetDefaultProvider 设置默认提供商
-func (m *SDKConfigManager) SetDefaultProvider(provider Provider) {
+func (m *SDKConfigManager) SetDefaultProvider(provider consts.Provider) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -232,7 +233,7 @@ func (m *SDKConfigManager) SetDefaultProvider(provider Provider) {
 }
 
 // GetDefaultProvider 获取默认提供商
-func (m *SDKConfigManager) GetDefaultProvider() (provider Provider) {
+func (m *SDKConfigManager) GetDefaultProvider() (provider consts.Provider) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -257,11 +258,11 @@ func (m *SDKConfigManager) GetConnectionOptions() (options ConnectionOptions) {
 
 // cloneProviderConfig 深拷贝 ProviderConfig
 func cloneProviderConfig(source ProviderConfig) (dest ProviderConfig) {
-	supportedModelsCopy := make(map[ModelType][]string)
+	supportedModelsCopy := make(map[consts.ModelType][]string)
 	for mk, mv := range source.SupportedModels {
 		supportedModelsCopy[mk] = slices.Clone(mv)
 	}
-	defaultModelsCopy := make(map[ModelType]string)
+	defaultModelsCopy := make(map[consts.ModelType]string)
 	maps.Copy(defaultModelsCopy, source.DefaultModels)
 	extraCopy := make(map[string]string)
 	maps.Copy(extraCopy, source.Extra)

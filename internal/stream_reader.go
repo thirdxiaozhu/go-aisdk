@@ -1,8 +1,8 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-07 22:28:26
+ * @Date: 2025-04-15 14:26:01
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-10 14:14:56
+ * @LastEditTime: 2025-04-15 15:17:58
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -13,7 +13,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	utils "github.com/liusuxian/aisdk/internal"
 	"io"
 	"net/http"
 )
@@ -23,23 +22,23 @@ var (
 	errorPrefix = []byte(`data: {"error":`)
 )
 
-// streamable 可流式传输的类型
-type streamable interface {
+// Streamable 可流式传输的类型
+type Streamable interface {
 }
 
-// streamReader 流读取器
-type streamReader[T streamable] struct {
+// StreamReader 流读取器
+type StreamReader[T Streamable] struct {
 	emptyMessagesLimit uint
 	isFinished         bool
 	reader             *bufio.Reader
 	response           *http.Response
-	errAccumulator     utils.ErrorAccumulator
-	unmarshaler        utils.Unmarshaler
-	httpHeader
+	errAccumulator     ErrorAccumulator
+	unmarshaler        Unmarshaler
+	HttpHeader
 }
 
 // Recv 接收数据
-func (stream *streamReader[T]) Recv() (response T, err error) {
+func (stream *StreamReader[T]) Recv() (response T, err error) {
 	var rawLine []byte
 	if rawLine, err = stream.RecvRaw(); err != nil {
 		return
@@ -51,8 +50,8 @@ func (stream *streamReader[T]) Recv() (response T, err error) {
 	return
 }
 
-// RecvRaw 接收数据
-func (stream *streamReader[T]) RecvRaw() (b []byte, err error) {
+// RecvRaw 接收原始数据
+func (stream *StreamReader[T]) RecvRaw() (b []byte, err error) {
 	if stream.isFinished {
 		return nil, io.EOF
 	}
@@ -61,7 +60,7 @@ func (stream *streamReader[T]) RecvRaw() (b []byte, err error) {
 }
 
 // processLines 处理行数据
-func (stream *streamReader[T]) processLines() (b []byte, err error) {
+func (stream *StreamReader[T]) processLines() (b []byte, err error) {
 	var (
 		emptyMessagesCount uint
 		hasErrorPrefix     bool
@@ -105,7 +104,7 @@ func (stream *streamReader[T]) processLines() (b []byte, err error) {
 }
 
 // unmarshalError 解析错误响应数据
-func (stream *streamReader[T]) unmarshalError() (errResp map[string]any) {
+func (stream *StreamReader[T]) unmarshalError() (errResp map[string]any) {
 	var errBytes []byte
 	if errBytes = stream.errAccumulator.Bytes(); len(errBytes) == 0 {
 		return
@@ -119,6 +118,6 @@ func (stream *streamReader[T]) unmarshalError() (errResp map[string]any) {
 }
 
 // Close 关闭流
-func (stream *streamReader[T]) Close() (err error) {
+func (stream *StreamReader[T]) Close() (err error) {
 	return stream.response.Body.Close()
 }
