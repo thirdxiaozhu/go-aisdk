@@ -2,7 +2,7 @@
 * @Author: liusuxian 382185882@qq.com
 * @Date: 2025-04-11 10:34:55
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-11 11:00:17
+ * @LastEditTime: 2025-04-15 10:31:50
 * @Description:
 *
 * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -16,8 +16,8 @@ import (
 
 // ProviderFactory 管理所有AI服务提供商的工厂
 type ProviderFactory struct {
-	providers map[Provider]ProviderService
-	mu        sync.RWMutex
+	providers map[Provider]ProviderService // 所有提供商
+	mu        sync.RWMutex                 // 读写锁
 }
 
 // NewProviderFactory 创建 ProviderFactory
@@ -32,6 +32,7 @@ func NewProviderFactory() (factory *ProviderFactory) {
 func (f *ProviderFactory) RegisterProvider(service ProviderService) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+
 	f.providers[service.GetProvider()] = service
 }
 
@@ -39,6 +40,7 @@ func (f *ProviderFactory) RegisterProvider(service ProviderService) {
 func (f *ProviderFactory) GetProvider(provider Provider) (service ProviderService, err error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
+
 	if p, ok := f.providers[provider]; ok {
 		return p, nil
 	}
@@ -49,6 +51,7 @@ func (f *ProviderFactory) GetProvider(provider Provider) (service ProviderServic
 func (f *ProviderFactory) ListProviders() (providers []Provider) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
+
 	providers = make([]Provider, 0, len(f.providers))
 	for p := range f.providers {
 		providers = append(providers, p)

@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-11 11:48:30
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-11 13:44:53
+ * @LastEditTime: 2025-04-11 16:57:27
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -21,10 +21,10 @@ type RetryFunc func(ctx context.Context) (err error)
 //
 //	f: 要执行的函数
 //	maxRetries: 最大重试次数。当配置了`delayList`时，该参数将失效
-//	delay: 默认重试之间的延迟时间。当配置了`delayList`时，该参数将失效
+//	retryDelay: 默认重试之间的延迟时间。当配置了`delayList`时，该参数将失效
 //	increaseDelay: 是否让延迟时间随着重试次数增加而线性增加。当配置了`delayList`时，该参数将失效
 //	delayList: 自定义延迟列表
-func Retry(ctx context.Context, f RetryFunc, maxRetries uint, delay time.Duration, increaseDelay bool, delayList ...time.Duration) (err error) {
+func Retry(ctx context.Context, f RetryFunc, maxRetries uint, retryDelay time.Duration, increaseDelay bool, delayList ...time.Duration) (err error) {
 	if len(delayList) > 0 {
 		maxRetries = uint(len(delayList))
 	}
@@ -42,10 +42,10 @@ func Retry(ctx context.Context, f RetryFunc, maxRetries uint, delay time.Duratio
 				} else {
 					if increaseDelay {
 						// 重试延迟随重试次数线性增加
-						<-time.After(delay * time.Duration(retry))
+						<-time.After(retryDelay * time.Duration(retry))
 					} else {
 						// 每次重试的延迟时间保持不变
-						<-time.After(delay)
+						<-time.After(retryDelay)
 					}
 				}
 			}
