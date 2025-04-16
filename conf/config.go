@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 19:09:15
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-15 19:14:03
+ * @LastEditTime: 2025-04-16 17:43:10
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -23,14 +23,12 @@ import (
 
 // ProviderConfig AI服务提供商的配置
 type ProviderConfig struct {
-	BaseURL          string                        `json:"base_url"`          // 基础URL，用于自定义API服务器的地址
-	APIKeys          []string                      `json:"api_keys"`          // API密钥列表
-	OrgID            string                        `json:"org_id"`            // 组织ID，对于某些提供商可能需要
-	APIVersion       string                        `json:"api_version"`       // API版本，对于某些提供商可能需要
-	AssistantVersion string                        `json:"assistant_version"` // 助手版本，对于某些提供商可能需要
-	SupportedModels  map[consts.ModelType][]string `json:"supported_models"`  // 支持的模型
-	DefaultModels    map[consts.ModelType]string   `json:"default_models"`    // 默认的模型
-	Extra            map[string]string             `json:"extra"`             // 额外参数，对于某些提供商可能需要
+	BaseURL          string            `json:"base_url"`          // 基础URL，用于自定义API服务器的地址
+	APIKeys          []string          `json:"api_keys"`          // API密钥列表
+	OrgID            string            `json:"org_id"`            // 组织ID，对于某些提供商可能需要
+	APIVersion       string            `json:"api_version"`       // API版本，对于某些提供商可能需要
+	AssistantVersion string            `json:"assistant_version"` // 助手版本，对于某些提供商可能需要
+	Extra            map[string]string `json:"extra"`             // 额外参数，对于某些提供商可能需要
 }
 
 // ConnectionOptions 连接选项
@@ -102,7 +100,6 @@ func (o *ConnectionOptions) UnmarshalJSON(data []byte) (err error) {
 // SDKConfig SDK整体配置
 type SDKConfig struct {
 	Providers         map[consts.Provider]ProviderConfig `json:"providers"`          // AI服务提供商的配置
-	DefaultProvider   consts.Provider                    `json:"default_provider"`   // 默认AI服务提供商
 	ConnectionOptions ConnectionOptions                  `json:"connection_options"` // 连接选项
 }
 
@@ -126,8 +123,7 @@ func NewSDKConfigManager(configPath string) (manager *SDKConfigManager, err erro
 	manager = &SDKConfigManager{
 		configPath: configPath,
 		config: SDKConfig{
-			Providers:       make(map[consts.Provider]ProviderConfig),
-			DefaultProvider: consts.OpenAI,
+			Providers: make(map[consts.Provider]ProviderConfig),
 			ConnectionOptions: ConnectionOptions{
 				RequestTimeout:              10 * time.Second,
 				StreamReturnIntervalTimeout: 20 * time.Second,
@@ -193,7 +189,6 @@ func (m *SDKConfigManager) GetConfig() (configCopy SDKConfig) {
 	// 返回配置的副本，防止外部修改
 	configCopy = SDKConfig{
 		Providers:         make(map[consts.Provider]ProviderConfig),
-		DefaultProvider:   m.config.DefaultProvider,
 		ConnectionOptions: cloneConnectionOptions(m.config.ConnectionOptions),
 	}
 
@@ -224,22 +219,6 @@ func (m *SDKConfigManager) GetProviderConfig(provider consts.Provider) (config P
 	return ProviderConfig{}, fmt.Errorf("provider %s not configured", provider)
 }
 
-// SetDefaultProvider 设置默认提供商
-func (m *SDKConfigManager) SetDefaultProvider(provider consts.Provider) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	m.config.DefaultProvider = provider
-}
-
-// GetDefaultProvider 获取默认提供商
-func (m *SDKConfigManager) GetDefaultProvider() (provider consts.Provider) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	return m.config.DefaultProvider
-}
-
 // SetConnectionOptions 设置连接选项
 func (m *SDKConfigManager) SetConnectionOptions(options ConnectionOptions) {
 	m.mu.Lock()
@@ -258,12 +237,6 @@ func (m *SDKConfigManager) GetConnectionOptions() (options ConnectionOptions) {
 
 // cloneProviderConfig 深拷贝 ProviderConfig
 func cloneProviderConfig(source ProviderConfig) (dest ProviderConfig) {
-	supportedModelsCopy := make(map[consts.ModelType][]string)
-	for mk, mv := range source.SupportedModels {
-		supportedModelsCopy[mk] = slices.Clone(mv)
-	}
-	defaultModelsCopy := make(map[consts.ModelType]string)
-	maps.Copy(defaultModelsCopy, source.DefaultModels)
 	extraCopy := make(map[string]string)
 	maps.Copy(extraCopy, source.Extra)
 
@@ -273,8 +246,6 @@ func cloneProviderConfig(source ProviderConfig) (dest ProviderConfig) {
 		OrgID:            source.OrgID,
 		APIVersion:       source.APIVersion,
 		AssistantVersion: source.AssistantVersion,
-		SupportedModels:  supportedModelsCopy,
-		DefaultModels:    defaultModelsCopy,
 		Extra:            extraCopy,
 	}
 	return

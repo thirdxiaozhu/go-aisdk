@@ -2,8 +2,8 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:45:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-15 19:16:35
- * @Description:
+ * @LastEditTime: 2025-04-16 10:47:58
+ * @Description: 提供AI服务的核心功能，包括提供商工厂和相关接口，采用单例模式实现，通过包级函数直接访问功能
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
@@ -15,46 +15,50 @@ import (
 	"sync"
 )
 
-// ProviderFactory 管理所有AI服务提供商的工厂
-type ProviderFactory struct {
+// providerFactory 管理所有AI服务提供商的工厂
+type providerFactory struct {
 	providers map[consts.Provider]ProviderService // 所有提供商
 	mu        sync.RWMutex                        // 读写锁
 }
 
-// NewProviderFactory 创建 ProviderFactory
-func NewProviderFactory() (factory *ProviderFactory) {
-	factory = &ProviderFactory{
+var (
+	factory *providerFactory // 全局工厂单例实例(非导出)
+)
+
+// init 包初始化时创建 providerFactory 单例
+// 确保在导入包时自动初始化工厂
+func init() {
+	factory = &providerFactory{
 		providers: make(map[consts.Provider]ProviderService),
 	}
-	return
 }
 
 // RegisterProvider 注册提供商
-func (f *ProviderFactory) RegisterProvider(service ProviderService) {
-	f.mu.Lock()
-	defer f.mu.Unlock()
+func RegisterProvider(provider consts.Provider, service ProviderService) {
+	factory.mu.Lock()
+	defer factory.mu.Unlock()
 
-	f.providers[service.GetProvider()] = service
+	factory.providers[provider] = service
 }
 
 // GetProvider 获取提供商
-func (f *ProviderFactory) GetProvider(provider consts.Provider) (service ProviderService, err error) {
-	f.mu.RLock()
-	defer f.mu.RUnlock()
+func GetProvider(provider consts.Provider) (service ProviderService, err error) {
+	factory.mu.RLock()
+	defer factory.mu.RUnlock()
 
-	if p, ok := f.providers[provider]; ok {
+	if p, ok := factory.providers[provider]; ok {
 		return p, nil
 	}
 	return nil, fmt.Errorf("provider %s not registered", provider)
 }
 
 // ListProviders 列出所有注册的提供商
-func (f *ProviderFactory) ListProviders() (providers []consts.Provider) {
-	f.mu.RLock()
-	defer f.mu.RUnlock()
+func ListProviders() (providers []consts.Provider) {
+	factory.mu.RLock()
+	defer factory.mu.RUnlock()
 
-	providers = make([]consts.Provider, 0, len(f.providers))
-	for p := range f.providers {
+	providers = make([]consts.Provider, 0, len(factory.providers))
+	for p := range factory.providers {
 		providers = append(providers, p)
 	}
 	return

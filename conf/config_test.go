@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 19:11:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-15 19:13:25
+ * @LastEditTime: 2025-04-16 16:15:45
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -47,9 +47,6 @@ func TestSDKConfigManager(t *testing.T) {
 	}
 	// 2. Test default configuration values
 	config := manager.GetConfig()
-	if config.DefaultProvider != consts.OpenAI {
-		t.Errorf("Default provider error, got: %v, want: %v", config.DefaultProvider, consts.OpenAI)
-	}
 	if len(config.Providers) != 0 {
 		t.Errorf("Providers should be empty initially, got: %d", len(config.Providers))
 	}
@@ -61,12 +58,6 @@ func TestSDKConfigManager(t *testing.T) {
 		BaseURL: "https://api.test.com/v1",
 		APIKeys: []string{"test-key-1", "test-key-2"},
 		OrgID:   "test-org-id",
-		SupportedModels: map[consts.ModelType][]string{
-			"chat": {"model-1", "model-2"},
-		},
-		DefaultModels: map[consts.ModelType]string{
-			"chat": "model-1",
-		},
 		Extra: map[string]string{
 			"key1": "value1",
 		},
@@ -100,10 +91,6 @@ func TestSDKConfigManager(t *testing.T) {
 	// 5. Test SetDefaultProvider and GetDefaultProvider
 	testProvider := consts.Provider("test-provider")
 	manager.SetProviderConfig(testProvider, testProviderConfig) // Ensure provider exists first
-	manager.SetDefaultProvider(testProvider)
-	if manager.GetDefaultProvider() != testProvider {
-		t.Errorf("Default provider error, got: %v, want: %v", manager.GetDefaultProvider(), testProvider)
-	}
 	// 6. Test SetConnectionOptions and GetConnectionOptions
 	testConnectionOptions := conf.ConnectionOptions{
 		RequestTimeout:              15 * time.Second,
@@ -137,10 +124,6 @@ func TestSDKConfigManager(t *testing.T) {
 	newManager, err := conf.NewSDKConfigManager(configPath)
 	if err != nil {
 		t.Fatalf("NewSDKConfigManager with existing config failed: %v", err)
-	}
-	// Verify loaded configuration
-	if newManager.GetDefaultProvider() != testProvider {
-		t.Errorf("Default provider after load error, got: %v, want: %v", newManager.GetDefaultProvider(), testProvider)
 	}
 	loadedConfig, err := newManager.GetProviderConfig(testProvider)
 	if err != nil {
@@ -185,10 +168,6 @@ func TestSDKConfigManager(t *testing.T) {
 	}
 	// 9. Test GetConfig and deep copy
 	fullConfig := manager.GetConfig()
-	// Verify configuration content
-	if fullConfig.DefaultProvider != testProvider {
-		t.Errorf("GetConfig DefaultProvider error, got: %v, want: %v", fullConfig.DefaultProvider, testProvider)
-	}
 	providerCfg, ok := fullConfig.Providers[testProvider]
 	if !ok {
 		t.Fatal("GetConfig should contain test provider configuration")
