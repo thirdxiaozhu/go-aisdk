@@ -12,7 +12,7 @@ package conf
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/liusuxian/aisdk/consts"
+	"github.com/liusuxian/go-aisdk/consts"
 	"maps"
 	"os"
 	"path/filepath"

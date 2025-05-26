@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:45:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-16 10:47:58
+ * @LastEditTime: 2025-05-26 17:16:34
  * @Description: 提供AI服务的核心功能，包括提供商工厂和相关接口，采用单例模式实现，通过包级函数直接访问功能
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,7 +11,7 @@ package core
 
 import (
 	"fmt"
-	"github.com/liusuxian/aisdk/consts"
+	"github.com/liusuxian/go-aisdk/consts"
 	"sync"
 )
 

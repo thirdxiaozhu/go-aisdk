@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 19:11:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-16 16:15:45
+ * @LastEditTime: 2025-05-26 17:16:03
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,8 +11,8 @@ package conf_test
 
 import (
 	"encoding/json"
-	"github.com/liusuxian/aisdk/conf"
-	"github.com/liusuxian/aisdk/consts"
+	"github.com/liusuxian/go-aisdk/conf"
+	"github.com/liusuxian/go-aisdk/consts"
 	"os"
 	"path/filepath"
 	"reflect"

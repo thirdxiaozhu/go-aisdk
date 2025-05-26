@@ -2,12 +2,12 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 14:26:01
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-15 15:17:58
+ * @LastEditTime: 2025-05-26 17:40:52
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package aisdk
+package utils
 
 import (
 	"bufio"

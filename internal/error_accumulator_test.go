@@ -2,18 +2,18 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 18:57:40
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-10 14:15:31
+ * @LastEditTime: 2025-05-26 17:41:05
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package aisdk_test
+package utils_test
 
 import (
 	"bytes"
 	"errors"
-	utils "github.com/liusuxian/aisdk/internal"
-	"github.com/liusuxian/aisdk/internal/test"
+	"github.com/liusuxian/go-aisdk/internal"
+	"github.com/liusuxian/go-aisdk/internal/test"
 	"testing"
 )
 

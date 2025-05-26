@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:09:20
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-16 17:55:57
+ * @LastEditTime: 2025-05-26 17:46:28
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,10 +11,10 @@ package aisdk
 
 import (
 	"context"
-	"github.com/liusuxian/aisdk/conf"
-	"github.com/liusuxian/aisdk/core"
-	"github.com/liusuxian/aisdk/models"
-	_ "github.com/liusuxian/aisdk/providers"
+	"github.com/liusuxian/go-aisdk/conf"
+	"github.com/liusuxian/go-aisdk/core"
+	"github.com/liusuxian/go-aisdk/models"
+	_ "github.com/liusuxian/go-aisdk/providers"
 )
 
 // SDKClient SDK客户端

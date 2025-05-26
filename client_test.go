@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:09:20
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-16 17:51:35
+ * @LastEditTime: 2025-05-26 17:46:15
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,9 +11,9 @@ package aisdk_test
 
 import (
 	"context"
-	"github.com/liusuxian/aisdk"
-	"github.com/liusuxian/aisdk/consts"
-	"github.com/liusuxian/aisdk/models"
+	"github.com/liusuxian/go-aisdk"
+	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/models"
 	"os"
 	"path/filepath"
 	"testing"

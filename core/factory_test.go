@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 19:17:12
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-16 16:48:32
+ * @LastEditTime: 2025-05-26 17:16:30
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,10 +11,10 @@ package core_test
 
 import (
 	"context"
-	"github.com/liusuxian/aisdk/conf"
-	"github.com/liusuxian/aisdk/consts"
-	"github.com/liusuxian/aisdk/core"
-	"github.com/liusuxian/aisdk/models"
+	"github.com/liusuxian/go-aisdk/conf"
+	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/core"
+	"github.com/liusuxian/go-aisdk/models"
 	"reflect"
 	"testing"
 )

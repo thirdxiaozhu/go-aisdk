@@ -2,12 +2,12 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-11 11:48:30
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-11 16:57:27
+ * @LastEditTime: 2025-05-26 17:40:47
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package aisdk
+package utils
 
 import (
 	"context"

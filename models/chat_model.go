@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-16 14:33:02
+ * @LastEditTime: 2025-05-26 17:18:43
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,7 +11,7 @@ package models
 
 import (
 	"encoding/json"
-	utils "github.com/liusuxian/aisdk/internal"
+	utils "github.com/liusuxian/go-aisdk/internal"
 )
 
 // ChatMessage 聊天消息的通用接口

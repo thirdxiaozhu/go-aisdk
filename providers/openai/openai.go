@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:56:55
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-16 17:52:16
+ * @LastEditTime: 2025-05-26 17:19:22
  * @Description: OpenAI服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,10 +11,10 @@ package openai
 
 import (
 	"context"
-	"github.com/liusuxian/aisdk/conf"
-	"github.com/liusuxian/aisdk/consts"
-	"github.com/liusuxian/aisdk/core"
-	"github.com/liusuxian/aisdk/models"
+	"github.com/liusuxian/go-aisdk/conf"
+	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/core"
+	"github.com/liusuxian/go-aisdk/models"
 )
 
 // openAIProvider OpenAI提供商
