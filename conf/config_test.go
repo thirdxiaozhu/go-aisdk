@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 19:11:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-26 17:16:03
+ * @LastEditTime: 2025-05-28 16:23:09
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -17,7 +17,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
-	"time"
 )
 
 func TestSDKConfigManager(t *testing.T) {
@@ -28,159 +27,130 @@ func TestSDKConfigManager(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 
 	configPath := filepath.Join(tempDir, "test-config.json")
-	// Create the config directory if it doesn't exist
+	// 1. Test NewSDKConfigManager with non-existent config file
+	_, err = conf.NewSDKConfigManager(configPath)
+	if err == nil {
+		t.Error("NewSDKConfigManager should return an error for non-existent config file")
+	}
+	// 2. Test NewSDKConfigManager with empty config path
+	_, err = conf.NewSDKConfigManager("")
+	if err == nil {
+		t.Error("NewSDKConfigManager should return an error for empty config path")
+	}
+	// 3. Test with existing config file
+	// Create a test config file with sample data
+	testConfig := conf.SDKConfig{
+		Providers: map[consts.Provider]conf.ProviderConfig{
+			consts.OpenAI: {
+				BaseURL:          "https://api.openai.com/v1",
+				APIKeys:          []string{"test-key-1", "test-key-2"},
+				OrgID:            "test-org-id",
+				APIVersion:       "v1",
+				AssistantVersion: "v2",
+				Extra: map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+				},
+			},
+			consts.DeepSeek: {
+				BaseURL: "https://api.deepseek.com",
+				APIKeys: []string{"deepseek-key"},
+			},
+		},
+	}
+	// Write test config to file
+	configData, err := json.MarshalIndent(testConfig, "", "  ")
+	if err != nil {
+		t.Fatalf("Failed to marshal test config: %v", err)
+	}
 	configDir := filepath.Dir(configPath)
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		t.Fatalf("Failed to create config directory: %v", err)
 	}
-	// Create an empty config file to ensure it exists
-	if err := os.WriteFile(configPath, []byte("{}"), 0644); err != nil {
-		t.Fatalf("Failed to create empty config file: %v", err)
+	if err := os.WriteFile(configPath, configData, 0644); err != nil {
+		t.Fatalf("Failed to write test config file: %v", err)
 	}
-	// 1. Test NewSDKConfigManager
-	manager, err := conf.NewSDKConfigManager(configPath)
-	if err != nil {
-		t.Fatalf("NewSDKConfigManager failed: %v", err)
-	}
-	if manager == nil {
-		t.Fatal("Config manager should not be nil")
-	}
-	// 2. Test default configuration values
-	config := manager.GetConfig()
-	if len(config.Providers) != 0 {
-		t.Errorf("Providers should be empty initially, got: %d", len(config.Providers))
-	}
-	if config.ConnectionOptions.RequestTimeout != 10*time.Second {
-		t.Errorf("Default request timeout error, got: %v, want: %v", config.ConnectionOptions.RequestTimeout, 10*time.Second)
-	}
-	// 3. Test SetProviderConfig and GetProviderConfig
-	testProviderConfig := conf.ProviderConfig{
-		BaseURL: "https://api.test.com/v1",
-		APIKeys: []string{"test-key-1", "test-key-2"},
-		OrgID:   "test-org-id",
-		Extra: map[string]string{
-			"key1": "value1",
-		},
-	}
-	manager.SetProviderConfig(consts.OpenAI, testProviderConfig)
-	providerConfig, err := manager.GetProviderConfig(consts.OpenAI)
-	if err != nil {
-		t.Fatalf("GetProviderConfig failed: %v", err)
-	}
-	// Verify configuration items
-	if providerConfig.BaseURL != testProviderConfig.BaseURL {
-		t.Errorf("Provider BaseURL error, got: %v, want: %v", providerConfig.BaseURL, testProviderConfig.BaseURL)
-	}
-	if !reflect.DeepEqual(providerConfig.APIKeys, testProviderConfig.APIKeys) {
-		t.Errorf("Provider APIKeys error, got: %v, want: %v", providerConfig.APIKeys, testProviderConfig.APIKeys)
-	}
-	if providerConfig.OrgID != testProviderConfig.OrgID {
-		t.Errorf("Provider OrgID error, got: %v, want: %v", providerConfig.OrgID, testProviderConfig.OrgID)
-	}
-	// Verify deep copy - modifying original data should not affect retrieved data
-	testProviderConfig.APIKeys[0] = "modified-key"
-	providerConfig, _ = manager.GetProviderConfig(consts.OpenAI)
-	if providerConfig.APIKeys[0] == "modified-key" {
-		t.Error("GetProviderConfig should return a deep copy, should not be affected by original data changes")
-	}
-	// 4. Test GetProviderConfig error case
-	_, err = manager.GetProviderConfig("non-existent-provider")
-	if err == nil {
-		t.Error("GetProviderConfig should return an error for non-existent provider")
-	}
-	// 5. Test SetDefaultProvider and GetDefaultProvider
-	testProvider := consts.Provider("test-provider")
-	manager.SetProviderConfig(testProvider, testProviderConfig) // Ensure provider exists first
-	// 6. Test SetConnectionOptions and GetConnectionOptions
-	testConnectionOptions := conf.ConnectionOptions{
-		RequestTimeout:              15 * time.Second,
-		StreamReturnIntervalTimeout: 30 * time.Second,
-		MaxRetries:                  5,
-		RetryDelay:                  2 * time.Second,
-		RetryIncreaseDelay:          true,
-		RetryDelayList:              []time.Duration{1 * time.Second, 3 * time.Second, 5 * time.Second},
-	}
-	manager.SetConnectionOptions(testConnectionOptions)
-	connectionOptions := manager.GetConnectionOptions()
-	if connectionOptions.RequestTimeout != testConnectionOptions.RequestTimeout {
-		t.Errorf("ConnectionOptions RequestTimeout error, got: %v, want: %v", connectionOptions.RequestTimeout, testConnectionOptions.RequestTimeout)
-	}
-	if connectionOptions.MaxRetries != testConnectionOptions.MaxRetries {
-		t.Errorf("ConnectionOptions MaxRetries error, got: %v, want: %v", connectionOptions.MaxRetries, testConnectionOptions.MaxRetries)
-	}
-	if !reflect.DeepEqual(connectionOptions.RetryDelayList, testConnectionOptions.RetryDelayList) {
-		t.Errorf("ConnectionOptions RetryDelayList error, got: %v, want: %v", connectionOptions.RetryDelayList, testConnectionOptions.RetryDelayList)
-	}
-	// 7. Test Save and Load
-	err = manager.Save()
-	if err != nil {
-		t.Fatalf("Save failed: %v", err)
-	}
-	// Verify file was created
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		t.Fatal("Config file should exist after save")
-	}
-	// Create new manager and load config
-	newManager, err := conf.NewSDKConfigManager(configPath)
+	// 4. Test NewSDKConfigManager with existing config file
+	manager2, err := conf.NewSDKConfigManager(configPath)
 	if err != nil {
 		t.Fatalf("NewSDKConfigManager with existing config failed: %v", err)
 	}
-	loadedConfig, err := newManager.GetProviderConfig(testProvider)
-	if err != nil {
-		t.Fatalf("GetProviderConfig after load failed: %v", err)
+	// 5. Test GetConfig
+	loadedConfig := manager2.GetConfig()
+	if len(loadedConfig.Providers) != 2 {
+		t.Errorf("Expected 2 providers, got: %d", len(loadedConfig.Providers))
 	}
-	if loadedConfig.BaseURL != testProviderConfig.BaseURL {
-		t.Errorf("Provider BaseURL after load error, got: %v, want: %v", loadedConfig.BaseURL, testProviderConfig.BaseURL)
+	// 6. Test GetProviderConfig for OpenAI
+	openaiConfig := manager2.GetProviderConfig(consts.OpenAI)
+	// Verify OpenAI configuration
+	expectedOpenAI := testConfig.Providers[consts.OpenAI]
+	if openaiConfig.BaseURL != expectedOpenAI.BaseURL {
+		t.Errorf("OpenAI BaseURL mismatch, got: %v, want: %v", openaiConfig.BaseURL, expectedOpenAI.BaseURL)
 	}
-	loadedOptions := newManager.GetConnectionOptions()
-	if loadedOptions.RequestTimeout != testConnectionOptions.RequestTimeout {
-		t.Errorf("ConnectionOptions RequestTimeout after load error, got: %v, want: %v", loadedOptions.RequestTimeout, testConnectionOptions.RequestTimeout)
+	if !reflect.DeepEqual(openaiConfig.APIKeys, expectedOpenAI.APIKeys) {
+		t.Errorf("OpenAI APIKeys mismatch, got: %v, want: %v", openaiConfig.APIKeys, expectedOpenAI.APIKeys)
 	}
-	// 8. Test ConnectionOptions JSON serialization and deserialization
-	testOptions := conf.ConnectionOptions{
-		RequestTimeout:              20 * time.Second,
-		StreamReturnIntervalTimeout: 40 * time.Second,
-		MaxRetries:                  8,
-		RetryDelay:                  3 * time.Second,
-		RetryIncreaseDelay:          true,
-		RetryDelayList:              []time.Duration{2 * time.Second, 4 * time.Second},
+	if openaiConfig.OrgID != expectedOpenAI.OrgID {
+		t.Errorf("OpenAI OrgID mismatch, got: %v, want: %v", openaiConfig.OrgID, expectedOpenAI.OrgID)
 	}
-	// Serialize
-	jsonData, err := json.Marshal(testOptions)
-	if err != nil {
-		t.Fatalf("ConnectionOptions serialization failed: %v", err)
+	if openaiConfig.APIVersion != expectedOpenAI.APIVersion {
+		t.Errorf("OpenAI APIVersion mismatch, got: %v, want: %v", openaiConfig.APIVersion, expectedOpenAI.APIVersion)
 	}
-	// Deserialize
-	var unmarshaledOptions conf.ConnectionOptions
-	err = json.Unmarshal(jsonData, &unmarshaledOptions)
-	if err != nil {
-		t.Fatalf("ConnectionOptions deserialization failed: %v", err)
+	if openaiConfig.AssistantVersion != expectedOpenAI.AssistantVersion {
+		t.Errorf("OpenAI AssistantVersion mismatch, got: %v, want: %v", openaiConfig.AssistantVersion, expectedOpenAI.AssistantVersion)
 	}
-	// Verify deserialization results
-	if unmarshaledOptions.RequestTimeout != testOptions.RequestTimeout {
-		t.Errorf("RequestTimeout after deserialization error, got: %v, want: %v", unmarshaledOptions.RequestTimeout, testOptions.RequestTimeout)
+	if !reflect.DeepEqual(openaiConfig.Extra, expectedOpenAI.Extra) {
+		t.Errorf("OpenAI Extra mismatch, got: %v, want: %v", openaiConfig.Extra, expectedOpenAI.Extra)
 	}
-	if unmarshaledOptions.MaxRetries != testOptions.MaxRetries {
-		t.Errorf("MaxRetries after deserialization error, got: %v, want: %v", unmarshaledOptions.MaxRetries, testOptions.MaxRetries)
+	// 7. Test GetProviderConfig for DeepSeek
+	deepseekConfig := manager2.GetProviderConfig(consts.DeepSeek)
+	deepseekConfig2 := testConfig.Providers[consts.DeepSeek]
+	if deepseekConfig.BaseURL != deepseekConfig2.BaseURL {
+		t.Errorf("Anthropic BaseURL mismatch, got: %v, want: %v", deepseekConfig.BaseURL, deepseekConfig2.BaseURL)
 	}
-	if !reflect.DeepEqual(unmarshaledOptions.RetryDelayList, testOptions.RetryDelayList) {
-		t.Errorf("RetryDelayList after deserialization error, got: %v, want: %v", unmarshaledOptions.RetryDelayList, testOptions.RetryDelayList)
+	if !reflect.DeepEqual(deepseekConfig.APIKeys, deepseekConfig2.APIKeys) {
+		t.Errorf("Anthropic APIKeys mismatch, got: %v, want: %v", deepseekConfig.APIKeys, deepseekConfig2.APIKeys)
 	}
-	// 9. Test GetConfig and deep copy
-	fullConfig := manager.GetConfig()
-	providerCfg, ok := fullConfig.Providers[testProvider]
-	if !ok {
-		t.Fatal("GetConfig should contain test provider configuration")
+	// 8. Test deep copy functionality
+	// Modify the returned config and verify it doesn't affect the internal config
+	openaiConfig.BaseURL = "modified-url"
+	openaiConfig.APIKeys[0] = "modified-key"
+	openaiConfig.Extra["key1"] = "modified-value"
+	// Get the config again and verify it's unchanged
+	openaiConfig2 := manager2.GetProviderConfig(consts.OpenAI)
+	if openaiConfig2.BaseURL != expectedOpenAI.BaseURL {
+		t.Error("GetProviderConfig should return a deep copy, BaseURL should not be affected by modifications")
 	}
-	if providerCfg.BaseURL != testProviderConfig.BaseURL {
-		t.Errorf("GetConfig provider BaseURL error, got: %v, want: %v", providerCfg.BaseURL, testProviderConfig.BaseURL)
+	if openaiConfig2.APIKeys[0] != expectedOpenAI.APIKeys[0] {
+		t.Error("GetProviderConfig should return a deep copy, APIKeys should not be affected by modifications")
 	}
-	// Verify deep copy - modifying returned config should not affect internal config
-	providerCfg = fullConfig.Providers[testProvider]
-	providerCfg.BaseURL = "modified-url"
-	fullConfig.Providers[testProvider] = providerCfg
-	checkConfig, _ := manager.GetProviderConfig(testProvider)
-	if checkConfig.BaseURL != testProviderConfig.BaseURL {
+	if openaiConfig2.Extra["key1"] != expectedOpenAI.Extra["key1"] {
+		t.Error("GetProviderConfig should return a deep copy, Extra should not be affected by modifications")
+	}
+	// 9. Test GetConfig deep copy functionality
+	fullConfig := manager2.GetConfig()
+	// Modify the returned config
+	if providerConfig, ok := fullConfig.Providers[consts.OpenAI]; ok {
+		providerConfig.BaseURL = "modified-full-config-url"
+		fullConfig.Providers[consts.OpenAI] = providerConfig
+	}
+	// Verify internal config is unchanged
+	openaiConfig3 := manager2.GetProviderConfig(consts.OpenAI)
+	if openaiConfig3.BaseURL != expectedOpenAI.BaseURL {
 		t.Error("GetConfig should return a deep copy, modifications should not affect internal config")
+	}
+	// 10. Test Load method with invalid JSON
+	invalidConfigPath := filepath.Join(tempDir, "invalid-config.json")
+	if err := os.WriteFile(invalidConfigPath, []byte("invalid json"), 0644); err != nil {
+		t.Fatalf("Failed to write invalid config file: %v", err)
+	}
+	_, err = conf.NewSDKConfigManager(invalidConfigPath)
+	if err == nil {
+		t.Error("NewSDKConfigManager should return an error for invalid JSON config")
+	}
+	// 11. Test GetProviderConfig for non-existent provider
+	providerConfig := manager2.GetProviderConfig("non-existent-provider")
+	if providerConfig.BaseURL != "" {
+		t.Error("GetProviderConfig should return an empty config for non-existent provider")
 	}
 }

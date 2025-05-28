@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:57:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-26 20:50:31
+ * @LastEditTime: 2025-05-28 17:11:32
  * @Description: DeepSeek服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -16,20 +16,26 @@ import (
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
 	"github.com/liusuxian/go-aisdk/internal"
+	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
 	"net/http"
 )
 
 // deepseekProvider DeepSeek提供商
 type deepseekProvider struct {
-	supportedModels   map[consts.ModelType][]string // 支持的模型
-	providerConfig    *conf.ProviderConfig          // 提供商配置
-	connectionOptions *conf.ConnectionOptions       // 连接选项
-	httpClient        *utils.HTTPClient             // HTTP 客户端
+	supportedModels map[consts.ModelType][]string // 支持的模型
+	providerConfig  *conf.ProviderConfig          // 提供商配置
+	httpClient      *utils.HTTPClient             // HTTP 客户端
+	lb              *loadbalancer.LoadBalancer    // 负载均衡器
 }
 
 var (
 	deepseekService *deepseekProvider // deepseek提供商实例
+)
+
+const (
+	apiModels          = "/models"
+	apiChatCompletions = "/chat/completions"
 )
 
 // init 包初始化时创建 deepseekProvider 实例并注册到工厂
@@ -54,23 +60,44 @@ func (s *deepseekProvider) GetSupportedModels() (supportedModels map[consts.Mode
 func (s *deepseekProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 	s.providerConfig = config
 	s.httpClient = utils.NewHTTPClient(s.providerConfig.BaseURL)
+	s.lb = loadbalancer.NewLoadBalancer(s.providerConfig.APIKeys)
 }
 
-// InitializeConnectionOptions 初始化连接选项
-func (s *deepseekProvider) InitializeConnectionOptions(options *conf.ConnectionOptions) {
-	s.connectionOptions = options
-}
-
-// TODO: CreateChatCompletion 创建聊天
-func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest) (response models.ChatResponse, err error) {
+// TODO ListModels 列出模型
+func (s *deepseekProvider) ListModels(ctx context.Context) (response models.ListModelsResponse, err error) {
+	// 获取一个APIKey
+	var apiKey *loadbalancer.APIKey
+	if apiKey, err = s.lb.GetAPIKey(); err != nil {
+		return
+	}
 	var (
 		setters = []utils.RequestOption{
-			utils.WithBody(request),
-			utils.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", s.providerConfig.APIKeys[0])),
+			utils.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
 		}
 		req *http.Request
 	)
-	if req, err = s.httpClient.NewRequest(ctx, http.MethodPost, s.httpClient.FullURL("/chat/completions"), setters...); err != nil {
+	if req, err = s.httpClient.NewRequest(ctx, http.MethodGet, s.httpClient.FullURL(apiModels), setters...); err != nil {
+		return
+	}
+	err = s.httpClient.SendRequest(req, &response)
+	return
+}
+
+// TODO CreateChatCompletion 创建聊天
+func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest) (response models.ChatResponse, err error) {
+	// 获取一个APIKey
+	var apiKey *loadbalancer.APIKey
+	if apiKey, err = s.lb.GetAPIKey(); err != nil {
+		return
+	}
+	var (
+		setters = []utils.RequestOption{
+			utils.WithBody(request),
+			utils.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
+		}
+		req *http.Request
+	)
+	if req, err = s.httpClient.NewRequest(ctx, http.MethodPost, s.httpClient.FullURL(apiChatCompletions), setters...); err != nil {
 		return
 	}
 	err = s.httpClient.SendRequest(req, &response)

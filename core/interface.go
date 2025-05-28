@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:45:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-26 17:16:41
+ * @LastEditTime: 2025-05-28 17:06:43
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -24,9 +24,9 @@ type ProviderService interface {
 	GetSupportedModels() (supportedModels map[consts.ModelType][]string)
 	// 初始化提供商配置
 	InitializeProviderConfig(config *conf.ProviderConfig)
-	// 初始化连接选项
-	InitializeConnectionOptions(options *conf.ConnectionOptions)
 
+	// 列出模型
+	ListModels(ctx context.Context) (response models.ListModelsResponse, err error)
 	// 聊天相关
 	CreateChatCompletion(ctx context.Context, request models.ChatRequest) (response models.ChatResponse, err error)
 	// CreateChatCompletionStream(ctx context.Context, request models.ChatRequest) (response models.ChatResponseStream, err error)
