@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 18:13:18
+ * @LastEditTime: 2025-05-28 20:27:18
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -18,6 +18,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 const (
@@ -102,13 +103,15 @@ type RawResponse struct {
 }
 
 // NewHTTPClient 新建 HTTP 客户端
-func NewHTTPClient(baseURL string) (c *HTTPClient) {
+func NewHTTPClient(baseURL string, opts ...utils.RequestBuilderOption) (c *HTTPClient) {
 	return NewHTTPClientWithConfig(HTTPClientConfig{
-		BaseURL:            baseURL,
-		HTTPClient:         &http.Client{},
+		BaseURL: baseURL,
+		HTTPClient: &http.Client{
+			Timeout: 5 * time.Second,
+		},
 		ResponseDecoder:    &DefaultResponseDecoder{},
 		EmptyMessagesLimit: defaultEmptyMessagesLimit,
-	})
+	}, opts...)
 }
 
 // NewHTTPClientWithConfig 通过客户端配置新建 HTTP 客户端
