@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 18:57:40
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-26 17:41:05
+ * @LastEditTime: 2025-05-28 18:20:56
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -12,7 +12,7 @@ package utils_test
 import (
 	"bytes"
 	"errors"
-	"github.com/liusuxian/go-aisdk/internal"
+	utils "github.com/liusuxian/go-aisdk/internal"
 	"github.com/liusuxian/go-aisdk/internal/test"
 	"testing"
 )

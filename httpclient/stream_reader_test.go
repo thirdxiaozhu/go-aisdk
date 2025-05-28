@@ -1,17 +1,18 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-15 15:33:40
+ * @Date: 2025-05-28 18:00:38
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-15 15:34:44
+ * @LastEditTime: 2025-05-28 18:13:42
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package utils
+package httpclient
 
 import (
 	"bufio"
 	"errors"
+	utils "github.com/liusuxian/go-aisdk/internal"
 	"io"
 	"net/http"
 	"strings"
@@ -45,7 +46,7 @@ func TestStreamReader_Recv(t *testing.T) {
 			stream := &StreamReader[map[string]any]{
 				reader:      bufio.NewReader(reader),
 				response:    response,
-				unmarshaler: &JSONUnmarshaler{},
+				unmarshaler: &utils.JSONUnmarshaler{},
 			}
 
 			_, err := stream.Recv()
@@ -89,7 +90,7 @@ func TestStreamReader_RecvRaw(t *testing.T) {
 			stream := &StreamReader[map[string]any]{
 				reader:      bufio.NewReader(reader),
 				response:    response,
-				unmarshaler: &JSONUnmarshaler{},
+				unmarshaler: &utils.JSONUnmarshaler{},
 			}
 
 			data, err := stream.RecvRaw()
@@ -115,7 +116,7 @@ func TestStreamReader_Close(t *testing.T) {
 	stream := &StreamReader[map[string]any]{
 		reader:      bufio.NewReader(reader),
 		response:    response,
-		unmarshaler: &JSONUnmarshaler{},
+		unmarshaler: &utils.JSONUnmarshaler{},
 	}
 
 	if err := stream.Close(); err != nil {
@@ -151,9 +152,9 @@ func TestStreamReader_ErrorHandling(t *testing.T) {
 			stream := &StreamReader[map[string]any]{
 				reader:             bufio.NewReader(reader),
 				response:           response,
-				unmarshaler:        &JSONUnmarshaler{},
+				unmarshaler:        &utils.JSONUnmarshaler{},
 				emptyMessagesLimit: 10,
-				errAccumulator:     NewErrorAccumulator(),
+				errAccumulator:     utils.NewErrorAccumulator(),
 			}
 
 			_, err := stream.Recv()

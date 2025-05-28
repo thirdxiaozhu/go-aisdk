@@ -1,18 +1,19 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-15 14:26:01
+ * @Date: 2025-05-28 18:00:38
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-26 17:40:52
+ * @LastEditTime: 2025-05-28 18:04:04
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package utils
+package httpclient
 
 import (
 	"bufio"
 	"bytes"
 	"fmt"
+	utils "github.com/liusuxian/go-aisdk/internal"
 	"io"
 	"net/http"
 )
@@ -32,8 +33,8 @@ type StreamReader[T Streamable] struct {
 	isFinished         bool
 	reader             *bufio.Reader
 	response           *http.Response
-	errAccumulator     ErrorAccumulator
-	unmarshaler        Unmarshaler
+	errAccumulator     utils.ErrorAccumulator
+	unmarshaler        utils.Unmarshaler
 	HttpHeader
 }
 

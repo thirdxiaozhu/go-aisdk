@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:56:55
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 17:11:39
+ * @LastEditTime: 2025-05-28 18:19:17
  * @Description: OpenAI服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -15,7 +15,7 @@ import (
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
-	"github.com/liusuxian/go-aisdk/internal"
+	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
 	"net/http"
@@ -25,7 +25,7 @@ import (
 type openAIProvider struct {
 	supportedModels map[consts.ModelType][]string // 支持的模型
 	providerConfig  *conf.ProviderConfig          // 提供商配置
-	httpClient      *utils.HTTPClient             // HTTP 客户端
+	httpClient      *httpclient.HTTPClient        // HTTP 客户端
 	lb              *loadbalancer.LoadBalancer    // 负载均衡器
 }
 
@@ -60,7 +60,7 @@ func (s *openAIProvider) GetSupportedModels() (supportedModels map[consts.ModelT
 // InitializeProviderConfig 初始化提供商配置
 func (s *openAIProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 	s.providerConfig = config
-	s.httpClient = utils.NewHTTPClient(s.providerConfig.BaseURL)
+	s.httpClient = httpclient.NewHTTPClient(s.providerConfig.BaseURL)
 	s.lb = loadbalancer.NewLoadBalancer(s.providerConfig.APIKeys)
 }
 
@@ -72,8 +72,8 @@ func (s *openAIProvider) ListModels(ctx context.Context) (response models.ListMo
 		return
 	}
 	var (
-		setters = []utils.RequestOption{
-			utils.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
+		setters = []httpclient.RequestOption{
+			httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
 		}
 		req *http.Request
 	)

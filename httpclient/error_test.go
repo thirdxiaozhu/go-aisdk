@@ -1,29 +1,29 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-15 15:36:08
+ * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-26 17:41:36
+ * @LastEditTime: 2025-05-28 17:58:10
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package utils_test
+package httpclient_test
 
 import (
 	"errors"
-	"github.com/liusuxian/go-aisdk/internal"
+	"github.com/liusuxian/go-aisdk/httpclient"
 	"testing"
 )
 
 func TestRequestError_Error(t *testing.T) {
 	tests := []struct {
 		name          string
-		requestError  *utils.RequestError
+		requestError  *httpclient.RequestError
 		expectedError string
 	}{
 		{
 			name: "Basic error with all fields",
-			requestError: &utils.RequestError{
+			requestError: &httpclient.RequestError{
 				HTTPStatus:     "Bad Request",
 				HTTPStatusCode: 400,
 				Err:            errors.New("invalid request"),
@@ -33,7 +33,7 @@ func TestRequestError_Error(t *testing.T) {
 		},
 		{
 			name: "Error with empty body",
-			requestError: &utils.RequestError{
+			requestError: &httpclient.RequestError{
 				HTTPStatus:     "Not Found",
 				HTTPStatusCode: 404,
 				Err:            errors.New("resource not found"),
@@ -54,7 +54,7 @@ func TestRequestError_Error(t *testing.T) {
 
 func TestRequestError_Unwrap(t *testing.T) {
 	originalError := errors.New("original error")
-	requestError := &utils.RequestError{
+	requestError := &httpclient.RequestError{
 		HTTPStatus:     "Internal Server Error",
 		HTTPStatusCode: 500,
 		Err:            originalError,

@@ -1,19 +1,20 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-04-15 14:19:30
+ * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-15 15:47:17
+ * @LastEditTime: 2025-05-28 18:13:18
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package utils
+package httpclient
 
 import (
 	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
+	utils "github.com/liusuxian/go-aisdk/internal"
 	"io"
 	"net/http"
 	"strings"
@@ -71,9 +72,9 @@ type HTTPClientConfig struct {
 
 // HTTPClient 客户端
 type HTTPClient struct {
-	config            HTTPClientConfig                 // 客户端配置
-	requestBuilder    RequestBuilder                   // 请求构建器
-	createFormBuilder func(body io.Writer) FormBuilder // 表单构建器
+	config            HTTPClientConfig                       // 客户端配置
+	requestBuilder    utils.RequestBuilder                   // 请求构建器
+	createFormBuilder func(body io.Writer) utils.FormBuilder // 表单构建器
 }
 
 // Response 响应
@@ -111,12 +112,12 @@ func NewHTTPClient(baseURL string) (c *HTTPClient) {
 }
 
 // NewHTTPClientWithConfig 通过客户端配置新建 HTTP 客户端
-func NewHTTPClientWithConfig(config HTTPClientConfig) (c *HTTPClient) {
+func NewHTTPClientWithConfig(config HTTPClientConfig, opts ...utils.RequestBuilderOption) (c *HTTPClient) {
 	return &HTTPClient{
 		config:         config,
-		requestBuilder: NewRequestBuilder(),
-		createFormBuilder: func(body io.Writer) FormBuilder {
-			return NewFormBuilder(body)
+		requestBuilder: utils.NewRequestBuilder(opts...),
+		createFormBuilder: func(body io.Writer) utils.FormBuilder {
+			return utils.NewFormBuilder(body)
 		},
 	}
 }
@@ -254,8 +255,8 @@ func SendRequestStream[T Streamable](client *HTTPClient, req *http.Request) (str
 		emptyMessagesLimit: client.config.EmptyMessagesLimit,
 		reader:             bufio.NewReader(resp.Body),
 		response:           resp,
-		errAccumulator:     NewErrorAccumulator(),
-		unmarshaler:        &JSONUnmarshaler{},
+		errAccumulator:     utils.NewErrorAccumulator(),
+		unmarshaler:        &utils.JSONUnmarshaler{},
 		HttpHeader:         HttpHeader(resp.Header),
 	}
 	return

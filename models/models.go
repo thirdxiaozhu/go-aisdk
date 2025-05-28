@@ -2,20 +2,20 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 16:42:30
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 16:50:32
+ * @LastEditTime: 2025-05-28 18:17:41
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
 package models
 
-import "github.com/liusuxian/go-aisdk/internal"
+import "github.com/liusuxian/go-aisdk/httpclient"
 
 // ListModelsResponse 列出模型响应
 type ListModelsResponse struct {
 	Object string   `json:"object"` // 对象类型
 	Data   []Models `json:"data"`   // 模型列表
-	utils.HttpHeader
+	httpclient.HttpHeader
 }
 
 // Models 模型信息
