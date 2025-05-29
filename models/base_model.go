@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-16 14:31:45
+ * @LastEditTime: 2025-05-29 15:47:18
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -16,21 +16,6 @@ type ModelInfo struct {
 	Provider  consts.Provider  `json:"provider"`   // 提供商
 	ModelType consts.ModelType `json:"model_type"` // 模型类型
 	Model     string           `json:"model"`      // 模型名称
-}
-
-// GetModel 获取模型名称
-func (m ModelInfo) GetModel() (model string) {
-	return m.Model
-}
-
-// GetProvider 获取提供商
-func (m ModelInfo) GetProvider() (provider consts.Provider) {
-	return m.Provider
-}
-
-// GetModelType 获取模型类型
-func (m ModelInfo) GetModelType() (modelType consts.ModelType) {
-	return m.ModelType
 }
 
 // ToolType 工具类型

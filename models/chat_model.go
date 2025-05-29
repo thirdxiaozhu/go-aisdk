@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 18:17:02
+ * @LastEditTime: 2025-05-29 15:47:46
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -227,7 +227,7 @@ type ChatRequest struct {
 // MarshalJSON 序列化JSON
 func (r ChatRequest) MarshalJSON() (b []byte, err error) {
 	// 获取提供商
-	provider := r.ModelInfo.GetProvider()
+	provider := r.ModelInfo.Provider
 	// 创建一个别名结构体
 	type Alias ChatRequest
 	temp := struct {
@@ -237,7 +237,7 @@ func (r ChatRequest) MarshalJSON() (b []byte, err error) {
 		MaxTokens int    `json:"max_tokens,omitempty"`
 		Alias
 	}{
-		Model: r.ModelInfo.GetModel(),
+		Model: r.ModelInfo.Model,
 		Alias: Alias(r),
 	}
 	// 根据提供商设置最大令牌数

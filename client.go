@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:09:20
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 17:07:17
+ * @LastEditTime: 2025-05-29 16:16:42
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -71,8 +71,9 @@ func (c *SDKClient) CreateChatCompletion(ctx context.Context, request models.Cha
 	if err = core.IsModelSupported(ps, request.ModelInfo); err != nil {
 		return
 	}
+	// 判断是否流式传输
 	if request.Stream {
-		// TODO
+		err = consts.ErrCompletionStreamNotSupported
 		return
 	}
 	// 创建聊天

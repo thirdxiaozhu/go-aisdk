@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:45:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 17:06:43
+ * @LastEditTime: 2025-05-29 16:10:30
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,7 +11,6 @@ package core
 
 import (
 	"context"
-	"fmt"
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/models"
@@ -42,8 +41,8 @@ type ProviderService interface {
 func IsModelSupported(s ProviderService, modelInfo models.ModelInfo) (err error) {
 	// 获取支持的模型
 	supportedModels := s.GetSupportedModels()
-	if supportedModels == nil {
-		return fmt.Errorf("error: provider [%s] has no supported models list", modelInfo.Provider)
+	if len(supportedModels) == 0 {
+		return consts.WrapProviderNotSupported(modelInfo.Provider)
 	}
 	// 获取指定模型类型支持的模型列表
 	var (
@@ -51,11 +50,11 @@ func IsModelSupported(s ProviderService, modelInfo models.ModelInfo) (err error)
 		ok        bool
 	)
 	if modelList, ok = supportedModels[modelInfo.ModelType]; !ok {
-		return fmt.Errorf("error: provider [%s] does not support model type [%s]", modelInfo.Provider, modelInfo.ModelType)
+		return consts.WrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
 	}
 	// 判断模型是否支持
 	if slices.Contains(modelList, modelInfo.Model) {
 		return
 	}
-	return fmt.Errorf("error: provider [%s] does not support model [%s] of type [%s]", modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
+	return consts.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
 }
