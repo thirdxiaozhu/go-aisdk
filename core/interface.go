@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:45:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-29 16:10:30
+ * @LastEditTime: 2025-05-30 14:55:39
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -13,6 +13,7 @@ import (
 	"context"
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"slices"
 )
@@ -25,10 +26,10 @@ type ProviderService interface {
 	InitializeProviderConfig(config *conf.ProviderConfig)
 
 	// 列出模型
-	ListModels(ctx context.Context) (response models.ListModelsResponse, err error)
+	ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error)
 	// 聊天相关
-	CreateChatCompletion(ctx context.Context, request models.ChatRequest) (response models.ChatResponse, err error)
-	// CreateChatCompletionStream(ctx context.Context, request models.ChatRequest) (response models.ChatResponseStream, err error)
+	CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error)
+	// CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponseStream, err error)
 
 	// TODO 图像相关
 

@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 17:57:05
+ * @LastEditTime: 2025-05-30 14:47:36
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -44,7 +44,7 @@ func TestNewHTTPClientWithConfig(t *testing.T) {
 	var (
 		config = HTTPClientConfig{
 			BaseURL:            "https://api.example.com",
-			HTTPClient:         &http.Client{},
+			HTTPClient:         NewDefaultHTTPDoer(0),
 			ResponseDecoder:    &DefaultResponseDecoder{},
 			EmptyMessagesLimit: defaultEmptyMessagesLimit,
 		}

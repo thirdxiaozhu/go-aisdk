@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 17:26:08
+ * @LastEditTime: 2025-05-30 19:02:20
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -14,11 +14,14 @@ import (
 	"fmt"
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/middleware"
 	"github.com/liusuxian/go-aisdk/models"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func getApiKeys(envKey string) (apiKeys string) {
@@ -50,7 +53,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 			},
 		},
 		MaxCompletionTokens: 4096,
-	})
+	}, httpclient.WithTimeout(time.Minute*2))
 }
 
 func main() {
@@ -86,7 +89,7 @@ func main() {
 		return
 	}
 
-	client, err := aisdk.NewSDKClient(configPath)
+	client, err := aisdk.NewSDKClient(configPath, aisdk.WithRetry(middleware.DefaultRetryConfig()), aisdk.WithLogging(middleware.DefaultLoggingConfig()), aisdk.WithMetrics(middleware.DefaultMetricsConfig()))
 	if err != nil {
 		log.Fatalf("NewSDKClient() error = %v", err)
 		return

@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:57:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 18:19:09
+ * @LastEditTime: 2025-05-30 14:59:37
  * @Description: DeepSeek服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -64,7 +64,11 @@ func (s *deepseekProvider) InitializeProviderConfig(config *conf.ProviderConfig)
 }
 
 // TODO ListModels 列出模型
-func (s *deepseekProvider) ListModels(ctx context.Context) (response models.ListModelsResponse, err error) {
+func (s *deepseekProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
+	// 设置客户端选项
+	for _, opt := range opts {
+		opt(s.httpClient)
+	}
 	// 获取一个APIKey
 	var apiKey *loadbalancer.APIKey
 	if apiKey, err = s.lb.GetAPIKey(); err != nil {
@@ -84,7 +88,11 @@ func (s *deepseekProvider) ListModels(ctx context.Context) (response models.List
 }
 
 // TODO CreateChatCompletion 创建聊天
-func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest) (response models.ChatResponse, err error) {
+func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+	// 设置客户端选项
+	for _, opt := range opts {
+		opt(s.httpClient)
+	}
 	// 获取一个APIKey
 	var apiKey *loadbalancer.APIKey
 	if apiKey, err = s.lb.GetAPIKey(); err != nil {

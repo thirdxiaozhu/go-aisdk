@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:56:55
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 18:19:17
+ * @LastEditTime: 2025-05-30 15:00:21
  * @Description: OpenAI服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -65,7 +65,11 @@ func (s *openAIProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 }
 
 // TODO ListModels 列出模型
-func (s *openAIProvider) ListModels(ctx context.Context) (response models.ListModelsResponse, err error) {
+func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
+	// 设置客户端选项
+	for _, opt := range opts {
+		opt(s.httpClient)
+	}
 	// 获取一个APIKey
 	var apiKey *loadbalancer.APIKey
 	if apiKey, err = s.lb.GetAPIKey(); err != nil {
@@ -85,6 +89,10 @@ func (s *openAIProvider) ListModels(ctx context.Context) (response models.ListMo
 }
 
 // TODO CreateChatCompletion 创建聊天
-func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest) (response models.ChatResponse, err error) {
+func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+	// 设置客户端选项
+	for _, opt := range opts {
+		opt(s.httpClient)
+	}
 	return
 }
