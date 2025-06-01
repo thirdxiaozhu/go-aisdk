@@ -19,7 +19,8 @@ var (
 	ErrModelTypeNotSupported        = errors.New("model type is not supported")                                                        // 模型类型不支持
 	ErrModelNotSupported            = errors.New("model is not supported")                                                             // 模型不支持
 	ErrCompletionStreamNotSupported = errors.New("streaming is not supported with this method, please use CreateChatCompletionStream") // 流式传输不支持
-	ErrMethodNotSupported           = errors.New("method is not supported")                                                            // 方法不支持
+	ErrCompletionNotStream          = errors.New("stream completion header is not stream")
+	ErrMethodNotSupported           = errors.New("method is not supported") // 方法不支持
 )
 
 // WrapProviderNotSupported 包装提供商不支持错误

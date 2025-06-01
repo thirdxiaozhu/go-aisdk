@@ -12,13 +12,14 @@ package openai
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
-	"net/http"
 )
 
 // openAIProvider OpenAI提供商
@@ -95,4 +96,13 @@ func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request model
 		opt(s.httpClient)
 	}
 	return
+}
+
+// TODO CreateChatCompletionStream 创建聊天
+func (s *openAIProvider) CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+	// 设置客户端选项
+	for _, opt := range opts {
+		opt(s.httpClient)
+	}
+	return nil, nil
 }

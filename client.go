@@ -13,6 +13,9 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"sort"
+	"time"
+
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
@@ -20,8 +23,6 @@ import (
 	"github.com/liusuxian/go-aisdk/middleware"
 	"github.com/liusuxian/go-aisdk/models"
 	_ "github.com/liusuxian/go-aisdk/providers"
-	"sort"
-	"time"
 )
 
 // SDKClient SDK客户端
@@ -198,6 +199,42 @@ func (c *SDKClient) CreateChatCompletion(ctx context.Context, request models.Cha
 	}
 
 	return resp.(models.ChatResponse), nil
+}
+
+// CreateChatCompletionStream  创建聊天
+func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+	// 创建请求信息
+	requestInfo := c.createRequestInfo(request.ModelInfo.Provider, request.ModelInfo, "CreateChatCompletion")
+	ctx = middleware.SetRequestInfo(ctx, requestInfo)
+	var err error
+
+	// 定义最终处理函数
+	finalHandler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		chatReq := req.(models.ChatRequest)
+		// 获取提供商
+		var ps core.ProviderService
+		if ps, err = core.GetProvider(chatReq.ModelInfo.Provider); err != nil {
+			return nil, err
+		}
+		// 判断模型是否支持
+		if err = core.IsModelSupported(ps, chatReq.ModelInfo); err != nil {
+			return nil, err
+		}
+		// 判断是否流式传输
+		if !chatReq.Stream {
+			return nil, consts.ErrCompletionNotStream
+		}
+		// 创建聊天
+		return ps.CreateChatCompletionStream(ctx, chatReq, cb, opts...)
+	}
+
+	// 执行中间件链
+	_, err = c.middlewareChain.Execute(ctx, request, finalHandler)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 // GetMetrics 获取指标数据（如果启用了监控中间件）

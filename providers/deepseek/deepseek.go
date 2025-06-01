@@ -11,14 +11,17 @@ package deepseek
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
+	"net/http"
+
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
-	"net/http"
 )
 
 // deepseekProvider DeepSeek提供商
@@ -110,4 +113,56 @@ func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request mod
 	}
 	err = s.httpClient.SendRequest(req, &response)
 	return
+}
+
+func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+	// 设置客户端选项
+	for _, opt := range opts {
+		opt(s.httpClient)
+	}
+	// 获取一个APIKey
+	var err error
+	var apiKey *loadbalancer.APIKey
+	if apiKey, err = s.lb.GetAPIKey(); err != nil {
+		return nil, err
+	}
+	var (
+		setters = []httpclient.RequestOption{
+			httpclient.WithBody(request),
+			httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
+		}
+		req *http.Request
+	)
+	if req, err = s.httpClient.NewRequest(ctx, http.MethodPost, s.httpClient.FullURL(apiChatCompletions), setters...); err != nil {
+		return nil, err
+	}
+
+	stream, err := httpclient.SendRequestStream[models.ChatResponse](s.httpClient, req)
+
+	defer func() {
+		if closeErr := stream.Close(); closeErr != nil && err == nil {
+			err = fmt.Errorf("stream close error: %w", closeErr)
+		}
+	}()
+
+	for {
+		select {
+		case <-ctx.Done(): // 支持上下文取消
+			return nil, ctx.Err()
+		default:
+			var msg models.ChatResponse
+			msg, err = stream.Recv()
+			switch {
+			case errors.Is(err, io.EOF):
+				return nil, err // 正常结束
+			case err != nil:
+				return nil, err // 错误处理
+			default:
+				// 使用回调处理消息
+				if err = cb(msg); err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
 }

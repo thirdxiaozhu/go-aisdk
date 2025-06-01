@@ -11,12 +11,15 @@ package core
 
 import (
 	"context"
+	"slices"
+
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
-	"slices"
 )
+
+type StreamCallback func(response models.ChatResponse) error
 
 // ProviderService AI服务提供商的服务接口
 type ProviderService interface {
@@ -29,7 +32,7 @@ type ProviderService interface {
 	ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error)
 	// 聊天相关
 	CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error)
-	// CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponseStream, err error)
+	CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, cb StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error)
 
 	// TODO 图像相关
 

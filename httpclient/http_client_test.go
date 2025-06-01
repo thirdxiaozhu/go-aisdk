@@ -593,10 +593,12 @@ data: [DONE]
 					msg2.ID, msg2.Message)
 			}
 
+			fmt.Println("??????????/")
 			_, err = stream.Recv()
 			if err != io.EOF {
 				t.Errorf("Expected third message to return EOF, got %v", err)
 			}
+			fmt.Println("??????????/", err)
 		})
 	}
 }

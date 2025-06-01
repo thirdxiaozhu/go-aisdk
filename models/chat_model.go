@@ -11,6 +11,7 @@ package models
 
 import (
 	"encoding/json"
+
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 )

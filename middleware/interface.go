@@ -16,6 +16,7 @@ import (
 
 // Handler 处理器函数类型
 type Handler func(ctx context.Context, request any) (response any, err error)
+type StreamHandler func(ctx context.Context, request any) (err error)
 
 // Middleware 中间件接口
 type Middleware interface {

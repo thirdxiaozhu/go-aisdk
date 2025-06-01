@@ -12,16 +12,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/liusuxian/go-aisdk"
-	"github.com/liusuxian/go-aisdk/consts"
-	"github.com/liusuxian/go-aisdk/httpclient"
-	"github.com/liusuxian/go-aisdk/middleware"
-	"github.com/liusuxian/go-aisdk/models"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/liusuxian/go-aisdk"
+	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/middleware"
+	"github.com/liusuxian/go-aisdk/models"
 )
 
 func getApiKeys(envKey string) (apiKeys string) {
@@ -49,11 +50,33 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+				Content: "你好",
 			},
 		},
 		MaxCompletionTokens: 4096,
 	}, httpclient.WithTimeout(time.Minute*2))
+}
+
+func streamCallback(response models.ChatResponse) error {
+	fmt.Println(response)
+	return nil
+}
+
+func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (interface{}, error) {
+	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
+		ModelInfo: models.ModelInfo{
+			Provider:  consts.DeepSeek,
+			ModelType: consts.ChatModel,
+			Model:     consts.DeepSeekReasoner,
+		},
+		Messages: []models.ChatMessage{
+			&models.UserMessage{
+				Content: "你好",
+			},
+		},
+		Stream:              true,
+		MaxCompletionTokens: 4096,
+	}, streamCallback, httpclient.WithTimeout(time.Minute*2))
 }
 
 func main() {
@@ -102,9 +125,11 @@ func main() {
 		log.Fatalf("listModels error = %v", err)
 		return
 	}
-	log.Printf("listModels response: %+v", response1)
+	log.Printf("listModels response: %+v\n", response1.Object)
+	log.Printf("listModels response: %+v\n", response1.Data)
+
 	// 创建聊天
-	response2, err := createChatCompletion(ctx, client)
+	response2, err := createChatCompletionStream(ctx, client)
 	if err != nil {
 		log.Fatalf("createChatCompletion error = %v", err)
 		return

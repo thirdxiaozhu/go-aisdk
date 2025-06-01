@@ -14,11 +14,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	utils "github.com/liusuxian/go-aisdk/internal"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	utils "github.com/liusuxian/go-aisdk/internal"
 )
 
 const (
@@ -238,6 +239,7 @@ func (c *HTTPClient) SendRequest(req *http.Request, v Response) (err error) {
 	}
 	defer resp.Body.Close()
 
+	fmt.Println(resp.Header)
 	if v != nil {
 		v.SetHeader(resp.Header)
 	}
