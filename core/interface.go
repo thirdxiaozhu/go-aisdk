@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:45:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-30 14:55:39
+ * @LastEditTime: 2025-06-02 04:41:34
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -13,7 +13,7 @@ import (
 	"context"
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
-	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/httpClient"
 	"github.com/liusuxian/go-aisdk/models"
 	"slices"
 )
@@ -26,10 +26,10 @@ type ProviderService interface {
 	InitializeProviderConfig(config *conf.ProviderConfig)
 
 	// 列出模型
-	ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error)
+	ListModels(ctx context.Context, opts ...httpClient.HTTPClientOption) (response models.ListModelsResponse, err error)
 	// 聊天相关
-	CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error)
-	// CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponseStream, err error)
+	CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpClient.HTTPClientOption) (response models.ChatResponse, err error)
+	// CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, opts ...httpClient.HTTPClientOption) (response models.ChatResponseStream, err error)
 
 	// TODO 图像相关
 
@@ -43,7 +43,7 @@ func IsModelSupported(s ProviderService, modelInfo models.ModelInfo) (err error)
 	// 获取支持的模型
 	supportedModels := s.GetSupportedModels()
 	if len(supportedModels) == 0 {
-		return consts.WrapProviderNotSupported(modelInfo.Provider)
+		return httpClient.WrapProviderNotSupported(modelInfo.Provider)
 	}
 	// 获取指定模型类型支持的模型列表
 	var (
@@ -51,11 +51,11 @@ func IsModelSupported(s ProviderService, modelInfo models.ModelInfo) (err error)
 		ok        bool
 	)
 	if modelList, ok = supportedModels[modelInfo.ModelType]; !ok {
-		return consts.WrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
+		return httpClient.WrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
 	}
 	// 判断模型是否支持
 	if slices.Contains(modelList, modelInfo.Model) {
 		return
 	}
-	return consts.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
+	return httpClient.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
 }

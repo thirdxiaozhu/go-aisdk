@@ -15,7 +15,7 @@ import (
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
-	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/httpClient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
 	"net/http"
@@ -25,7 +25,7 @@ import (
 type deepseekProvider struct {
 	supportedModels map[consts.ModelType][]string // 支持的模型
 	providerConfig  *conf.ProviderConfig          // 提供商配置
-	httpClient      *httpclient.HTTPClient        // HTTP 客户端
+	httpClient      *httpClient.HTTPClient        // HTTP 客户端
 	lb              *loadbalancer.LoadBalancer    // 负载均衡器
 }
 
@@ -59,12 +59,12 @@ func (s *deepseekProvider) GetSupportedModels() (supportedModels map[consts.Mode
 // InitializeProviderConfig 初始化提供商配置
 func (s *deepseekProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 	s.providerConfig = config
-	s.httpClient = httpclient.NewHTTPClient(s.providerConfig.BaseURL)
+	s.httpClient = httpClient.NewHTTPClient(s.providerConfig.BaseURL)
 	s.lb = loadbalancer.NewLoadBalancer(s.providerConfig.APIKeys)
 }
 
 // TODO ListModels 列出模型
-func (s *deepseekProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
+func (s *deepseekProvider) ListModels(ctx context.Context, opts ...httpClient.HTTPClientOption) (response models.ListModelsResponse, err error) {
 	// 设置客户端选项
 	for _, opt := range opts {
 		opt(s.httpClient)
@@ -75,8 +75,8 @@ func (s *deepseekProvider) ListModels(ctx context.Context, opts ...httpclient.HT
 		return
 	}
 	var (
-		setters = []httpclient.RequestOption{
-			httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
+		setters = []httpClient.RequestOption{
+			httpClient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
 		}
 		req *http.Request
 	)
@@ -88,7 +88,7 @@ func (s *deepseekProvider) ListModels(ctx context.Context, opts ...httpclient.HT
 }
 
 // TODO CreateChatCompletion 创建聊天
-func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpClient.HTTPClientOption) (response models.ChatResponse, err error) {
 	// 设置客户端选项
 	for _, opt := range opts {
 		opt(s.httpClient)
@@ -99,9 +99,9 @@ func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request mod
 		return
 	}
 	var (
-		setters = []httpclient.RequestOption{
-			httpclient.WithBody(request),
-			httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
+		setters = []httpClient.RequestOption{
+			httpClient.WithBody(request),
+			httpClient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
 		}
 		req *http.Request
 	)

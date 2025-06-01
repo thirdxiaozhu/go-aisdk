@@ -2,19 +2,18 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-30 14:50:08
+ * @LastEditTime: 2025-06-02 04:30:19
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package httpclient
+package httpClient
 
 import (
 	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
-	utils "github.com/liusuxian/go-aisdk/internal"
 	"io"
 	"net/http"
 	"strings"
@@ -52,6 +51,9 @@ func NewDefaultHTTPDoer(timeout time.Duration) (doer *DefaultHTTPDoer) {
 
 // SetTimeout 设置请求超时时间，零值表示无超时限制
 func (doer *DefaultHTTPDoer) SetTimeout(timeout time.Duration) {
+	if timeout <= 0 {
+		timeout = 0
+	}
 	doer.client.Timeout = timeout
 }
 
@@ -103,9 +105,9 @@ type HTTPClientConfig struct {
 
 // HTTPClient 客户端
 type HTTPClient struct {
-	config            HTTPClientConfig                       // 客户端配置
-	requestBuilder    utils.RequestBuilder                   // 请求构建器
-	createFormBuilder func(body io.Writer) utils.FormBuilder // 表单构建器
+	config            HTTPClientConfig                 // 客户端配置
+	requestBuilder    RequestBuilder                   // 请求构建器
+	createFormBuilder func(body io.Writer) FormBuilder // 表单构建器
 }
 
 // HTTPClientOption 客户端选项
@@ -143,7 +145,7 @@ type RawResponse struct {
 }
 
 // NewHTTPClient 新建 HTTP 客户端
-func NewHTTPClient(baseURL string, opts ...utils.RequestBuilderOption) (c *HTTPClient) {
+func NewHTTPClient(baseURL string, opts ...RequestBuilderOption) (c *HTTPClient) {
 	return NewHTTPClientWithConfig(HTTPClientConfig{
 		BaseURL:            baseURL,
 		HTTPClient:         NewDefaultHTTPDoer(10 * time.Second),
@@ -153,12 +155,12 @@ func NewHTTPClient(baseURL string, opts ...utils.RequestBuilderOption) (c *HTTPC
 }
 
 // NewHTTPClientWithConfig 通过客户端配置新建 HTTP 客户端
-func NewHTTPClientWithConfig(config HTTPClientConfig, opts ...utils.RequestBuilderOption) (c *HTTPClient) {
+func NewHTTPClientWithConfig(config HTTPClientConfig, opts ...RequestBuilderOption) (c *HTTPClient) {
 	return &HTTPClient{
 		config:         config,
-		requestBuilder: utils.NewRequestBuilder(opts...),
-		createFormBuilder: func(body io.Writer) utils.FormBuilder {
-			return utils.NewFormBuilder(body)
+		requestBuilder: NewRequestBuilder(opts...),
+		createFormBuilder: func(body io.Writer) FormBuilder {
+			return NewFormBuilder(body)
 		},
 	}
 }
@@ -296,8 +298,8 @@ func SendRequestStream[T Streamable](client *HTTPClient, req *http.Request) (str
 		emptyMessagesLimit: client.config.EmptyMessagesLimit,
 		reader:             bufio.NewReader(resp.Body),
 		response:           resp,
-		errAccumulator:     utils.NewErrorAccumulator(),
-		unmarshaler:        &utils.JSONUnmarshaler{},
+		errAccumulator:     NewErrorAccumulator(),
+		unmarshaler:        &JSONUnmarshaler{},
 		HttpHeader:         HttpHeader(resp.Header),
 	}
 	return

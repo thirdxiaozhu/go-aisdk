@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-30 19:02:20
+ * @LastEditTime: 2025-06-02 06:26:02
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -14,8 +14,7 @@ import (
 	"fmt"
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
-	"github.com/liusuxian/go-aisdk/httpclient"
-	"github.com/liusuxian/go-aisdk/middleware"
+	"github.com/liusuxian/go-aisdk/httpClient"
 	"github.com/liusuxian/go-aisdk/models"
 	"log"
 	"os"
@@ -37,11 +36,11 @@ func getApiKeys(envKey string) (apiKeys string) {
 }
 
 func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
-	return client.ListModels(ctx, consts.DeepSeek)
+	return client.ListModels(ctx, "system", consts.DeepSeek)
 }
 
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
-	return client.CreateChatCompletion(ctx, models.ChatRequest{
+	return client.CreateChatCompletion(ctx, "system", models.ChatRequest{
 		ModelInfo: models.ModelInfo{
 			Provider:  consts.DeepSeek,
 			ModelType: consts.ChatModel,
@@ -53,7 +52,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 			},
 		},
 		MaxCompletionTokens: 4096,
-	}, httpclient.WithTimeout(time.Minute*2))
+	}, httpClient.WithTimeout(time.Minute*2))
 }
 
 func main() {
@@ -89,7 +88,7 @@ func main() {
 		return
 	}
 
-	client, err := aisdk.NewSDKClient(configPath, aisdk.WithRetry(middleware.DefaultRetryConfig()), aisdk.WithLogging(middleware.DefaultLoggingConfig()), aisdk.WithMetrics(middleware.DefaultMetricsConfig()))
+	client, err := aisdk.NewSDKClient(configPath, aisdk.WithDefaultMiddlewares())
 	if err != nil {
 		log.Fatalf("NewSDKClient() error = %v", err)
 		return

@@ -2,12 +2,12 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 18:27:52
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-26 17:40:36
+ * @LastEditTime: 2025-06-02 04:26:17
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package utils
+package httpClient
 
 import (
 	"fmt"
