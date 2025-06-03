@@ -338,6 +338,7 @@ type ChatChoice struct {
 	Index        int                   `json:"index"`              // 该 completion 在模型生成的 completion 的选择列表中的索引
 	LogProbs     *ChatLogProbs         `json:"logprobs,omitempty"` // 该 choice 的对数概率信息
 	Message      ChatCompletionMessage `json:"message"`            // 模型生成的 completion 消息
+	Delta        ChatCompletionMessage `json:"delta"`              // 模型生成的 delta 消息
 }
 
 // ChatResponse 聊天响应

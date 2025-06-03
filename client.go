@@ -204,7 +204,7 @@ func (c *SDKClient) CreateChatCompletion(ctx context.Context, request models.Cha
 // CreateChatCompletionStream  创建聊天
 func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
 	// 创建请求信息
-	requestInfo := c.createRequestInfo(request.ModelInfo.Provider, request.ModelInfo, "CreateChatCompletion")
+	requestInfo := c.createRequestInfo(request.ModelInfo.Provider, request.ModelInfo, "CreateChatCompletionStream")
 	ctx = middleware.SetRequestInfo(ctx, requestInfo)
 	var err error
 

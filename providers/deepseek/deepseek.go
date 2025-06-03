@@ -154,7 +154,7 @@ func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, reque
 			msg, err = stream.Recv()
 			switch {
 			case errors.Is(err, io.EOF):
-				return nil, err // 正常结束
+				return nil, nil // 正常结束
 			case err != nil:
 				return nil, err // 错误处理
 			default:

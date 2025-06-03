@@ -12,10 +12,12 @@ package httpclient
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
-	utils "github.com/liusuxian/go-aisdk/internal"
 	"io"
 	"net/http"
+
+	utils "github.com/liusuxian/go-aisdk/internal"
 )
 
 var (
@@ -48,6 +50,9 @@ func (stream *StreamReader[T]) Recv() (response T, err error) {
 	if err = stream.unmarshaler.Unmarshal(rawLine, &response); err != nil {
 		return
 	}
+	var out bytes.Buffer
+	err = json.Indent(&out, rawLine, "", "\t")
+	//fmt.Println(out.String(), response)
 	return
 }
 

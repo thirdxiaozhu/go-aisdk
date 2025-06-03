@@ -50,7 +50,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好",
+				Content: "立即输出“API”三个字母",
 			},
 		},
 		MaxCompletionTokens: 4096,
@@ -58,7 +58,12 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 }
 
 func streamCallback(response models.ChatResponse) error {
-	fmt.Println(response)
+	if response.Choices[0].Delta.Content == "" {
+		fmt.Print(response.Choices[0].Delta.ReasoningContent)
+	} else {
+		fmt.Println()
+		fmt.Println(response.Choices[0].Delta.Content)
+	}
 	return nil
 }
 
@@ -71,7 +76,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (i
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好",
+				Content: "立即输出“API”三个字母",
 			},
 		},
 		Stream:              true,
@@ -129,6 +134,7 @@ func main() {
 	log.Printf("listModels response: %+v\n", response1.Data)
 
 	// 创建聊天
+	//response2, err := createChatCompletion(ctx, client)
 	response2, err := createChatCompletionStream(ctx, client)
 	if err != nil {
 		log.Fatalf("createChatCompletion error = %v", err)
