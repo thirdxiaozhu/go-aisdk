@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 18:00:38
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 18:04:04
+ * @LastEditTime: 2025-06-02 04:31:54
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -35,8 +35,8 @@ type StreamReader[T Streamable] struct {
 	isFinished         bool
 	reader             *bufio.Reader
 	response           *http.Response
-	errAccumulator     utils.ErrorAccumulator
-	unmarshaler        utils.Unmarshaler
+	errAccumulator     ErrorAccumulator
+	unmarshaler        Unmarshaler
 	HttpHeader
 }
 

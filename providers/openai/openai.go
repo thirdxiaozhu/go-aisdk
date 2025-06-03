@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:56:55
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-30 15:00:21
+ * @LastEditTime: 2025-06-03 11:49:13
  * @Description: OpenAI服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -26,7 +26,7 @@ import (
 type openAIProvider struct {
 	supportedModels map[consts.ModelType][]string // 支持的模型
 	providerConfig  *conf.ProviderConfig          // 提供商配置
-	httpClient      *httpclient.HTTPClient        // HTTP 客户端
+	hClient         *httpclient.HTTPClient        // HTTP 客户端
 	lb              *loadbalancer.LoadBalancer    // 负载均衡器
 }
 
@@ -61,7 +61,7 @@ func (s *openAIProvider) GetSupportedModels() (supportedModels map[consts.ModelT
 // InitializeProviderConfig 初始化提供商配置
 func (s *openAIProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 	s.providerConfig = config
-	s.httpClient = httpclient.NewHTTPClient(s.providerConfig.BaseURL)
+	s.hClient = httpclient.NewHTTPClient(s.providerConfig.BaseURL)
 	s.lb = loadbalancer.NewLoadBalancer(s.providerConfig.APIKeys)
 }
 
@@ -69,7 +69,7 @@ func (s *openAIProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
 	// 设置客户端选项
 	for _, opt := range opts {
-		opt(s.httpClient)
+		opt(s.hClient)
 	}
 	// 获取一个APIKey
 	var apiKey *loadbalancer.APIKey
@@ -82,10 +82,10 @@ func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTP
 		}
 		req *http.Request
 	)
-	if req, err = s.httpClient.NewRequest(ctx, http.MethodGet, s.httpClient.FullURL(apiModels), setters...); err != nil {
+	if req, err = s.hClient.NewRequest(ctx, http.MethodGet, s.hClient.FullURL(apiModels), setters...); err != nil {
 		return
 	}
-	err = s.httpClient.SendRequest(req, &response)
+	err = s.hClient.SendRequest(req, &response)
 	return
 }
 
@@ -93,7 +93,7 @@ func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTP
 func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	// 设置客户端选项
 	for _, opt := range opts {
-		opt(s.httpClient)
+		opt(s.hClient)
 	}
 	return
 }

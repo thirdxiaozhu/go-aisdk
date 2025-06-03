@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:45:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-30 14:55:39
+ * @LastEditTime: 2025-06-02 04:41:34
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -46,7 +46,7 @@ func IsModelSupported(s ProviderService, modelInfo models.ModelInfo) (err error)
 	// 获取支持的模型
 	supportedModels := s.GetSupportedModels()
 	if len(supportedModels) == 0 {
-		return consts.WrapProviderNotSupported(modelInfo.Provider)
+		return httpclient.WrapProviderNotSupported(modelInfo.Provider)
 	}
 	// 获取指定模型类型支持的模型列表
 	var (
@@ -54,11 +54,11 @@ func IsModelSupported(s ProviderService, modelInfo models.ModelInfo) (err error)
 		ok        bool
 	)
 	if modelList, ok = supportedModels[modelInfo.ModelType]; !ok {
-		return consts.WrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
+		return httpclient.WrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
 	}
 	// 判断模型是否支持
 	if slices.Contains(modelList, modelInfo.Model) {
 		return
 	}
-	return consts.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
+	return httpclient.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
 }

@@ -2,23 +2,23 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 18:57:40
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 18:20:56
+ * @LastEditTime: 2025-06-03 11:41:57
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package utils_test
+package httpclient_test
 
 import (
 	"bytes"
 	"errors"
-	utils "github.com/liusuxian/go-aisdk/internal"
-	"github.com/liusuxian/go-aisdk/internal/test"
+	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/httpclient/test"
 	"testing"
 )
 
 func TestErrorAccumulatorBytes(t *testing.T) {
-	accumulator := &utils.DefaultErrorAccumulator{
+	accumulator := &httpclient.DefaultErrorAccumulator{
 		Buffer: &bytes.Buffer{},
 	}
 
@@ -36,7 +36,7 @@ func TestErrorAccumulatorBytes(t *testing.T) {
 }
 
 func TestErrorByteWriteErrors(t *testing.T) {
-	accumulator := &utils.DefaultErrorAccumulator{
+	accumulator := &httpclient.DefaultErrorAccumulator{
 		Buffer: &test.FailingErrorBuffer{},
 	}
 
