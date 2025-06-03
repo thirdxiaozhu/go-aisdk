@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:09:20
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-02 06:19:41
+ * @LastEditTime: 2025-06-03 11:44:57
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -14,8 +14,8 @@ import (
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
-	"github.com/liusuxian/go-aisdk/httpClient"
-	"github.com/liusuxian/go-aisdk/httpClient/middleware"
+	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/httpclient/middleware"
 	"github.com/liusuxian/go-aisdk/models"
 	_ "github.com/liusuxian/go-aisdk/providers"
 	"sort"
@@ -70,7 +70,7 @@ func NewSDKClient(configPath string, opts ...SDKClientOption) (client *SDKClient
 }
 
 // ListModels 列出模型
-func (c *SDKClient) ListModels(ctx context.Context, userId string, provider consts.Provider, opts ...httpClient.HTTPClientOption) (response models.ListModelsResponse, err error) {
+func (c *SDKClient) ListModels(ctx context.Context, userId string, provider consts.Provider, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
 	// 定义处理函数
 	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
 		// 列出模型
@@ -87,13 +87,13 @@ func (c *SDKClient) ListModels(ctx context.Context, userId string, provider cons
 }
 
 // CreateChatCompletion 创建聊天
-func (c *SDKClient) CreateChatCompletion(ctx context.Context, userId string, request models.ChatRequest, opts ...httpClient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (c *SDKClient) CreateChatCompletion(ctx context.Context, userId string, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	// 定义处理函数
 	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
 		chatReq := req.(models.ChatRequest)
 		// 判断是否流式传输
 		if chatReq.Stream {
-			return nil, httpClient.ErrCompletionStreamNotSupported
+			return nil, httpclient.ErrCompletionStreamNotSupported
 		}
 		// 创建聊天
 		return ps.CreateChatCompletion(ctx, chatReq, opts...)

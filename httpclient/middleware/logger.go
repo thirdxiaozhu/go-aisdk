@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:39
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-30 19:02:54
+ * @LastEditTime: 2025-06-03 12:10:37
  * @Description: 日志中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -13,6 +13,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/liusuxian/go-aisdk/internal/utils"
 	"log"
 	"os"
 	"strings"
@@ -130,7 +131,7 @@ func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handl
 		if reqData := m.sanitizeData(request); reqData != nil {
 			startFields["request"] = reqData
 		}
-		m.config.Logger.Info(ctx, "request started: %v", mustJsonString(startFields))
+		m.config.Logger.Info(ctx, "request started: %v", utils.MustString(startFields))
 	}
 	// 执行下一个处理器
 	startTime := time.Now()
@@ -143,7 +144,7 @@ func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handl
 		"model_type":  requestInfo.ModelType,
 		"model":       requestInfo.Model,
 		"method":      requestInfo.Method,
-		"duration":    formatDuration(duration),
+		"duration":    utils.FormatDuration(duration),
 		"success":     err == nil,
 		"user_id":     requestInfo.UserID,
 		"retry_count": requestInfo.RetryCount,
@@ -152,7 +153,7 @@ func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handl
 		// 是否记录错误
 		if m.config.LogError {
 			endFields["error"] = err.Error()
-			m.config.Logger.Error(ctx, "request failed: %v", mustJsonString(endFields))
+			m.config.Logger.Error(ctx, "request failed: %v", utils.MustString(endFields))
 		}
 	} else {
 		// 是否跳过成功请求的日志
@@ -164,7 +165,7 @@ func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handl
 					endFields["response"] = respData
 				}
 			}
-			m.config.Logger.Info(ctx, "request completed: %v", mustJsonString(endFields))
+			m.config.Logger.Info(ctx, "request completed: %v", utils.MustString(endFields))
 		}
 	}
 	return

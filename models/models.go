@@ -9,13 +9,13 @@
  */
 package models
 
-import "github.com/liusuxian/go-aisdk/httpClient"
+import "github.com/liusuxian/go-aisdk/httpclient"
 
 // ListModelsResponse 列出模型响应
 type ListModelsResponse struct {
 	Object string   `json:"object"` // 对象类型
 	Data   []Models `json:"data"`   // 模型列表
-	httpClient.HttpHeader
+	httpclient.HttpHeader
 }
 
 // Models 模型信息

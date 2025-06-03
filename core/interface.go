@@ -13,7 +13,7 @@ import (
 	"context"
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
-	"github.com/liusuxian/go-aisdk/httpClient"
+	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"slices"
 )
@@ -26,10 +26,10 @@ type ProviderService interface {
 	InitializeProviderConfig(config *conf.ProviderConfig)
 
 	// 列出模型
-	ListModels(ctx context.Context, opts ...httpClient.HTTPClientOption) (response models.ListModelsResponse, err error)
+	ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error)
 	// 聊天相关
-	CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpClient.HTTPClientOption) (response models.ChatResponse, err error)
-	// CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, opts ...httpClient.HTTPClientOption) (response models.ChatResponseStream, err error)
+	CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error)
+	// CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponseStream, err error)
 
 	// TODO 图像相关
 
@@ -43,7 +43,7 @@ func IsModelSupported(s ProviderService, modelInfo models.ModelInfo) (err error)
 	// 获取支持的模型
 	supportedModels := s.GetSupportedModels()
 	if len(supportedModels) == 0 {
-		return httpClient.WrapProviderNotSupported(modelInfo.Provider)
+		return httpclient.WrapProviderNotSupported(modelInfo.Provider)
 	}
 	// 获取指定模型类型支持的模型列表
 	var (
@@ -51,11 +51,11 @@ func IsModelSupported(s ProviderService, modelInfo models.ModelInfo) (err error)
 		ok        bool
 	)
 	if modelList, ok = supportedModels[modelInfo.ModelType]; !ok {
-		return httpClient.WrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
+		return httpclient.WrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
 	}
 	// 判断模型是否支持
 	if slices.Contains(modelList, modelInfo.Model) {
 		return
 	}
-	return httpClient.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
+	return httpclient.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
 }

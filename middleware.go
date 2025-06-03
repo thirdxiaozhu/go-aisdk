@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-02 04:49:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-02 06:21:27
+ * @LastEditTime: 2025-06-03 11:45:23
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -13,7 +13,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/liusuxian/go-aisdk/core"
-	"github.com/liusuxian/go-aisdk/httpClient/middleware"
+	"github.com/liusuxian/go-aisdk/httpclient/middleware"
 	"github.com/liusuxian/go-aisdk/models"
 	"time"
 )

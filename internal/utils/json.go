@@ -7,12 +7,12 @@
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package middleware
+package utils
 
 import "encoding/json"
 
-// jsonString 将数据转换为json字符串
-func jsonString(v any) (str string, err error) {
+// String 将数据转换为json字符串
+func String(v any) (str string, err error) {
 	if v == nil {
 		return
 	}
@@ -22,8 +22,8 @@ func jsonString(v any) (str string, err error) {
 	return
 }
 
-// mustJsonString 将数据转换为json字符串，如果转换失败，返回空字符串
-func mustJsonString(v any) (str string) {
-	str, _ = jsonString(v)
+// MustString 将数据转换为json字符串，如果转换失败，返回空字符串
+func MustString(v any) (str string) {
+	str, _ = String(v)
 	return
 }

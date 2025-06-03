@@ -2,18 +2,18 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-07 19:24:23
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-02 04:30:05
+ * @LastEditTime: 2025-06-03 11:43:24
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package httpClient_test
+package httpclient_test
 
 import (
 	"bytes"
 	"errors"
-	"github.com/liusuxian/go-aisdk/httpClient"
-	"github.com/liusuxian/go-aisdk/httpClient/test/checks"
+	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/httpclient/test/checks"
 	"os"
 	"testing"
 )
@@ -37,7 +37,7 @@ func TestFormBuilderWithFailingWriter(t *testing.T) {
 	}
 	defer file.Close()
 
-	builder := httpClient.NewFormBuilder(&failingWriter{})
+	builder := httpclient.NewFormBuilder(&failingWriter{})
 	err = builder.CreateFormFile("file", file)
 	checks.ErrorIs(t, err, errMockFailingWriterError, "formbuilder should return error if writer fails")
 }
@@ -52,7 +52,7 @@ func TestFormBuilderWithClosedFile(t *testing.T) {
 	}
 	file.Close()
 
-	builder := httpClient.NewFormBuilder(&bytes.Buffer{})
+	builder := httpclient.NewFormBuilder(&bytes.Buffer{})
 	err = builder.CreateFormFile("file", file)
 	checks.HasError(t, err, "formbuilder should return error if file is closed")
 	checks.ErrorIs(t, err, os.ErrClosed, "formbuilder should return error if file is closed")

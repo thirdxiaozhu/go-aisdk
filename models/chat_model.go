@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-02 04:17:57
+ * @LastEditTime: 2025-06-03 11:46:01
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -12,7 +12,7 @@ package models
 import (
 	"encoding/json"
 	"github.com/liusuxian/go-aisdk/consts"
-	"github.com/liusuxian/go-aisdk/httpClient"
+	"github.com/liusuxian/go-aisdk/httpclient"
 )
 
 // ChatMessage 聊天消息的通用接口
@@ -349,5 +349,5 @@ type ChatResponse struct {
 	ServiceTier       string       `json:"service_tier,omitempty"` // 用于处理请求的服务层级
 	SystemFingerprint string       `json:"system_fingerprint"`     // 此指纹表示模型运行的后端配置。可以与 seed 请求参数一起使用，以了解何时进行了可能影响确定性的后端更改
 	Usage             Usage        `json:"usage"`                  // 该对话补全请求的用量信息
-	httpClient.HttpHeader
+	httpclient.HttpHeader
 }
