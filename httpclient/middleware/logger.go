@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:39
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-04 22:08:41
+ * @LastEditTime: 2025-06-06 04:06:33
  * @Description: 日志中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -133,22 +133,30 @@ func NewLoggingMiddleware(config LoggingMiddlewareConfig) (lm *LoggingMiddleware
 // Process 处理请求
 func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handler) (response any, err error) {
 	requestInfo := GetRequestInfo(ctx)
+	// 创建一个别名结构体
+	type Alias RequestInfo
 	// 是否记录请求
 	if m.config.LogRequest {
-		startFields := map[string]any{
-			"provider":   requestInfo.Provider,
-			"model_type": requestInfo.ModelType,
-			"model":      requestInfo.Model,
-			"method":     requestInfo.Method,
-			"start_time": requestInfo.StartTime,
-			"request_id": requestInfo.RequestID,
-			"user_id":    requestInfo.UserID,
+		startTemp := struct {
+			EndTime   *time.Time     `json:"end_time,omitempty"`
+			Duration  *time.Duration `json:"duration,omitempty"`
+			IsSuccess *bool          `json:"is_success,omitempty"`
+			LastError *string        `json:"last_error,omitempty"`
+			Request   any            `json:"request"`
+			Alias
+		}{
+			EndTime:   nil,
+			Duration:  nil,
+			IsSuccess: nil,
+			LastError: nil,
+			Request:   nil,
+			Alias:     Alias(*requestInfo),
 		}
 		// 脱敏处理请求数据
 		if reqData := m.sanitizeData(request); reqData != nil {
-			startFields["request"] = reqData
+			startTemp.Request = reqData
 		}
-		m.config.Logger.Info(ctx, "request started: %v", utils.MustString(startFields))
+		m.config.Logger.Info(ctx, "request started: %s", utils.MustString(startTemp))
 	}
 	// 执行下一个处理器
 	processingStartTime := time.Now()
@@ -157,27 +165,24 @@ func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handl
 	requestInfo.Duration = requestInfo.EndTime.Sub(requestInfo.StartTime)
 	requestInfo.IsSuccess = err == nil
 	requestInfo.LastError = err
-	// 记录请求结果
-	endFields := map[string]any{
-		"provider":            requestInfo.Provider,
-		"model_type":          requestInfo.ModelType,
-		"model":               requestInfo.Model,
-		"method":              requestInfo.Method,
-		"start_time":          requestInfo.StartTime,
-		"end_time":            requestInfo.EndTime,
-		"processing_duration": utils.FormatDuration(requestInfo.EndTime.Sub(processingStartTime)), // 单次处理耗时
-		"duration":            utils.FormatDuration(requestInfo.Duration),
-		"is_success":          requestInfo.IsSuccess,
-		"request_id":          requestInfo.RequestID,
-		"user_id":             requestInfo.UserID,
-		"attempt":             requestInfo.Attempt,
-		"max_attempts":        requestInfo.MaxAttempts,
+	endTemp := struct {
+		ProcessingDuration string `json:"processing_duration,omitempty"`
+		Duration           string `json:"duration,omitempty"`
+		LastError          string `json:"last_error,omitempty"`
+		Response           *any   `json:"response,omitempty"`
+		Alias
+	}{
+		ProcessingDuration: requestInfo.EndTime.Sub(processingStartTime).String(),
+		Duration:           requestInfo.Duration.String(),
+		LastError:          "",
+		Response:           nil,
+		Alias:              Alias(*requestInfo),
 	}
 	if err != nil {
 		// 是否记录错误
 		if m.config.LogError {
-			endFields["last_error"] = requestInfo.LastError.Error()
-			m.config.Logger.Error(ctx, "request failed: %v", utils.MustString(endFields))
+			endTemp.LastError = requestInfo.LastError.Error()
+			m.config.Logger.Error(ctx, "request failed: %s", utils.MustString(endTemp))
 		}
 	} else {
 		// 是否跳过成功请求的日志
@@ -186,10 +191,10 @@ func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handl
 			if m.config.LogResponse {
 				// 脱敏处理响应数据
 				if respData := m.sanitizeData(response); respData != nil {
-					endFields["response"] = respData
+					endTemp.Response = &respData
 				}
 			}
-			m.config.Logger.Info(ctx, "request completed: %v", utils.MustString(endFields))
+			m.config.Logger.Info(ctx, "request completed: %s", utils.MustString(endTemp))
 		}
 	}
 	return

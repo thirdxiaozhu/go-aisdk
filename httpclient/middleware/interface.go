@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-04 21:20:31
+ * @LastEditTime: 2025-06-06 04:07:41
  * @Description: 中间件接口定义
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -95,7 +95,7 @@ func GetRequestInfo(ctx context.Context) (reqInfo *RequestInfo) {
 		ModelType: "unknown",
 		Model:     "unknown",
 		Method:    "unknown",
-		StartTime: time.Now(),
+		StartTime: time.Time{},
 		RequestID: "unknown",
 	}
 }
