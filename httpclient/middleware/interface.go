@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-30 18:02:45
+ * @LastEditTime: 2025-06-04 21:20:31
  * @Description: 中间件接口定义
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -62,18 +62,19 @@ func (c *Chain) GetMiddlewares() (middlewares []Middleware) {
 
 // RequestInfo 请求信息
 type RequestInfo struct {
-	Provider   string        `json:"provider"`    // 提供商
-	ModelType  string        `json:"model_type"`  // 模型类型
-	Model      string        `json:"model"`       // 模型名称
-	Method     string        `json:"method"`      // 方法名称
-	StartTime  time.Time     `json:"start_time"`  // 开始时间
-	EndTime    time.Time     `json:"end_time"`    // 结束时间
-	Duration   time.Duration `json:"duration"`    // 耗时
-	Success    bool          `json:"success"`     // 是否成功
-	Error      error         `json:"error"`       // 错误信息
-	RequestID  string        `json:"request_id"`  // 请求ID
-	UserID     string        `json:"user_id"`     // 用户ID
-	RetryCount int           `json:"retry_count"` // 重试次数
+	Provider    string        `json:"provider"`     // 提供商
+	ModelType   string        `json:"model_type"`   // 模型类型
+	Model       string        `json:"model"`        // 模型名称
+	Method      string        `json:"method"`       // 方法名称
+	StartTime   time.Time     `json:"start_time"`   // 请求开始时间
+	EndTime     time.Time     `json:"end_time"`     // 最新一次请求结束时间（重试过程中会更新）
+	Duration    time.Duration `json:"duration"`     // 累计请求耗时（包含所有重试）
+	IsSuccess   bool          `json:"is_success"`   // 当前请求状态（重试过程中会更新，最终表示是否成功）
+	LastError   error         `json:"last_error"`   // 最后一次的错误信息（重试过程中会更新）
+	RequestID   string        `json:"request_id"`   // 请求ID
+	UserID      string        `json:"user_id"`      // 用户ID
+	Attempt     int           `json:"attempt"`      // 第几次重试
+	MaxAttempts int           `json:"max_attempts"` // 最大重试次数
 }
 
 // ContextKey 上下文键类型
@@ -90,14 +91,12 @@ func GetRequestInfo(ctx context.Context) (reqInfo *RequestInfo) {
 	}
 	// 返回安全的默认值
 	return &RequestInfo{
-		Provider:   "unknown",
-		ModelType:  "unknown",
-		Model:      "unknown",
-		Method:     "unknown",
-		StartTime:  time.Now(),
-		RequestID:  "unknown",
-		UserID:     "",
-		RetryCount: 0,
+		Provider:  "unknown",
+		ModelType: "unknown",
+		Model:     "unknown",
+		Method:    "unknown",
+		StartTime: time.Now(),
+		RequestID: "unknown",
 	}
 }
 

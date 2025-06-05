@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-02 04:49:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-03 11:45:23
+ * @LastEditTime: 2025-06-05 20:58:40
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,7 +11,6 @@ package aisdk
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"github.com/liusuxian/go-aisdk/core"
 	"github.com/liusuxian/go-aisdk/httpclient/middleware"
 	"github.com/liusuxian/go-aisdk/models"
@@ -84,19 +83,22 @@ func (c *SDKClient) handlerRequest(
 	request any,
 	handler func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error),
 ) (resp any, err error) {
-	// 创建请求信息
-	requestInfo := &middleware.RequestInfo{
-		Provider:   string(modelInfo.Provider),
-		ModelType:  string(modelInfo.ModelType),
-		Model:      modelInfo.Model,
-		Method:     method,
-		StartTime:  time.Now(),
-		RequestID:  uuid.New().String(),
-		UserID:     userId,
-		RetryCount: 0,
+	// 生成唯一请求ID
+	var requestId string
+	if requestId, err = c.flakeInstance.RequestID(); err != nil {
+		err = &SDKError{RequestID: requestId, Err: err}
+		return
 	}
 	// 设置请求信息到上下文
-	ctx = middleware.SetRequestInfo(ctx, requestInfo)
+	ctx = middleware.SetRequestInfo(ctx, &middleware.RequestInfo{
+		Provider:  string(modelInfo.Provider),
+		ModelType: string(modelInfo.ModelType),
+		Model:     modelInfo.Model,
+		Method:    method,
+		StartTime: time.Now(),
+		RequestID: requestId,
+		UserID:    userId,
+	})
 	// 定义最终处理函数
 	finalHandler := func(ctx context.Context, req any) (resp any, err error) {
 		// 获取提供商
@@ -118,5 +120,9 @@ func (c *SDKClient) handlerRequest(
 		return handler(ctx, ps, req)
 	}
 	// 执行中间件链
-	return c.middlewareChain.Execute(ctx, request, finalHandler)
+	if resp, err = c.middlewareChain.Execute(ctx, request, finalHandler); err != nil {
+		err = &SDKError{RequestID: requestId, Err: err}
+		return
+	}
+	return
 }
