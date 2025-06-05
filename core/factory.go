@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:45:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-03 11:45:26
+ * @LastEditTime: 2025-06-06 01:05:07
  * @Description: 提供AI服务的核心功能，包括提供商工厂和相关接口，采用单例模式实现，通过包级函数直接访问功能
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,7 +11,7 @@ package core
 
 import (
 	"github.com/liusuxian/go-aisdk/consts"
-	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
 )
 
 // providerFactory 管理所有AI服务提供商的工厂
@@ -42,7 +42,7 @@ func GetProvider(provider consts.Provider) (service ProviderService, err error) 
 		return p, nil
 	}
 
-	return nil, httpclient.WrapProviderNotSupported(provider)
+	return nil, sdkerrors.WrapProviderNotSupported(provider)
 }
 
 // ListProviders 列出所有注册的提供商

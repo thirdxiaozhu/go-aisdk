@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:09:20
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-05 19:12:22
+ * @LastEditTime: 2025-06-06 02:50:01
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -14,11 +14,12 @@ import (
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
+	"github.com/liusuxian/go-aisdk/flake"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/httpclient/middleware"
-	"github.com/liusuxian/go-aisdk/internal/flake"
 	"github.com/liusuxian/go-aisdk/models"
 	_ "github.com/liusuxian/go-aisdk/providers"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"sort"
 )
 
@@ -101,7 +102,7 @@ func (c *SDKClient) CreateChatCompletion(ctx context.Context, userId string, req
 		chatReq := req.(models.ChatRequest)
 		// 判断是否流式传输
 		if chatReq.Stream {
-			return nil, httpclient.ErrCompletionStreamNotSupported
+			return nil, sdkerrors.ErrCompletionStreamNotSupported
 		}
 		// 创建聊天
 		return ps.CreateChatCompletion(ctx, chatReq, opts...)

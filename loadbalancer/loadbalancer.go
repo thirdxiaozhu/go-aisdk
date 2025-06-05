@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-27 15:03:40
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-05 15:57:30
+ * @LastEditTime: 2025-06-06 02:40:00
  * @Description: 负载均衡器
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -10,20 +10,12 @@
 package loadbalancer
 
 import (
-	"errors"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"math"
 	"math/rand/v2"
 	"slices"
 	"sync"
 	"time"
-)
-
-var (
-	ErrEmptyAPIKeyList          = errors.New("api key list is empty")
-	ErrNoAPIKeyAvailable        = errors.New("no api key available")
-	ErrAPIKeyNotFound           = errors.New("api key not found")
-	ErrAPIKeyAlreadyExists      = errors.New("api key already exists")
-	ErrWeightMustBeGreaterThan0 = errors.New("weight must be greater than 0")
 )
 
 // APIKey API密钥
@@ -61,7 +53,7 @@ func NewLoadBalancer(keyList []string) (lb *LoadBalancer) {
 // GetAPIKey 获取一个APIKey，使用最少连接算法
 func (lb *LoadBalancer) GetAPIKey() (apiKey *APIKey, err error) {
 	if len(lb.apiKeyList) == 0 {
-		return nil, ErrEmptyAPIKeyList
+		return nil, sdkerrors.ErrEmptyAPIKeyList
 	}
 	// 选择使用次数最少的APIKey
 	lb.mu.RLock()
@@ -81,7 +73,7 @@ func (lb *LoadBalancer) GetAPIKey() (apiKey *APIKey, err error) {
 	lb.mu.RUnlock()
 	// 如果未找到可用的APIKey，则返回错误
 	if selectedAPIKey == nil {
-		return nil, ErrNoAPIKeyAvailable
+		return nil, sdkerrors.ErrNoAPIKeyAvailable
 	}
 	// 增加使用次数（需要写锁）
 	lb.mu.Lock()
@@ -101,7 +93,7 @@ func (lb *LoadBalancer) SetAvailability(key string, available bool) (err error) 
 	})
 	// 如果APIKey不存在，则返回错误
 	if index == -1 {
-		return ErrAPIKeyNotFound
+		return sdkerrors.ErrAPIKeyNotFound
 	}
 	// 设置APIKey的可用性
 	lb.apiKeyList[index].Available = available
@@ -117,7 +109,7 @@ func (lb *LoadBalancer) RegisterAPIKey(key string) (err error) {
 	if isExists := slices.ContainsFunc(lb.apiKeyList, func(apiKey *APIKey) bool {
 		return apiKey.Key == key
 	}); isExists {
-		return ErrAPIKeyAlreadyExists
+		return sdkerrors.ErrAPIKeyAlreadyExists
 	}
 
 	if lb.apiKeyList == nil {
@@ -145,7 +137,7 @@ func (lb *LoadBalancer) UnregisterAPIKey(key string) (err error) {
 
 	// 如果长度没有变化，说明APIKey不存在
 	if len(lb.apiKeyList) == originalLen {
-		return ErrAPIKeyNotFound
+		return sdkerrors.ErrAPIKeyNotFound
 	}
 	return
 }
@@ -153,7 +145,7 @@ func (lb *LoadBalancer) UnregisterAPIKey(key string) (err error) {
 // SetWeight 设置API权重，权重必须大于0
 func (lb *LoadBalancer) SetWeight(key string, weight uint32) (err error) {
 	if weight == 0 {
-		return ErrWeightMustBeGreaterThan0
+		return sdkerrors.ErrWeightMustBeGreaterThan0
 	}
 
 	lb.mu.Lock()
@@ -165,7 +157,7 @@ func (lb *LoadBalancer) SetWeight(key string, weight uint32) (err error) {
 	})
 	// 如果APIKey不存在，则返回错误
 	if index == -1 {
-		return ErrAPIKeyNotFound
+		return sdkerrors.ErrAPIKeyNotFound
 	}
 	// 设置APIKey的权重
 	lb.apiKeyList[index].Weight = weight
