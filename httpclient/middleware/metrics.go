@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-01-XX XX:XX:XX
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-01-XX XX:XX:XX
+ * @LastEditTime: 2025-06-04 21:55:34
  * @Description: 监控中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -293,13 +293,13 @@ func (m *MetricsMiddleware) Process(ctx context.Context, req interface{}, next H
 	}
 
 	// 记录重试次数
-	if requestInfo.RetryCount > 0 {
+	if requestInfo.Attempt > 0 {
 		m.config.Collector.RecordRetry(
 			requestInfo.Provider,
 			requestInfo.ModelType,
 			requestInfo.Model,
 			requestInfo.Method,
-			requestInfo.RetryCount,
+			requestInfo.Attempt,
 		)
 	}
 

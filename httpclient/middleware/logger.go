@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:39
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-03 21:26:35
+ * @LastEditTime: 2025-06-04 22:08:41
  * @Description: 日志中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -16,6 +16,7 @@ import (
 	"github.com/liusuxian/go-aisdk/internal/utils"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -56,12 +57,24 @@ func NewDefaultLogger(level LogLevel) (l *DefaultLogger) {
 	}
 }
 
+// fileInfo 获取调用者的文件名和行号
+func fileInfo(skip int) (caller string) {
+	_, file, line, ok := runtime.Caller(skip)
+	if !ok {
+		caller = "<???>:1"
+		return
+	}
+	caller = fmt.Sprintf("%s:%d", file, line)
+	return
+}
+
 // Debug 调试日志
 func (l *DefaultLogger) Debug(ctx context.Context, format string, args ...any) {
 	if LogLevelDebug < l.level {
 		return
 	}
-	l.logger.Printf("[DEBUG] %s", fmt.Sprintf(format, args...))
+	caller := fileInfo(2) // 跳过本函数和调用者
+	l.logger.Printf("[DEBUG] [%s] %s", caller, fmt.Sprintf(format, args...))
 }
 
 // Info 信息日志
@@ -69,7 +82,8 @@ func (l *DefaultLogger) Info(ctx context.Context, format string, args ...any) {
 	if LogLevelInfo < l.level {
 		return
 	}
-	l.logger.Printf("[INFO] %s", fmt.Sprintf(format, args...))
+	caller := fileInfo(2) // 跳过本函数和调用者
+	l.logger.Printf("[INFO] [%s] %s", caller, fmt.Sprintf(format, args...))
 }
 
 // Warn 警告日志
@@ -77,7 +91,8 @@ func (l *DefaultLogger) Warn(ctx context.Context, format string, args ...any) {
 	if LogLevelWarn < l.level {
 		return
 	}
-	l.logger.Printf("[WARN] %s", fmt.Sprintf(format, args...))
+	caller := fileInfo(2) // 跳过本函数和调用者
+	l.logger.Printf("[WARN] [%s] %s", caller, fmt.Sprintf(format, args...))
 }
 
 // Error 错误日志
@@ -85,7 +100,8 @@ func (l *DefaultLogger) Error(ctx context.Context, format string, args ...any) {
 	if LogLevelError < l.level {
 		return
 	}
-	l.logger.Printf("[ERROR] %s", fmt.Sprintf(format, args...))
+	caller := fileInfo(2) // 跳过本函数和调用者
+	l.logger.Printf("[ERROR] [%s] %s", caller, fmt.Sprintf(format, args...))
 }
 
 // LoggingMiddlewareConfig 日志中间件配置
@@ -120,11 +136,12 @@ func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handl
 	// 是否记录请求
 	if m.config.LogRequest {
 		startFields := map[string]any{
-			"request_id": requestInfo.RequestID,
 			"provider":   requestInfo.Provider,
 			"model_type": requestInfo.ModelType,
 			"model":      requestInfo.Model,
 			"method":     requestInfo.Method,
+			"start_time": requestInfo.StartTime,
+			"request_id": requestInfo.RequestID,
 			"user_id":    requestInfo.UserID,
 		}
 		// 脱敏处理请求数据
@@ -134,25 +151,32 @@ func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handl
 		m.config.Logger.Info(ctx, "request started: %v", utils.MustString(startFields))
 	}
 	// 执行下一个处理器
-	startTime := time.Now()
+	processingStartTime := time.Now()
 	response, err = next(ctx, request)
-	duration := time.Since(startTime)
+	requestInfo.EndTime = time.Now()
+	requestInfo.Duration = requestInfo.EndTime.Sub(requestInfo.StartTime)
+	requestInfo.IsSuccess = err == nil
+	requestInfo.LastError = err
 	// 记录请求结果
 	endFields := map[string]any{
-		"request_id":  requestInfo.RequestID,
-		"provider":    requestInfo.Provider,
-		"model_type":  requestInfo.ModelType,
-		"model":       requestInfo.Model,
-		"method":      requestInfo.Method,
-		"duration":    utils.FormatDuration(duration),
-		"success":     err == nil,
-		"user_id":     requestInfo.UserID,
-		"retry_count": requestInfo.RetryCount,
+		"provider":            requestInfo.Provider,
+		"model_type":          requestInfo.ModelType,
+		"model":               requestInfo.Model,
+		"method":              requestInfo.Method,
+		"start_time":          requestInfo.StartTime,
+		"end_time":            requestInfo.EndTime,
+		"processing_duration": utils.FormatDuration(requestInfo.EndTime.Sub(processingStartTime)), // 单次处理耗时
+		"duration":            utils.FormatDuration(requestInfo.Duration),
+		"is_success":          requestInfo.IsSuccess,
+		"request_id":          requestInfo.RequestID,
+		"user_id":             requestInfo.UserID,
+		"attempt":             requestInfo.Attempt,
+		"max_attempts":        requestInfo.MaxAttempts,
 	}
 	if err != nil {
 		// 是否记录错误
 		if m.config.LogError {
-			endFields["error"] = err.Error()
+			endFields["last_error"] = requestInfo.LastError.Error()
 			m.config.Logger.Error(ctx, "request failed: %v", utils.MustString(endFields))
 		}
 	} else {
@@ -187,12 +211,15 @@ func (m *LoggingMiddleware) sanitizeData(data any) (newData any) {
 		return nil
 	}
 	// 将数据转换为map进行处理
-	jsonData, err := json.Marshal(data)
-	if err != nil {
+	var (
+		jsonData []byte
+		err      error
+	)
+	if jsonData, err = json.Marshal(data); err != nil {
 		return fmt.Sprintf("failed to marshal data: %v", err)
 	}
 	var result any
-	if err := json.Unmarshal(jsonData, &result); err != nil {
+	if err = json.Unmarshal(jsonData, &result); err != nil {
 		return string(jsonData) // 如果无法解析，直接返回字符串
 	}
 	// 递归脱敏，从深度0开始
