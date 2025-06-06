@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-05 19:18:02
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-06 02:44:49
+ * @LastEditTime: 2025-06-06 10:17:14
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -70,20 +70,6 @@ func (e *SDKError) Error() (errStr string) {
 	return fmt.Sprintf("request_id: %s, error: %v", e.RequestID, e.Err)
 }
 
-// Unwrap 解包错误
-func Unwrap(err error) (originalError error) {
-	if err == nil {
-		return nil
-	}
-
-	var sdkErr *SDKError
-	if errors.As(err, &sdkErr) {
-		return sdkErr.Err
-	}
-
-	return err
-}
-
 // RequestID 获取请求ID
 func RequestID(err error) (requestId string) {
 	if err == nil {
@@ -98,22 +84,28 @@ func RequestID(err error) (requestId string) {
 	return ""
 }
 
-// Cause 错误根因
-func Cause(err error) (cause error) {
+// Unwrap 解包错误
+func Unwrap(err error) (originalError error) {
 	if err == nil {
 		return nil
 	}
 
 	var sdkErr *SDKError
 	if errors.As(err, &sdkErr) {
-		return doCause(sdkErr.Err)
+		return sdkErr.Err
 	}
 
-	return doCause(err)
+	return err
+}
+
+// Cause 错误根因
+func Cause(err error) (causeError error) {
+	originalError := Unwrap(err)
+	return doCause(originalError)
 }
 
 // doCause 递归获取错误根因
-func doCause(err error) (cause error) {
+func doCause(err error) (causeError error) {
 	if err == nil {
 		return nil
 	}
