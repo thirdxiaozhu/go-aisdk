@@ -74,6 +74,27 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (i
 	}, streamCallback, httpclient.WithTimeout(time.Minute*2))
 }
 
+func createChatCompletionPicture(ctx context.Context, client *aisdk.SDKClient) (interface{}, error) {
+	return client.CreateChatCompletionStream(ctx, "system", models.ChatRequest{
+		ModelInfo: models.ModelInfo{
+			Provider:  consts.Ark,
+			ModelType: consts.ChatModel,
+			Model:     consts.ArkThinkingVersion,
+		},
+		Messages: []models.ChatMessage{
+			&models.UserMessage{
+				MultimodalContent: []models.ChatUserMsgPart{
+					{ImageURL: &models.ChatUserMsgImageURL{URL: "https://ark-project.tos-cn-beijing.volces.com/images/view.jpeg"}, Type: models.ChatUserMsgPartTypeImageURL},
+					{Text: "这张图里有什么", Type: models.ChatUserMsgPartTypeText},
+				},
+			},
+		},
+		Stream:              true,
+		MaxCompletionTokens: 4096,
+		Thinking:            &models.ChatThinking{Type: "enabled"},
+	}, streamCallback, httpclient.WithTimeout(time.Minute*2))
+}
+
 func main() {
 	tempDir, err := os.MkdirTemp("", "config-test")
 	if err != nil {
@@ -119,7 +140,8 @@ func main() {
 		log.Printf("listModels error = %v\n", err)
 	}
 
-	response2, err := createChatCompletionStream(ctx, client)
+	//response2, err := createChatCompletionStream(ctx, client)
+	response2, err := createChatCompletionPicture(ctx, client)
 	if err != nil {
 		log.Fatalf("createChatCompletion error = %v", err)
 		return

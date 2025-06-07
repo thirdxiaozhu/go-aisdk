@@ -53,6 +53,10 @@ func init() {
 	core.RegisterProvider(consts.OpenAI, openaiService)
 }
 
+func (s *openAIProvider) CheckRequestValidation(request models.ChatRequest) (err error) {
+	return nil
+}
+
 // GetSupportedModels 获取支持的模型
 func (s *openAIProvider) GetSupportedModels() (supportedModels map[consts.ModelType][]string) {
 	return s.supportedModels

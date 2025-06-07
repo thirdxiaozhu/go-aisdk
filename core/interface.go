@@ -23,6 +23,7 @@ type StreamCallback func(response models.ChatResponse) error
 
 // ProviderService AI服务提供商的服务接口
 type ProviderService interface {
+	CheckRequestValidation(request models.ChatRequest) error
 	// 获取支持的模型
 	GetSupportedModels() (supportedModels map[consts.ModelType][]string)
 	// 初始化提供商配置

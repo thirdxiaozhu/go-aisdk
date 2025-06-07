@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"io"
 	"net/http"
 
@@ -43,6 +44,10 @@ func init() {
 	core.RegisterProvider(consts.Ark, arkService)
 }
 
+func (s *arkProvider) CheckRequestValidation(request models.ChatRequest) (err error) {
+	return nil
+}
+
 // GetSupportedModels 获取支持的模型
 func (s *arkProvider) GetSupportedModels() (supportedModels map[consts.ModelType][]string) {
 	return s.supportedModels
@@ -57,8 +62,7 @@ func (s *arkProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 
 // TODO ListModels 列出模型
 func (s *arkProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (models.ListModelsResponse, error) {
-
-	return models.ListModelsResponse{}, consts.ErrFunctionNotSupported
+	return models.ListModelsResponse{}, sdkerrors.ErrMethodNotSupported
 }
 
 // TODO CreateChatCompletion 创建聊天

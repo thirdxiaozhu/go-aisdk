@@ -90,6 +90,10 @@ func (s *deepseekProvider) ListModels(ctx context.Context, opts ...httpclient.HT
 	return
 }
 
+func (s *deepseekProvider) CheckRequestValidation(request models.ChatRequest) (err error) {
+	return nil
+}
+
 // TODO CreateChatCompletion 创建聊天
 func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	// 设置客户端选项

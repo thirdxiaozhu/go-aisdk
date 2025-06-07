@@ -13,7 +13,7 @@ import "encoding/json"
 
 // UserMessage 用户消息，支持多模态内容
 type UserMessage struct {
-	Content           string            `json:"content,omitempty"`            // 文本内容
+	Content           any               `json:"content,omitempty"`            // 文本内容
 	MultimodalContent []ChatUserMsgPart `json:"multimodal_content,omitempty"` // 多模态内容
 	Name              string            `json:"name,omitempty"`               // 参与者名称
 }

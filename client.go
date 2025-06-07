@@ -104,6 +104,11 @@ func (c *SDKClient) CreateChatCompletion(ctx context.Context, userId string, req
 		if chatReq.Stream {
 			return nil, sdkerrors.ErrCompletionStreamNotSupported
 		}
+
+		if err = ps.CheckRequestValidation(request); err != nil {
+			return nil, err
+		}
+
 		// 创建聊天
 		return ps.CreateChatCompletion(ctx, chatReq, opts...)
 	}
@@ -125,6 +130,9 @@ func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, userId strin
 	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
 		chatReq := req.(models.ChatRequest)
 		// 创建聊天
+		if err = ps.CheckRequestValidation(request); err != nil {
+			return nil, err
+		}
 		return ps.CreateChatCompletionStream(ctx, chatReq, cb, opts...)
 	}
 	// 处理请求
