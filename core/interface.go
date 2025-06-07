@@ -11,15 +11,13 @@ package core
 
 import (
 	"context"
-	"slices"
-
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
+	"slices"
 )
-
-type StreamCallback func(response models.ChatResponse) error
 
 // ProviderService AI服务提供商的服务接口
 type ProviderService interface {
@@ -32,7 +30,7 @@ type ProviderService interface {
 	ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error)
 	// 聊天相关
 	CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error)
-	CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, cb StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error)
+	// CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponseStream, err error)
 
 	// TODO 图像相关
 
@@ -46,7 +44,7 @@ func IsModelSupported(s ProviderService, modelInfo models.ModelInfo) (err error)
 	// 获取支持的模型
 	supportedModels := s.GetSupportedModels()
 	if len(supportedModels) == 0 {
-		return httpclient.WrapProviderNotSupported(modelInfo.Provider)
+		return sdkerrors.WrapProviderNotSupported(modelInfo.Provider)
 	}
 	// 获取指定模型类型支持的模型列表
 	var (
@@ -54,11 +52,11 @@ func IsModelSupported(s ProviderService, modelInfo models.ModelInfo) (err error)
 		ok        bool
 	)
 	if modelList, ok = supportedModels[modelInfo.ModelType]; !ok {
-		return httpclient.WrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
+		return sdkerrors.WrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
 	}
 	// 判断模型是否支持
 	if slices.Contains(modelList, modelInfo.Model) {
 		return
 	}
-	return httpclient.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
+	return sdkerrors.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
 }

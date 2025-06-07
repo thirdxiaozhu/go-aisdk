@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-05 16:29:54
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-05 19:10:26
+ * @LastEditTime: 2025-06-06 02:48:05
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -10,7 +10,7 @@
 package flake_test
 
 import (
-	"github.com/liusuxian/go-aisdk/internal/flake"
+	"github.com/liusuxian/go-aisdk/flake"
 	"sync"
 	"testing"
 	"time"

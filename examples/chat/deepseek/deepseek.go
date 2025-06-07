@@ -11,7 +11,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/liusuxian/go-aisdk"
+	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"log"
 	"os"
 	"path/filepath"
@@ -49,7 +55,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "立即输出“API”三个字母",
+				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
 			},
 		},
 		MaxCompletionTokens: 4096,
@@ -125,7 +131,7 @@ func main() {
 	// 列出模型
 	response1, err := listModels(ctx, client)
 	if err != nil {
-		log.Fatalf("listModels error = %v", err)
+		log.Fatalf("listModels error = %v, request_id = %s", err, sdkerrors.RequestID(err))
 		return
 	}
 	log.Printf("listModels response: %+v\n", response1.Object)
@@ -135,7 +141,25 @@ func main() {
 	//response2, err := createChatCompletion(ctx, client)
 	response2, err := createChatCompletionStream(ctx, client)
 	if err != nil {
-		log.Fatalf("createChatCompletion error = %v", err)
+		fmt.Println("Cause Error =", sdkerrors.Cause(err))
+		originalErr := sdkerrors.Unwrap(err)
+		switch {
+		case errors.Is(originalErr, sdkerrors.ErrProviderNotSupported):
+			fmt.Println("ErrProviderNotSupported =", true)
+		case errors.Is(originalErr, sdkerrors.ErrModelTypeNotSupported):
+			fmt.Println("ErrModelTypeNotSupported =", true)
+		case errors.Is(originalErr, sdkerrors.ErrModelNotSupported):
+			fmt.Println("ErrModelNotSupported =", true)
+		case errors.Is(originalErr, sdkerrors.ErrMethodNotSupported):
+			fmt.Println("ErrMethodNotSupported =", true)
+		case errors.Is(originalErr, sdkerrors.ErrCompletionStreamNotSupported):
+			fmt.Println("ErrCompletionStreamNotSupported =", true)
+		case errors.Is(originalErr, context.Canceled):
+			fmt.Println("context.Canceled =", true)
+		case errors.Is(originalErr, context.DeadlineExceeded):
+			fmt.Println("context.DeadlineExceeded =", true)
+		}
+		log.Fatalf("createChatCompletion error = %v, request_id = %s", err, sdkerrors.RequestID(err))
 		return
 	}
 	log.Printf("createChatCompletion response: %+v", response2)

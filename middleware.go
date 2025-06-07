@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-02 04:49:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-05 20:58:40
+ * @LastEditTime: 2025-06-06 03:16:18
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -14,6 +14,7 @@ import (
 	"github.com/liusuxian/go-aisdk/core"
 	"github.com/liusuxian/go-aisdk/httpclient/middleware"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"time"
 )
 
@@ -86,7 +87,7 @@ func (c *SDKClient) handlerRequest(
 	// 生成唯一请求ID
 	var requestId string
 	if requestId, err = c.flakeInstance.RequestID(); err != nil {
-		err = &SDKError{RequestID: requestId, Err: err}
+		err = &sdkerrors.SDKError{RequestID: requestId, Err: err}
 		return
 	}
 	// 设置请求信息到上下文
@@ -121,7 +122,7 @@ func (c *SDKClient) handlerRequest(
 	}
 	// 执行中间件链
 	if resp, err = c.middlewareChain.Execute(ctx, request, finalHandler); err != nil {
-		err = &SDKError{RequestID: requestId, Err: err}
+		err = &sdkerrors.SDKError{RequestID: requestId, Err: err}
 		return
 	}
 	return

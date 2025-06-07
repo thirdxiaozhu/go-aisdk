@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-04 11:56:13
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-04 22:29:30
+ * @LastEditTime: 2025-06-06 01:59:26
  * @Description: 重试中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -314,9 +314,7 @@ func DefaultRetryConfig() (config RetryMiddlewareConfig) {
 		Multiplier:    2.0,
 		JitterPercent: 0.1, // 默认±10%抖动
 		Condition:     DefaultRetryCondition,
-		OnRetry: func(ctx context.Context, requestInfo RequestInfo) {
-			fmt.Printf("111111111111: %+v\n", requestInfo)
-		},
+		OnRetry:       nil,
 	}
 }
 

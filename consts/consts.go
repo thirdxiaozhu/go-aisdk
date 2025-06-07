@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:57:28
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-15 18:57:30
+ * @LastEditTime: 2025-06-06 00:50:04
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,6 +11,11 @@ package consts
 
 // Provider AI服务提供商类型
 type Provider string
+
+// String 实现 fmt.Stringer 接口
+func (p Provider) String() (str string) {
+	return string(p)
+}
 
 const (
 	OpenAI     Provider = "openai"     // OpenAI
@@ -26,6 +31,11 @@ const (
 
 // ModelType 模型类型
 type ModelType string
+
+// String 实现 fmt.Stringer 接口
+func (m ModelType) String() (str string) {
+	return string(m)
+}
 
 const (
 	ChatModel  ModelType = "chat"  // 对话模型

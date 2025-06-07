@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-27 21:30:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-27 21:25:58
+ * @LastEditTime: 2025-06-06 02:41:58
  * @Description: 负载均衡器测试
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -10,6 +10,7 @@
 package loadbalancer
 
 import (
+	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"sync"
 	"testing"
 )
@@ -61,8 +62,8 @@ func TestGetAPIKey(t *testing.T) {
 		lb := NewLoadBalancer([]string{})
 		apiKey, err := lb.GetAPIKey()
 
-		if err != ErrEmptyAPIKeyList {
-			t.Errorf("expected error %v, got %v", ErrEmptyAPIKeyList, err)
+		if err != sdkerrors.ErrEmptyAPIKeyList {
+			t.Errorf("expected error %v, got %v", sdkerrors.ErrEmptyAPIKeyList, err)
 		}
 		if apiKey != nil {
 			t.Error("expected API key to be nil")
@@ -74,8 +75,8 @@ func TestGetAPIKey(t *testing.T) {
 		lb.SetAvailabilityForAll(false)
 
 		apiKey, err := lb.GetAPIKey()
-		if err != ErrNoAPIKeyAvailable {
-			t.Errorf("expected error %v, got %v", ErrNoAPIKeyAvailable, err)
+		if err != sdkerrors.ErrNoAPIKeyAvailable {
+			t.Errorf("expected error %v, got %v", sdkerrors.ErrNoAPIKeyAvailable, err)
 		}
 		if apiKey != nil {
 			t.Error("expected API key to be nil")
@@ -179,8 +180,8 @@ func TestSetAvailability(t *testing.T) {
 		lb := NewLoadBalancer([]string{"key1"})
 
 		err := lb.SetAvailability("nonexistent", false)
-		if err != ErrAPIKeyNotFound {
-			t.Errorf("expected error %v, got %v", ErrAPIKeyNotFound, err)
+		if err != sdkerrors.ErrAPIKeyNotFound {
+			t.Errorf("expected error %v, got %v", sdkerrors.ErrAPIKeyNotFound, err)
 		}
 	})
 }
@@ -223,8 +224,8 @@ func TestRegisterAPIKey(t *testing.T) {
 		lb := NewLoadBalancer([]string{"key1"})
 
 		err := lb.RegisterAPIKey("key1")
-		if err != ErrAPIKeyAlreadyExists {
-			t.Errorf("expected error %v, got %v", ErrAPIKeyAlreadyExists, err)
+		if err != sdkerrors.ErrAPIKeyAlreadyExists {
+			t.Errorf("expected error %v, got %v", sdkerrors.ErrAPIKeyAlreadyExists, err)
 		}
 	})
 
@@ -270,8 +271,8 @@ func TestUnregisterAPIKey(t *testing.T) {
 		lb := NewLoadBalancer([]string{"key1"})
 
 		err := lb.UnregisterAPIKey("nonexistent")
-		if err != ErrAPIKeyNotFound {
-			t.Errorf("expected error %v, got %v", ErrAPIKeyNotFound, err)
+		if err != sdkerrors.ErrAPIKeyNotFound {
+			t.Errorf("expected error %v, got %v", sdkerrors.ErrAPIKeyNotFound, err)
 		}
 	})
 }
@@ -297,8 +298,8 @@ func TestSetWeight(t *testing.T) {
 		lb := NewLoadBalancer([]string{"key1"})
 
 		err := lb.SetWeight("key1", 0)
-		if err != ErrWeightMustBeGreaterThan0 {
-			t.Errorf("expected error %v, got %v", ErrWeightMustBeGreaterThan0, err)
+		if err != sdkerrors.ErrWeightMustBeGreaterThan0 {
+			t.Errorf("expected error %v, got %v", sdkerrors.ErrWeightMustBeGreaterThan0, err)
 		}
 	})
 
@@ -306,8 +307,8 @@ func TestSetWeight(t *testing.T) {
 		lb := NewLoadBalancer([]string{"key1"})
 
 		err := lb.SetWeight("nonexistent", 5)
-		if err != ErrAPIKeyNotFound {
-			t.Errorf("expected error %v, got %v", ErrAPIKeyNotFound, err)
+		if err != sdkerrors.ErrAPIKeyNotFound {
+			t.Errorf("expected error %v, got %v", sdkerrors.ErrAPIKeyNotFound, err)
 		}
 	})
 }
