@@ -102,7 +102,7 @@ func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request model
 func (s *openAIProvider) CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
 	// 设置客户端选项
 	for _, opt := range opts {
-		opt(s.httpClient)
+		opt(s.hClient)
 	}
 	return nil, nil
 }

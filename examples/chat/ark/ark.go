@@ -1,12 +1,3 @@
-/*
- * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-05-28 17:15:27
- * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-03 13:38:11
- * @Description:
- *
- * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
- */
 package main
 
 import (
@@ -37,15 +28,15 @@ func getApiKeys(envKey string) (apiKeys string) {
 }
 
 func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
-	return client.ListModels(ctx, "system", consts.DeepSeek)
+	return client.ListModels(ctx, "system", consts.Ark)
 }
 
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
 	return client.CreateChatCompletion(ctx, "system", models.ChatRequest{
 		ModelInfo: models.ModelInfo{
-			Provider:  consts.DeepSeek,
+			Provider:  consts.Ark,
 			ModelType: consts.ChatModel,
-			Model:     consts.DeepSeekReasoner,
+			Model:     consts.ArkThinkingVersion,
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
@@ -68,17 +59,18 @@ func streamCallback(response models.ChatResponse) error {
 func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (interface{}, error) {
 	return client.CreateChatCompletionStream(ctx, "system", models.ChatRequest{
 		ModelInfo: models.ModelInfo{
-			Provider:  consts.DeepSeek,
+			Provider:  consts.Ark,
 			ModelType: consts.ChatModel,
-			Model:     consts.DeepSeekReasoner,
+			Model:     consts.ArkThinkingVersion,
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "立即输出“API”三个字母",
+				Content: "请给出C语言Hello world，最简单的版本就好",
 			},
 		},
 		Stream:              true,
 		MaxCompletionTokens: 4096,
+		Thinking:            &models.ChatThinking{Type: "enabled"},
 	}, streamCallback, httpclient.WithTimeout(time.Minute*2))
 }
 
@@ -120,19 +112,13 @@ func main() {
 		log.Fatalf("NewSDKClient() error = %v", err)
 		return
 	}
-
 	ctx := context.Background()
 	// 列出模型
-	response1, err := listModels(ctx, client)
+	_, err = listModels(ctx, client)
 	if err != nil {
-		log.Fatalf("listModels error = %v", err)
-		return
+		log.Printf("listModels error = %v\n", err)
 	}
-	log.Printf("listModels response: %+v\n", response1.Object)
-	log.Printf("listModels response: %+v\n", response1.Data)
 
-	// 创建聊天
-	//response2, err := createChatCompletion(ctx, client)
 	response2, err := createChatCompletionStream(ctx, client)
 	if err != nil {
 		log.Fatalf("createChatCompletion error = %v", err)

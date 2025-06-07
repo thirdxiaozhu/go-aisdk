@@ -13,11 +13,10 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
-
-	utils "github.com/liusuxian/go-aisdk/internal"
 )
 
 var (
@@ -71,6 +70,9 @@ func (stream *StreamReader[T]) processLines() (b []byte, err error) {
 		emptyMessagesCount uint
 		hasErrorPrefix     bool
 	)
+	if stream.reader == nil {
+		return nil, errors.New("stream reader is nil")
+	}
 
 	for {
 		rawLine, readErr := stream.reader.ReadBytes('\n')
@@ -125,5 +127,8 @@ func (stream *StreamReader[T]) unmarshalError() (errResp map[string]any) {
 
 // Close 关闭流
 func (stream *StreamReader[T]) Close() (err error) {
+	if stream.response == nil {
+		return errors.New("stream.response.Body is nil")
+	}
 	return stream.response.Body.Close()
 }

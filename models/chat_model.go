@@ -193,6 +193,10 @@ type ChatWebSearchOptions struct {
 	UserLocation      *ChatUserLocation     `json:"user_location,omitempty"`       // 用户位置信息
 }
 
+type ChatThinking struct {
+	Type string `json:"type"`
+}
+
 // ChatRequest 聊天请求
 type ChatRequest struct {
 	ModelInfo
@@ -223,6 +227,9 @@ type ChatRequest struct {
 	TopP                float32                 `json:"top_p,omitempty"`                 // 一种替代温度采样的方法，我们通常建议调整此参数或温度（temperature），但不要同时调整两者
 	User                string                  `json:"user,omitempty"`                  // 代表你的终端用户的唯一标识符
 	WebSearchOptions    *ChatWebSearchOptions   `json:"web_search_options,omitempty"`    // 网络搜索选项
+
+	//火山大模型
+	Thinking *ChatThinking `json:"thinking,omitempty"` // 火山大模型 - 深度思考
 }
 
 // MarshalJSON 序列化JSON

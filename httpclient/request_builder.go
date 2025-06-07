@@ -61,6 +61,11 @@ func (hrb *HTTPRequestBuilder) Build(ctx context.Context, method, url string, bo
 			}
 			bodyReader = bytes.NewBuffer(reqBytes)
 		}
+		//indent, err := json.MarshalIndent(body, "", " ")
+		//if err != nil {
+		//	return nil, err
+		//}
+		//fmt.Println(url, header, string(indent))
 	}
 	if req, err = http.NewRequestWithContext(ctx, method, url, bodyReader); err != nil {
 		return

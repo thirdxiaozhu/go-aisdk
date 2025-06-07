@@ -21,6 +21,7 @@ const (
 	Midjourney Provider = "midjourney" // Midjourney
 	Vidu       Provider = "vidu"       // 生数科技
 	Keling     Provider = "keling"     // 可灵AI
+	Ark        Provider = "ark"
 )
 
 // ModelType 模型类型
