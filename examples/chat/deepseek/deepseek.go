@@ -23,11 +23,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/liusuxian/go-aisdk"
-	"github.com/liusuxian/go-aisdk/consts"
-	"github.com/liusuxian/go-aisdk/httpclient"
-	"github.com/liusuxian/go-aisdk/models"
 )
 
 func getApiKeys(envKey string) (apiKeys string) {

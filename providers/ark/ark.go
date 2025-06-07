@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/liusuxian/go-aisdk/internal/loadbalancer"
+	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"io"
 	"net/http"
 
