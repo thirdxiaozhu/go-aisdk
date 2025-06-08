@@ -95,6 +95,28 @@ func createChatCompletionPicture(ctx context.Context, client *aisdk.SDKClient) (
 	}, streamCallback, httpclient.WithTimeout(time.Minute*2))
 }
 
+func createImageGeneration(ctx context.Context, client *aisdk.SDKClient) (interface{}, error) {
+	return client.CreateChatCompletionStream(ctx, "system", models.ChatRequest{
+		ModelInfo: models.ModelInfo{
+			Provider:  consts.Ark,
+			ModelType: consts.ChatModel,
+			Model:     consts.ArkTextImage,
+		},
+		Messages: []models.ChatMessage{
+			&models.UserMessage{
+				MultimodalContent: []models.ChatUserMsgPart{
+					{ImageURL: &models.ChatUserMsgImageURL{URL: "https://ark-project.tos-cn-beijing.volces.com/images/view.jpeg"}, Type: models.ChatUserMsgPartTypeImageURL},
+					{Text: "这张图里有什么", Type: models.ChatUserMsgPartTypeText},
+				},
+			},
+		},
+		Stream:              true,
+		MaxCompletionTokens: 4096,
+		Thinking:            &models.ChatThinking{Type: "enabled"},
+	}, streamCallback, httpclient.WithTimeout(time.Minute*2))
+
+}
+
 func main() {
 	tempDir, err := os.MkdirTemp("", "config-test")
 	if err != nil {

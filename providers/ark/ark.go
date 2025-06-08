@@ -29,7 +29,8 @@ var (
 )
 
 const (
-	apiChatCompletions = "/chat/completions"
+	apiChatCompletions  = "/chat/completions"
+	apiImagesGeneration = "/images/generation"
 )
 
 // init 包初始化时创建 arkProvider 实例并注册到工厂
@@ -42,6 +43,24 @@ func init() {
 		},
 	}
 	core.RegisterProvider(consts.Ark, arkService)
+}
+
+func (s *arkProvider) defaultSetters(req models.ChatRequest, setters ...httpclient.RequestOption) ([]httpclient.RequestOption, error) {
+	var apiKey *loadbalancer.APIKey
+	var err error
+	if apiKey, err = s.lb.GetAPIKey(); err != nil {
+		return nil, err
+	}
+	retSetters := []httpclient.RequestOption{
+		httpclient.WithBody(req),
+		httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
+	}
+
+	for _, setter := range setters {
+		retSetters = append(retSetters, setter)
+	}
+
+	return retSetters, nil
 }
 
 func (s *arkProvider) CheckRequestValidation(request models.ChatRequest) (err error) {
@@ -72,17 +91,9 @@ func (s *arkProvider) CreateChatCompletion(ctx context.Context, request models.C
 		opt(s.hClient)
 	}
 	// 获取一个APIKey
-	var apiKey *loadbalancer.APIKey
-	if apiKey, err = s.lb.GetAPIKey(); err != nil {
-		return
-	}
-	var (
-		setters = []httpclient.RequestOption{
-			httpclient.WithBody(request),
-			httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
-		}
-		req *http.Request
-	)
+	var setters []httpclient.RequestOption
+	var req *http.Request
+	setters, err = s.defaultSetters(request)
 	if req, err = s.hClient.NewRequest(ctx, http.MethodPost, s.hClient.FullURL(apiChatCompletions), setters...); err != nil {
 		return
 	}
@@ -95,19 +106,9 @@ func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request mo
 	for _, opt := range opts {
 		opt(s.hClient)
 	}
-	// 获取一个APIKey
-	var err error
-	var apiKey *loadbalancer.APIKey
-	if apiKey, err = s.lb.GetAPIKey(); err != nil {
-		return nil, err
-	}
-	var (
-		setters = []httpclient.RequestOption{
-			httpclient.WithBody(request),
-			httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
-		}
-		req *http.Request
-	)
+	var setters []httpclient.RequestOption
+	var req *http.Request
+	setters, err := s.defaultSetters(request)
 	if req, err = s.hClient.NewRequest(ctx, http.MethodPost, s.hClient.FullURL(apiChatCompletions), setters...); err != nil {
 		return nil, err
 	}
@@ -140,4 +141,19 @@ func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request mo
 			}
 		}
 	}
+}
+
+func (s *arkProvider) CreateImageGeneration(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+	for _, opt := range opts {
+		opt(s.hClient)
+	}
+	// 获取一个APIKey
+	var setters []httpclient.RequestOption
+	var req *http.Request
+	setters, err = s.defaultSetters(request)
+	if req, err = s.hClient.NewRequest(ctx, http.MethodPost, s.hClient.FullURL(apiImagesGeneration), setters...); err != nil {
+		return
+	}
+	err = s.hClient.SendRequest(req, &response)
+	return
 }

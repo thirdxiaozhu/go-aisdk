@@ -12,6 +12,7 @@ package openai
 import (
 	"context"
 	"fmt"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"net/http"
 
 	"github.com/liusuxian/go-aisdk/conf"
@@ -109,4 +110,8 @@ func (s *openAIProvider) CreateChatCompletionStream(ctx context.Context, request
 		opt(s.hClient)
 	}
 	return nil, nil
+}
+
+func (s *openAIProvider) CreateImageGeneration(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+	return models.ChatResponse{}, sdkerrors.ErrMethodNotSupported
 }

@@ -37,6 +37,8 @@ type ProviderService interface {
 
 	// TODO 图像相关
 
+	CreateImageGeneration(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error)
+
 	// TODO 视频相关
 
 	// TODO 音频相关

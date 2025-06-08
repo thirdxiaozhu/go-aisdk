@@ -13,6 +13,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"io"
 	"net/http"
 
@@ -169,4 +170,7 @@ func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, reque
 			}
 		}
 	}
+}
+func (s *deepseekProvider) CreateImageGeneration(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+	return models.ChatResponse{}, sdkerrors.ErrMethodNotSupported
 }

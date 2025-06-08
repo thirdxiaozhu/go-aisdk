@@ -142,3 +142,23 @@ func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, userId strin
 	return nil, nil
 
 }
+
+func (c *SDKClient) CreateImageGeneration(ctx context.Context, userId string, request models.ChatRequest, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+	var err error
+
+	// 定义处理函数
+	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
+		chatReq := req.(models.ChatRequest)
+		// 创建聊天
+		if err = ps.CheckRequestValidation(request); err != nil {
+			return nil, err
+		}
+		return ps.CreateImageGeneration(ctx, chatReq, opts...)
+	}
+	// 处理请求
+	if _, err = c.handlerRequest(ctx, userId, request.ModelInfo, "CreateImageGeneration", request, handler); err != nil {
+		return nil, err
+	}
+	return nil, nil
+
+}

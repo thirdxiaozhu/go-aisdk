@@ -25,3 +25,7 @@ type Models struct {
 	Object  string `json:"object"`            // 对象的类型，其值为 model
 	OwnedBy string `json:"owned_by"`          // 拥有该模型的组织
 }
+
+type Rqeuest interface {
+	MarshalJSON() (b []byte, err error)
+}
