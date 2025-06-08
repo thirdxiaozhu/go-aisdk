@@ -54,7 +54,7 @@ func init() {
 	core.RegisterProvider(consts.OpenAI, openaiService)
 }
 
-func (s *openAIProvider) CheckRequestValidation(request models.ChatRequest) (err error) {
+func (s *openAIProvider) CheckRequestValidation(request models.Request) (err error) {
 	return nil
 }
 
@@ -95,7 +95,7 @@ func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTP
 }
 
 // TODO CreateChatCompletion 创建聊天
-func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	// 设置客户端选项
 	for _, opt := range opts {
 		opt(s.hClient)
@@ -104,7 +104,7 @@ func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request model
 }
 
 // TODO CreateChatCompletionStream 创建聊天
-func (s *openAIProvider) CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+func (s *openAIProvider) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
 	// 设置客户端选项
 	for _, opt := range opts {
 		opt(s.hClient)
@@ -112,6 +112,6 @@ func (s *openAIProvider) CreateChatCompletionStream(ctx context.Context, request
 	return nil, nil
 }
 
-func (s *openAIProvider) CreateImageGeneration(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *openAIProvider) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	return models.ChatResponse{}, sdkerrors.ErrMethodNotSupported
 }

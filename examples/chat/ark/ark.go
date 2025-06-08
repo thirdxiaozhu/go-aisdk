@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/liusuxian/go-aisdk/providers/ark"
 	"log"
 	"os"
 	"path/filepath"
@@ -96,24 +97,12 @@ func createChatCompletionPicture(ctx context.Context, client *aisdk.SDKClient) (
 }
 
 func createImageGeneration(ctx context.Context, client *aisdk.SDKClient) (interface{}, error) {
-	return client.CreateChatCompletionStream(ctx, "system", models.ChatRequest{
-		ModelInfo: models.ModelInfo{
-			Provider:  consts.Ark,
-			ModelType: consts.ChatModel,
-			Model:     consts.ArkTextImage,
-		},
-		Messages: []models.ChatMessage{
-			&models.UserMessage{
-				MultimodalContent: []models.ChatUserMsgPart{
-					{ImageURL: &models.ChatUserMsgImageURL{URL: "https://ark-project.tos-cn-beijing.volces.com/images/view.jpeg"}, Type: models.ChatUserMsgPartTypeImageURL},
-					{Text: "这张图里有什么", Type: models.ChatUserMsgPartTypeText},
-				},
-			},
-		},
-		Stream:              true,
-		MaxCompletionTokens: 4096,
-		Thinking:            &models.ChatThinking{Type: "enabled"},
-	}, streamCallback, httpclient.WithTimeout(time.Minute*2))
+	return client.CreateImageGeneration(ctx, "system", ark.ImageRequest{
+		Prompt:         "生成一个三花小猫",
+		ResponseFormat: ark.ResponseFormatURL,
+		Size:           ark.Size1024x1024,
+		Seed:           12,
+	}, httpclient.WithTimeout(time.Minute*2))
 
 }
 
@@ -163,7 +152,8 @@ func main() {
 	}
 
 	//response2, err := createChatCompletionStream(ctx, client)
-	response2, err := createChatCompletionPicture(ctx, client)
+	//response2, err := createChatCompletionPicture(ctx, client)
+	response2, err := createImageGeneration(ctx, client)
 	if err != nil {
 		log.Fatalf("createChatCompletion error = %v", err)
 		return

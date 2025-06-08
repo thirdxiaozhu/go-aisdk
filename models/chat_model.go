@@ -232,6 +232,10 @@ type ChatRequest struct {
 	Thinking *ChatThinking `json:"thinking,omitempty"` // 火山大模型 - 深度思考
 }
 
+func (r ChatRequest) GetModelInfo() ModelInfo {
+	return r.ModelInfo
+}
+
 // MarshalJSON 序列化JSON
 func (r ChatRequest) MarshalJSON() (b []byte, err error) {
 	// 获取提供商

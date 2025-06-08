@@ -96,7 +96,7 @@ func (c *SDKClient) ListModels(ctx context.Context, userId string, provider cons
 }
 
 // CreateChatCompletion 创建聊天
-func (c *SDKClient) CreateChatCompletion(ctx context.Context, userId string, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (c *SDKClient) CreateChatCompletion(ctx context.Context, userId string, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	// 定义处理函数
 	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
 		chatReq := req.(models.ChatRequest)
@@ -114,7 +114,7 @@ func (c *SDKClient) CreateChatCompletion(ctx context.Context, userId string, req
 	}
 	// 处理请求
 	var resp any
-	if resp, err = c.handlerRequest(ctx, userId, request.ModelInfo, "CreateChatCompletion", request, handler); err != nil {
+	if resp, err = c.handlerRequest(ctx, userId, request.GetModelInfo(), "CreateChatCompletion", request, handler); err != nil {
 		return
 	}
 	// 返回结果
@@ -123,7 +123,7 @@ func (c *SDKClient) CreateChatCompletion(ctx context.Context, userId string, req
 }
 
 // CreateChatCompletionStream  创建聊天
-func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, userId string, request models.ChatRequest, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, userId string, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
 	var err error
 
 	// 定义处理函数
@@ -136,19 +136,17 @@ func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, userId strin
 		return ps.CreateChatCompletionStream(ctx, chatReq, cb, opts...)
 	}
 	// 处理请求
-	if _, err = c.handlerRequest(ctx, userId, request.ModelInfo, "CreateChatCompletionStream", request, handler); err != nil {
+	if _, err = c.handlerRequest(ctx, userId, request.GetModelInfo(), "CreateChatCompletionStream", request, handler); err != nil {
 		return nil, err
 	}
 	return nil, nil
 
 }
 
-func (c *SDKClient) CreateImageGeneration(ctx context.Context, userId string, request models.ChatRequest, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
-	var err error
-
+func (c *SDKClient) CreateImageGeneration(ctx context.Context, userId string, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	// 定义处理函数
 	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
-		chatReq := req.(models.ChatRequest)
+		chatReq := req.(models.Request)
 		// 创建聊天
 		if err = ps.CheckRequestValidation(request); err != nil {
 			return nil, err
@@ -156,9 +154,11 @@ func (c *SDKClient) CreateImageGeneration(ctx context.Context, userId string, re
 		return ps.CreateImageGeneration(ctx, chatReq, opts...)
 	}
 	// 处理请求
-	if _, err = c.handlerRequest(ctx, userId, request.ModelInfo, "CreateImageGeneration", request, handler); err != nil {
-		return nil, err
+	var resp any
+	if resp, err = c.handlerRequest(ctx, userId, request.GetModelInfo(), "CreateImageGeneration", request, handler); err != nil {
+		return
 	}
-	return nil, nil
+	response = resp.(models.ChatResponse)
+	return
 
 }

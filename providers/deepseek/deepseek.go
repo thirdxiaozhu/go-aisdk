@@ -91,12 +91,12 @@ func (s *deepseekProvider) ListModels(ctx context.Context, opts ...httpclient.HT
 	return
 }
 
-func (s *deepseekProvider) CheckRequestValidation(request models.ChatRequest) (err error) {
+func (s *deepseekProvider) CheckRequestValidation(request models.Request) (err error) {
 	return nil
 }
 
 // TODO CreateChatCompletion 创建聊天
-func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	// 设置客户端选项
 	for _, opt := range opts {
 		opt(s.hClient)
@@ -120,7 +120,7 @@ func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request mod
 	return
 }
 
-func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
 	// 设置客户端选项
 	for _, opt := range opts {
 		opt(s.hClient)
@@ -171,6 +171,6 @@ func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, reque
 		}
 	}
 }
-func (s *deepseekProvider) CreateImageGeneration(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *deepseekProvider) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	return models.ChatResponse{}, sdkerrors.ErrMethodNotSupported
 }

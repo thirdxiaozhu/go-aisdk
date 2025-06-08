@@ -30,7 +30,7 @@ var (
 
 const (
 	apiChatCompletions  = "/chat/completions"
-	apiImagesGeneration = "/images/generation"
+	apiImagesGeneration = "/images/generations"
 )
 
 // init 包初始化时创建 arkProvider 实例并注册到工厂
@@ -40,12 +40,15 @@ func init() {
 			consts.ChatModel: {
 				consts.ArkThinkingVersion,
 			},
+			consts.ImageModel: {
+				consts.ArkTextImage,
+			},
 		},
 	}
 	core.RegisterProvider(consts.Ark, arkService)
 }
 
-func (s *arkProvider) defaultSetters(req models.ChatRequest, setters ...httpclient.RequestOption) ([]httpclient.RequestOption, error) {
+func (s *arkProvider) defaultSetters(req models.Request, setters ...httpclient.RequestOption) ([]httpclient.RequestOption, error) {
 	var apiKey *loadbalancer.APIKey
 	var err error
 	if apiKey, err = s.lb.GetAPIKey(); err != nil {
@@ -63,7 +66,7 @@ func (s *arkProvider) defaultSetters(req models.ChatRequest, setters ...httpclie
 	return retSetters, nil
 }
 
-func (s *arkProvider) CheckRequestValidation(request models.ChatRequest) (err error) {
+func (s *arkProvider) CheckRequestValidation(request models.Request) (err error) {
 	return nil
 }
 
@@ -85,7 +88,7 @@ func (s *arkProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPCli
 }
 
 // TODO CreateChatCompletion 创建聊天
-func (s *arkProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *arkProvider) CreateChatCompletion(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	// 设置客户端选项
 	for _, opt := range opts {
 		opt(s.hClient)
@@ -101,7 +104,7 @@ func (s *arkProvider) CreateChatCompletion(ctx context.Context, request models.C
 	return
 }
 
-func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
 	// 设置客户端选项
 	for _, opt := range opts {
 		opt(s.hClient)
@@ -143,7 +146,7 @@ func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request mo
 	}
 }
 
-func (s *arkProvider) CreateImageGeneration(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *arkProvider) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	for _, opt := range opts {
 		opt(s.hClient)
 	}

@@ -23,7 +23,7 @@ type StreamCallback func(response models.ChatResponse) error
 
 // ProviderService AI服务提供商的服务接口
 type ProviderService interface {
-	CheckRequestValidation(request models.ChatRequest) error
+	CheckRequestValidation(request models.Request) error
 	// 获取支持的模型
 	GetSupportedModels() (supportedModels map[consts.ModelType][]string)
 	// 初始化提供商配置
@@ -32,12 +32,12 @@ type ProviderService interface {
 	// 列出模型
 	ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error)
 	// 聊天相关
-	CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error)
-	CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, cb StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error)
+	CreateChatCompletion(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error)
+	CreateChatCompletionStream(ctx context.Context, request models.Request, cb StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error)
 
 	// TODO 图像相关
 
-	CreateImageGeneration(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error)
+	CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error)
 
 	// TODO 视频相关
 
