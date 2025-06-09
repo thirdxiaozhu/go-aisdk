@@ -146,7 +146,8 @@ func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request mo
 	}
 }
 
-func (s *arkProvider) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *arkProvider) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
+	var err error
 	for _, opt := range opts {
 		opt(s.hClient)
 	}
@@ -155,8 +156,13 @@ func (s *arkProvider) CreateImageGeneration(ctx context.Context, request models.
 	var req *http.Request
 	setters, err = s.defaultSetters(request)
 	if req, err = s.hClient.NewRequest(ctx, http.MethodPost, s.hClient.FullURL(apiImagesGeneration), setters...); err != nil {
-		return
+		return nil, err
 	}
-	err = s.hClient.SendRequest(req, &response)
-	return
+
+	var resp ImageResponse
+
+	if err = s.hClient.SendRequest(req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, err
 }

@@ -143,7 +143,7 @@ func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, userId strin
 
 }
 
-func (c *SDKClient) CreateImageGeneration(ctx context.Context, userId string, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (c *SDKClient) CreateImageGeneration(ctx context.Context, userId string, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
 	// 定义处理函数
 	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
 		chatReq := req.(models.Request)
@@ -156,9 +156,8 @@ func (c *SDKClient) CreateImageGeneration(ctx context.Context, userId string, re
 	// 处理请求
 	var resp any
 	if resp, err = c.handlerRequest(ctx, userId, request.GetModelInfo(), "CreateImageGeneration", request, handler); err != nil {
-		return
+		return nil, err
 	}
-	response = resp.(models.ChatResponse)
+	response = resp.(httpclient.Response)
 	return
-
 }

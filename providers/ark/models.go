@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 )
 
@@ -60,4 +61,27 @@ func (i ImageRequest) MarshalJSON() (b []byte, err error) {
 	marsheld, err := json.MarshalIndent(temp, "", "  ")
 	fmt.Println(string(marsheld))
 	return json.Marshal(temp)
+}
+
+type ImageResponseData struct {
+	URL string `json:"url"`
+	B64 string `json:"b64_json"`
+}
+
+type ImageResponseUsgae struct {
+	GeneratedImages int `json:"generated_images"`
+}
+
+type ImageResponseError struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+type ImageResponse struct {
+	Model   string              `json:"model"`
+	Created int                 `json:"created"`
+	Data    []ImageResponseData `json:"data"`
+	Usage   ImageResponseUsgae  `json:"usage"`
+	Error   ImageResponseError  `json:"error"`
+	httpclient.HttpHeader
 }

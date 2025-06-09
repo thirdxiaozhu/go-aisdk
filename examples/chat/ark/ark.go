@@ -96,9 +96,9 @@ func createChatCompletionPicture(ctx context.Context, client *aisdk.SDKClient) (
 	}, streamCallback, httpclient.WithTimeout(time.Minute*2))
 }
 
-func createImageGeneration(ctx context.Context, client *aisdk.SDKClient) (interface{}, error) {
+func createImageGeneration(ctx context.Context, client *aisdk.SDKClient) (httpclient.Response, error) {
 	return client.CreateImageGeneration(ctx, "system", ark.ImageRequest{
-		Prompt:         "生成一个三花小猫",
+		Prompt:         "生成一个飞机",
 		ResponseFormat: ark.ResponseFormatURL,
 		Size:           ark.Size1024x1024,
 		Seed:           12,
@@ -154,9 +154,10 @@ func main() {
 	//response2, err := createChatCompletionStream(ctx, client)
 	//response2, err := createChatCompletionPicture(ctx, client)
 	response2, err := createImageGeneration(ctx, client)
+	response2a := response2.(*ark.ImageResponse)
 	if err != nil {
 		log.Fatalf("createChatCompletion error = %v", err)
 		return
 	}
-	log.Printf("createChatCompletion response: %+v", response2)
+	log.Printf("createChatCompletion response: %+v", response2a)
 }

@@ -37,7 +37,7 @@ type ProviderService interface {
 
 	// TODO 图像相关
 
-	CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error)
+	CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error)
 
 	// TODO 视频相关
 
