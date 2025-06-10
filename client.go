@@ -140,7 +140,6 @@ func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, userId strin
 		return nil, err
 	}
 	return nil, nil
-
 }
 
 func (c *SDKClient) CreateImageGeneration(ctx context.Context, userId string, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
@@ -160,4 +159,7 @@ func (c *SDKClient) CreateImageGeneration(ctx context.Context, userId string, re
 	}
 	response = resp.(httpclient.Response)
 	return
+}
+
+type MultipleRoundDialogue struct {
 }
