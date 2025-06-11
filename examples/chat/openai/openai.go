@@ -1,8 +1,8 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-05-28 17:15:27
+ * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-11 14:56:11
+ * @LastEditTime: 2025-06-11 16:14:30
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -38,15 +38,15 @@ func getApiKeys(envKey string) (apiKeys string) {
 }
 
 func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
-	return client.ListModels(ctx, "system", consts.DeepSeek)
+	return client.ListModels(ctx, "system", consts.OpenAI)
 }
 
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
 	return client.CreateChatCompletion(ctx, "system", models.ChatRequest{
 		ModelInfo: models.ModelInfo{
-			Provider:  consts.DeepSeek,
+			Provider:  consts.OpenAI,
 			ModelType: consts.ChatModel,
-			Model:     consts.DeepSeekReasoner,
+			Model:     consts.OpenAIGPT4o,
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
@@ -73,13 +73,13 @@ func main() {
 	}
 	configData := `{
   "providers": {
-    "deepseek": {
-			"base_url": "https://api.deepseek.com",
-      "api_keys": [%v]
+    "openai": {
+      "base_url": "https://chatapi.onechats.ai/v1",
+			"api_keys": [%v]
     }
   }
 }`
-	configData = fmt.Sprintf(configData, getApiKeys("DEEPSEEK_API_KEYS"))
+	configData = fmt.Sprintf(configData, getApiKeys("OPENAI_API_KEYS"))
 	log.Printf("configData: %s", configData)
 	if err := os.WriteFile(configPath, []byte(configData), 0644); err != nil {
 		log.Fatalf("Failed to create empty config file: %v", err)

@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:57:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-06 02:49:18
+ * @LastEditTime: 2025-06-11 14:47:20
  * @Description: DeepSeek服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -63,32 +63,20 @@ func (s *deepseekProvider) InitializeProviderConfig(config *conf.ProviderConfig)
 	s.lb = loadbalancer.NewLoadBalancer(s.providerConfig.APIKeys)
 }
 
-// TODO ListModels 列出模型
+// ListModels 列出模型
 func (s *deepseekProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
-	// 设置客户端选项
-	for _, opt := range opts {
-		opt(s.hClient)
-	}
-	// 获取一个APIKey
-	var apiKey *loadbalancer.APIKey
-	if apiKey, err = s.lb.GetAPIKey(); err != nil {
-		return
-	}
-	var (
-		setters = []httpclient.RequestOption{
-			httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
-		}
-		req *http.Request
-	)
-	if req, err = s.hClient.NewRequest(ctx, http.MethodGet, s.hClient.FullURL(apiModels), setters...); err != nil {
-		return
-	}
-	err = s.hClient.SendRequest(req, &response)
+	err = s.executeRequest(ctx, http.MethodGet, apiModels, opts, &response)
 	return
 }
 
-// TODO CreateChatCompletion 创建聊天
+// CreateChatCompletion 创建聊天
 func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+	err = s.executeRequest(ctx, http.MethodPost, apiChatCompletions, opts, &response, httpclient.WithBody(request))
+	return
+}
+
+// executeRequest 执行请求
+func (s *deepseekProvider) executeRequest(ctx context.Context, method, apiPath string, opts []httpclient.HTTPClientOption, response httpclient.Response, reqSetters ...httpclient.RequestOption) (err error) {
 	// 设置客户端选项
 	for _, opt := range opts {
 		opt(s.hClient)
@@ -98,16 +86,15 @@ func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request mod
 	if apiKey, err = s.lb.GetAPIKey(); err != nil {
 		return
 	}
+	// 创建请求
 	var (
-		setters = []httpclient.RequestOption{
-			httpclient.WithBody(request),
-			httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
-		}
-		req *http.Request
+		setters = append(reqSetters, httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)))
+		req     *http.Request
 	)
-	if req, err = s.hClient.NewRequest(ctx, http.MethodPost, s.hClient.FullURL(apiChatCompletions), setters...); err != nil {
+	if req, err = s.hClient.NewRequest(ctx, method, s.hClient.FullURL(apiPath), setters...); err != nil {
 		return
 	}
-	err = s.hClient.SendRequest(req, &response)
+	// 发送请求
+	err = s.hClient.SendRequest(req, response)
 	return
 }
