@@ -1,8 +1,8 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-05-28 17:15:27
+ * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-06 02:48:52
+ * @LastEditTime: 2025-06-11 16:14:30
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -38,50 +38,23 @@ func getApiKeys(envKey string) (apiKeys string) {
 }
 
 func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
-	return client.ListModels(ctx, "system", consts.DeepSeek)
+	return client.ListModels(ctx, "system", consts.OpenAI)
 }
 
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
 	return client.CreateChatCompletion(ctx, "system", models.ChatRequest{
 		ModelInfo: models.ModelInfo{
-			Provider:  consts.DeepSeek,
+			Provider:  consts.OpenAI,
 			ModelType: consts.ChatModel,
-			Model:     consts.DeepSeekReasoner,
+			Model:     consts.OpenAIGPT4o,
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你是谁",
+				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
 			},
 		},
 		MaxCompletionTokens: 4096,
 	}, httpclient.WithTimeout(time.Minute*2))
-}
-
-func streamCallback(response models.ChatResponse) error {
-	//if response.Choices[0].Delta.Content == "" {
-	//	fmt.Print(response.Choices[0].Delta.ReasoningContent)
-	//} else {
-	//	fmt.Print(response.Choices[0].Delta.Content)
-	//}
-	fmt.Println(response)
-	return nil
-}
-
-func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (interface{}, error) {
-	return client.CreateChatCompletionStream(ctx, "system", models.ChatRequest{
-		ModelInfo: models.ModelInfo{
-			Provider:  consts.DeepSeek,
-			ModelType: consts.ChatModel,
-			Model:     consts.DeepSeekReasoner,
-		},
-		Messages: []models.ChatMessage{
-			&models.UserMessage{
-				Content: "立即输出“API”三个字母",
-			},
-		},
-		Stream:              true,
-		MaxCompletionTokens: 4096,
-	}, streamCallback, httpclient.WithTimeout(time.Minute*2))
 }
 
 func main() {
@@ -100,17 +73,13 @@ func main() {
 	}
 	configData := `{
   "providers": {
-    "deepseek": {
-			"base_url": "https://api.deepseek.com",
-      "api_keys": [%v]
-    },
-    "ark": {
-      "base_url": "https://ark.cn-beijing.volces.com/api/v3",
+    "openai": {
+      "base_url": "https://chatapi.onechats.ai/v1",
 			"api_keys": [%v]
     }
   }
 }`
-	configData = fmt.Sprintf(configData, getApiKeys("DEEPSEEK_API_KEYS"), getApiKeys("ARK_API_KEYS"))
+	configData = fmt.Sprintf(configData, getApiKeys("OPENAI_API_KEYS"))
 	log.Printf("configData: %s", configData)
 	if err := os.WriteFile(configPath, []byte(configData), 0644); err != nil {
 		log.Fatalf("Failed to create empty config file: %v", err)
@@ -130,12 +99,9 @@ func main() {
 		log.Fatalf("listModels error = %v, request_id = %s", err, sdkerrors.RequestID(err))
 		return
 	}
-	log.Printf("listModels response: %+v\n", response1.Object)
-	log.Printf("listModels response: %+v\n", response1.Data)
-
+	log.Printf("listModels response: %+v, request_id: %s", response1, response1.RequestID())
 	// 创建聊天
 	response2, err := createChatCompletion(ctx, client)
-	//response2, err := createChatCompletionStream(ctx, client)
 	if err != nil {
 		fmt.Println("Cause Error =", sdkerrors.Cause(err))
 		originalErr := sdkerrors.Unwrap(err)
@@ -158,5 +124,5 @@ func main() {
 		log.Fatalf("createChatCompletion error = %v, request_id = %s", err, sdkerrors.RequestID(err))
 		return
 	}
-	log.Printf("createChatCompletion response: %+v", response2)
+	log.Printf("createChatCompletion response: %+v, request_id: %s", response2, response2.RequestID())
 }

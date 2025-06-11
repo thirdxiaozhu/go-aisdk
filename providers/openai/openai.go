@@ -12,15 +12,13 @@ package openai
 import (
 	"context"
 	"fmt"
-	"github.com/liusuxian/go-aisdk/sdkerrors"
-	"net/http"
-
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
+	"net/http"
 )
 
 // openAIProvider OpenAI提供商
@@ -44,7 +42,9 @@ const (
 func init() {
 	openaiService = &openAIProvider{
 		supportedModels: map[consts.ModelType][]string{
-			consts.ChatModel:  {},
+			consts.ChatModel:  {
+				consts.OpenAIGPT4o,
+			},
 			consts.ImageModel: {},
 			consts.VideoModel: {},
 			consts.AudioModel: {},
@@ -70,8 +70,20 @@ func (s *openAIProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 	s.lb = loadbalancer.NewLoadBalancer(s.providerConfig.APIKeys)
 }
 
-// TODO ListModels 列出模型
+// ListModels 列出模型
 func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
+	err = s.executeRequest(ctx, http.MethodGet, apiModels, opts, &response)
+	return
+}
+
+// CreateChatCompletion 创建聊天
+func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+	err = s.executeRequest(ctx, http.MethodPost, apiChatCompletions, opts, &response, httpclient.WithBody(request))
+	return
+}
+
+// executeRequest 执行请求
+func (s *openAIProvider) executeRequest(ctx context.Context, method, apiPath string, opts []httpclient.HTTPClientOption, response httpclient.Response, reqSetters ...httpclient.RequestOption) (err error) {
 	// 设置客户端选项
 	for _, opt := range opts {
 		opt(s.hClient)
@@ -81,13 +93,12 @@ func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTP
 	if apiKey, err = s.lb.GetAPIKey(); err != nil {
 		return
 	}
+	// 创建请求
 	var (
-		setters = []httpclient.RequestOption{
-			httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)),
-		}
-		req *http.Request
+		setters = append(reqSetters, httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)))
+		req     *http.Request
 	)
-	if req, err = s.hClient.NewRequest(ctx, http.MethodGet, s.hClient.FullURL(apiModels), setters...); err != nil {
+	if req, err = s.hClient.NewRequest(ctx, method, s.hClient.FullURL(apiPath), setters...); err != nil {
 		return
 	}
 	err = s.hClient.SendRequest(req, &response)
@@ -100,6 +111,8 @@ func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request model
 	for _, opt := range opts {
 		opt(s.hClient)
 	}
+	// 发送请求
+	err = s.hClient.SendRequest(req, response)
 	return
 }
 

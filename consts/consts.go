@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:57:28
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-06 00:50:04
+ * @LastEditTime: 2025-06-11 19:06:24
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -38,9 +38,10 @@ func (m ModelType) String() (str string) {
 }
 
 const (
-	ChatModel  ModelType = "chat"  // 对话模型
-	ImageModel ModelType = "image" // 图像生成模型
-	VideoModel ModelType = "video" // 视频生成模型
-	AudioModel ModelType = "audio" // 音频处理模型
-	EmbedModel ModelType = "embed" // 嵌入模型
+	ChatModel       ModelType = "chat"       // 对话模型
+	ImageModel      ModelType = "image"      // 图像生成模型
+	VideoModel      ModelType = "video"      // 视频生成模型
+	AudioModel      ModelType = "audio"      // 音频处理模型
+	ModerationModel ModelType = "moderation" // 内容审核模型
+	EmbedModel      ModelType = "embed"      // 嵌入模型
 )

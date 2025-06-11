@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-03 11:43:48
+ * @LastEditTime: 2025-06-11 14:21:50
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -14,6 +14,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/liusuxian/go-aisdk/httpclient/middleware"
 	"io"
 	"net/http"
 	"strings"
@@ -138,6 +139,11 @@ func (h *HttpHeader) Header() (header http.Header) {
 	return http.Header(*h)
 }
 
+// RequestID 获取请求ID
+func (h *HttpHeader) RequestID() (requestID string) {
+	return h.Header().Get("X-AISDK-Request-Id")
+}
+
 // RawResponse 原始响应
 type RawResponse struct {
 	io.ReadCloser
@@ -241,6 +247,10 @@ func (c *HTTPClient) SendRequest(req *http.Request, v Response) (err error) {
 	defer resp.Body.Close()
 
 	if v != nil {
+		reqInfo := middleware.GetRequestInfo(req.Context())
+		if reqInfo.RequestID != "" && reqInfo.RequestID != "unknown" {
+			resp.Header.Set("X-AISDK-Request-Id", reqInfo.RequestID)
+		}
 		v.SetHeader(resp.Header)
 	}
 
@@ -263,6 +273,10 @@ func (c *HTTPClient) SendRequestRaw(req *http.Request) (response RawResponse, er
 		return
 	}
 
+	reqInfo := middleware.GetRequestInfo(req.Context())
+	if reqInfo.RequestID != "" && reqInfo.RequestID != "unknown" {
+		resp.Header.Set("X-AISDK-Request-Id", reqInfo.RequestID)
+	}
 	response.SetHeader(resp.Header)
 	response.ReadCloser = resp.Body
 	return
@@ -294,6 +308,10 @@ func SendRequestStream[T Streamable](client *HTTPClient, req *http.Request) (str
 		return
 	}
 
+	reqInfo := middleware.GetRequestInfo(req.Context())
+	if reqInfo.RequestID != "" && reqInfo.RequestID != "unknown" {
+		resp.Header.Set("X-AISDK-Request-Id", reqInfo.RequestID)
+	}
 	stream = &StreamReader[T]{
 		emptyMessagesLimit: client.config.EmptyMessagesLimit,
 		reader:             bufio.NewReader(resp.Body),
