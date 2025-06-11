@@ -82,6 +82,30 @@ func (s *arkProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 	s.lb = loadbalancer.NewLoadBalancer(s.providerConfig.APIKeys)
 }
 
+// executeRequest 执行请求
+func (s *arkProvider) executeRequest(ctx context.Context, method, apiPath string, opts []httpclient.HTTPClientOption, response httpclient.Response, reqSetters ...httpclient.RequestOption) (err error) {
+	// 设置客户端选项
+	for _, opt := range opts {
+		opt(s.hClient)
+	}
+	// 获取一个APIKey
+	var apiKey *loadbalancer.APIKey
+	if apiKey, err = s.lb.GetAPIKey(); err != nil {
+		return
+	}
+	// 创建请求
+	var (
+		setters = append(reqSetters, httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)))
+		req     *http.Request
+	)
+	if req, err = s.hClient.NewRequest(ctx, method, s.hClient.FullURL(apiPath), setters...); err != nil {
+		return
+	}
+	// 发送请求
+	err = s.hClient.SendRequest(req, response)
+	return
+}
+
 // TODO ListModels 列出模型
 func (s *arkProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (models.ListModelsResponse, error) {
 	return models.ListModelsResponse{}, sdkerrors.ErrMethodNotSupported
@@ -90,17 +114,19 @@ func (s *arkProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPCli
 // TODO CreateChatCompletion 创建聊天
 func (s *arkProvider) CreateChatCompletion(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	// 设置客户端选项
-	for _, opt := range opts {
-		opt(s.hClient)
-	}
-	// 获取一个APIKey
-	var setters []httpclient.RequestOption
-	var req *http.Request
-	setters, err = s.defaultSetters(request)
-	if req, err = s.hClient.NewRequest(ctx, http.MethodPost, s.hClient.FullURL(apiChatCompletions), setters...); err != nil {
-		return
-	}
-	err = s.hClient.SendRequest(req, &response)
+	//for _, opt := range opts {
+	//	opt(s.hClient)
+	//}
+	//// 获取一个APIKey
+	//var setters []httpclient.RequestOption
+	//var req *http.Request
+	//setters, err = s.defaultSetters(request)
+	//if req, err = s.hClient.NewRequest(ctx, http.MethodPost, s.hClient.FullURL(apiChatCompletions), setters...); err != nil {
+	//	return
+	//}
+	//err = s.hClient.SendRequest(req, &response)
+
+	err = s.executeRequest(ctx, http.MethodPost, apiChatCompletions, opts, &response, httpclient.WithBody(request))
 	return
 }
 

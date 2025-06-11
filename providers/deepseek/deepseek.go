@@ -11,6 +11,7 @@ package deepseek
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
@@ -18,6 +19,8 @@ import (
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
+	"io"
 	"net/http"
 )
 
@@ -70,9 +73,13 @@ func (s *deepseekProvider) ListModels(ctx context.Context, opts ...httpclient.HT
 }
 
 // CreateChatCompletion 创建聊天
-func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *deepseekProvider) CreateChatCompletion(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	err = s.executeRequest(ctx, http.MethodPost, apiChatCompletions, opts, &response, httpclient.WithBody(request))
 	return
+}
+
+func (s *deepseekProvider) CheckRequestValidation(request models.Request) (err error) {
+	return nil
 }
 
 // executeRequest 执行请求

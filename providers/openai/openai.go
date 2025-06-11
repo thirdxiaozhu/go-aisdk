@@ -18,6 +18,7 @@ import (
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"net/http"
 )
 
@@ -42,7 +43,7 @@ const (
 func init() {
 	openaiService = &openAIProvider{
 		supportedModels: map[consts.ModelType][]string{
-			consts.ChatModel:  {
+			consts.ChatModel: {
 				consts.OpenAIGPT4o,
 			},
 			consts.ImageModel: {},
@@ -77,7 +78,7 @@ func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTP
 }
 
 // CreateChatCompletion 创建聊天
-func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	err = s.executeRequest(ctx, http.MethodPost, apiChatCompletions, opts, &response, httpclient.WithBody(request))
 	return
 }
@@ -101,17 +102,6 @@ func (s *openAIProvider) executeRequest(ctx context.Context, method, apiPath str
 	if req, err = s.hClient.NewRequest(ctx, method, s.hClient.FullURL(apiPath), setters...); err != nil {
 		return
 	}
-	err = s.hClient.SendRequest(req, &response)
-	return
-}
-
-// TODO CreateChatCompletion 创建聊天
-func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
-	// 设置客户端选项
-	for _, opt := range opts {
-		opt(s.hClient)
-	}
-	// 发送请求
 	err = s.hClient.SendRequest(req, response)
 	return
 }
