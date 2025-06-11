@@ -85,8 +85,8 @@ func createChatCompletionPicture(ctx context.Context, client *aisdk.SDKClient) (
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
 				MultimodalContent: []models.ChatUserMsgPart{
-					{ImageURL: &models.ChatUserMsgImageURL{URL: "https://ark-project.tos-cn-beijing.volces.com/images/view.jpeg"}, Type: models.ChatUserMsgPartTypeImageURL},
-					{Text: "这张图里有什么", Type: models.ChatUserMsgPartTypeText},
+					{ImageURL: &models.ChatUserMsgImageURL{URL: "https://ego-1302841739.cos.ap-beijing.myqcloud.com/ego/1749666822%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-06-04%20013659.png"}, Type: models.ChatUserMsgPartTypeImageURL},
+					{Text: "凝练概述图片内容", Type: models.ChatUserMsgPartTypeText},
 				},
 			},
 		},
@@ -152,12 +152,12 @@ func main() {
 	}
 
 	//response2, err := createChatCompletionStream(ctx, client)
-	//response2, err := createChatCompletionPicture(ctx, client)
-	response2, err := createImageGeneration(ctx, client)
-	response2a := response2.(*ark.ImageResponse)
+	response2, err := createChatCompletionPicture(ctx, client)
+	//response2, err := createImageGeneration(ctx, client)
 	if err != nil {
 		log.Fatalf("createChatCompletion error = %v", err)
 		return
 	}
+	response2a := response2.(*models.ChatResponse)
 	log.Printf("createChatCompletion response: %+v", response2a)
 }
