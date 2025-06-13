@@ -103,7 +103,22 @@ func createImageGeneration(ctx context.Context, client *aisdk.SDKClient) (httpcl
 		Size:           ark.Size1024x1024,
 		Seed:           12,
 	}, httpclient.WithTimeout(time.Minute*2))
+}
 
+func createVideoGeneration(ctx context.Context, client *aisdk.SDKClient) (httpclient.Response, error) {
+	return client.CreateVideoGeneration(ctx, "system", ark.VideoRequest{
+		ModelInfo: models.ModelInfo{
+			Provider:  consts.Ark,
+			ModelType: consts.VideoModel,
+			Model:     consts.ArkTextVideo,
+		},
+		Content: []ark.VideoContent{
+			{
+				Type: models.ChatUserMsgPartTypeText,
+				Text: "生成一个小孩在走路的视频",
+			},
+		},
+	}, httpclient.WithTimeout(time.Minute*2))
 }
 
 func main() {
@@ -153,11 +168,12 @@ func main() {
 
 	//response2, err := createChatCompletionStream(ctx, client)
 	//response2, err := createChatCompletionPicture(ctx, client)
-	response2, err := createImageGeneration(ctx, client)
+	//response2, err := createImageGeneration(ctx, client)
+	response2, err := createVideoGeneration(ctx, client)
 	if err != nil || response2 == nil {
 		log.Fatalf("createChatCompletion error = %v", err)
 		return
 	}
-	response2a := response2.(*ark.ImageResponse)
+	response2a := response2.(*ark.VideoResponse)
 	log.Printf("createChatCompletion response: %+v", response2a)
 }

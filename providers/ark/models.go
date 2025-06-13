@@ -88,8 +88,8 @@ type ImageResponse struct {
 
 type VideoRequest struct {
 	models.ModelInfo
-	Content     VideoTextContent `json:"content"`
-	CallbackURL string           `json:"callback_url,omitempty"`
+	Content     []VideoContent `json:"content"`
+	CallbackURL string         `json:"callback_url,omitempty"`
 }
 
 func (v VideoRequest) GetModelInfo() models.ModelInfo {
@@ -97,6 +97,7 @@ func (v VideoRequest) GetModelInfo() models.ModelInfo {
 }
 
 func (v VideoRequest) MarshalJSON() (b []byte, err error) {
+	fmt.Println("!!!!!!!!!!!!!!", v.GetModelInfo().Model)
 	// 创建一个别名结构体
 	type Alias VideoRequest
 	temp := struct {
@@ -107,7 +108,7 @@ func (v VideoRequest) MarshalJSON() (b []byte, err error) {
 		Alias: Alias(v),
 	}
 
-	marsheld, err := json.MarshalIndent(temp, "", "  ")
+	marsheld, err := json.Marshal(temp)
 	fmt.Println(string(marsheld))
 	return json.Marshal(temp)
 }
@@ -165,15 +166,15 @@ type VideoParameters struct {
 	CameraFixed    bool                `json:"camerafixed,omitempty"`
 }
 
-type VideoTextContent struct {
-	Type       string            `json:"type"`
-	Text       string            `json:"text"`                 // 文本内容
-	Parameters VideoParameters   `json:"parameters,omitempty"` // 多模态内容
-	Image      ImageResponseData `json:"image_url,omitempty"`
-	Role       VideoImageRole    `json:"role"`
+type VideoContent struct {
+	Type       models.ChatUserMsgPartType `json:"type"`
+	Text       string                     `json:"text"`                 // 文本内容
+	Parameters VideoParameters            `json:"parameters,omitempty"` // 多模态内容
+	Image      ImageResponseData          `json:"image_url,omitempty"`
+	Role       VideoImageRole             `json:"role"`
 }
 
-func (v VideoTextContent) MarshalJSON() (b []byte, err error) {
+func (v VideoContent) MarshalJSON() (b []byte, err error) {
 	return
 }
 

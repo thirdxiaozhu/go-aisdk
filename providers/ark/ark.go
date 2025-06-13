@@ -18,10 +18,10 @@ import (
 
 // arkProvider Ark提供商
 type arkProvider struct {
-	supportedModels map[consts.ModelType][]string // 支持的模型
-	providerConfig  *conf.ProviderConfig          // 提供商配置
-	hClient         *httpclient.HTTPClient        // HTTP 客户端
-	lb              *loadbalancer.LoadBalancer    // 负载均衡器
+	supportedModels map[consts.ModelType]map[string]bool // 支持的模型
+	providerConfig  *conf.ProviderConfig                 // 提供商配置
+	hClient         *httpclient.HTTPClient               // HTTP 客户端
+	lb              *loadbalancer.LoadBalancer           // 负载均衡器
 }
 
 var (
@@ -37,12 +37,15 @@ const (
 // init 包初始化时创建 arkProvider 实例并注册到工厂
 func init() {
 	arkService = &arkProvider{
-		supportedModels: map[consts.ModelType][]string{
+		supportedModels: map[consts.ModelType]map[string]bool{
 			consts.ChatModel: {
-				consts.ArkThinkingVersion,
+				consts.ArkThinkingVersion: true,
 			},
 			consts.ImageModel: {
-				consts.ArkTextImage,
+				consts.ArkTextImage: true,
+			},
+			consts.VideoModel: {
+				consts.ArkTextVideo: true,
 			},
 		},
 	}
@@ -72,7 +75,7 @@ func (s *arkProvider) CheckRequestValidation(request models.Request) (err error)
 }
 
 // GetSupportedModels 获取支持的模型
-func (s *arkProvider) GetSupportedModels() (supportedModels map[consts.ModelType][]string) {
+func (s *arkProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]bool) {
 	return s.supportedModels
 }
 

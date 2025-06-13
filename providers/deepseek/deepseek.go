@@ -11,6 +11,7 @@ package deepseek
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
@@ -18,6 +19,8 @@ import (
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/sdkerrors"
+	"io"
 	"net/http"
 )
 

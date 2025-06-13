@@ -16,7 +16,6 @@ import (
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"github.com/liusuxian/go-aisdk/sdkerrors"
-	"slices"
 )
 
 type StreamCallback func(response models.ChatResponse) error
