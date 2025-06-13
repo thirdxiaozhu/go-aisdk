@@ -11,6 +11,7 @@ package consts
 
 // DeepSeek 模型名称
 const (
+	// 对话模型
 	DeepSeekChat     = "deepseek-chat"
 	DeepSeekReasoner = "deepseek-reasoner"
 )
