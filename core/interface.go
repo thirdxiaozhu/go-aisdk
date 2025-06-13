@@ -41,6 +41,8 @@ type ProviderService interface {
 
 	// TODO 视频相关
 
+	CreateVideoGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (httpclient.Response, error)
+
 	// TODO 音频相关
 }
 

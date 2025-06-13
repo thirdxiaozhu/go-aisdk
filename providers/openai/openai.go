@@ -118,3 +118,7 @@ func (s *openAIProvider) CreateChatCompletionStream(ctx context.Context, request
 func (s *openAIProvider) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
 	return nil, sdkerrors.ErrMethodNotSupported
 }
+
+func (s *openAIProvider) CreateVideoGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
+	return nil, sdkerrors.ErrMethodNotSupported
+}

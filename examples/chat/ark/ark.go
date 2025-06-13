@@ -152,12 +152,12 @@ func main() {
 	}
 
 	//response2, err := createChatCompletionStream(ctx, client)
-	response2, err := createChatCompletionPicture(ctx, client)
-	//response2, err := createImageGeneration(ctx, client)
-	if err != nil {
+	//response2, err := createChatCompletionPicture(ctx, client)
+	response2, err := createImageGeneration(ctx, client)
+	if err != nil || response2 == nil {
 		log.Fatalf("createChatCompletion error = %v", err)
 		return
 	}
-	response2a := response2.(*models.ChatResponse)
+	response2a := response2.(*ark.ImageResponse)
 	log.Printf("createChatCompletion response: %+v", response2a)
 }

@@ -9,7 +9,9 @@
  */
 package models
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // UserMessage 用户消息，支持多模态内容
 type UserMessage struct {

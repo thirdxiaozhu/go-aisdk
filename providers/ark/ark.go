@@ -29,8 +29,9 @@ var (
 )
 
 const (
-	apiChatCompletions  = "/chat/completions"
-	apiImagesGeneration = "/images/generations"
+	apiChatCompletions     = "/chat/completions"
+	apiImagesGeneration    = "/images/generations"
+	apiConetentsGeneration = "/contents/generations/tasks"
 )
 
 // init 包初始化时创建 arkProvider 实例并注册到工厂
@@ -106,7 +107,7 @@ func (s *arkProvider) executeRequest(ctx context.Context, method, apiPath string
 	return
 }
 
-// TODO ListModels 列出模型
+// ListModels  列出模型
 func (s *arkProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (models.ListModelsResponse, error) {
 	return models.ListModelsResponse{}, sdkerrors.ErrMethodNotSupported
 }
@@ -173,22 +174,31 @@ func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request mo
 }
 
 func (s *arkProvider) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
-	var err error
-	for _, opt := range opts {
-		opt(s.hClient)
-	}
-	// 获取一个APIKey
-	var setters []httpclient.RequestOption
-	var req *http.Request
-	setters, err = s.defaultSetters(request)
-	if req, err = s.hClient.NewRequest(ctx, http.MethodPost, s.hClient.FullURL(apiImagesGeneration), setters...); err != nil {
-		return nil, err
-	}
-
 	var resp ImageResponse
+	err := s.executeRequest(ctx, http.MethodPost, apiImagesGeneration, opts, &resp, httpclient.WithBody(request))
+	return &resp, err
+}
 
-	if err = s.hClient.SendRequest(req, &resp); err != nil {
-		return nil, err
-	}
+func (s *arkProvider) CreateVideoGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
+	//var err error
+	//for _, opt := range opts {
+	//	opt(s.hClient)
+	//}
+	//// 获取一个APIKey
+	//var setters []httpclient.RequestOption
+	//var req *http.Request
+	//setters, err = s.defaultSetters(request)
+	//if req, err = s.hClient.NewRequest(ctx, http.MethodPost, s.hClient.FullURL(apiConetentsGeneration), setters...); err != nil {
+	//	return nil, err
+	//}
+	//
+	//var resp VideoResponse
+	//
+	//if err = s.hClient.SendRequest(req, &resp); err != nil {
+	//	return nil, err
+	//}
+	//return &resp, err
+	var resp VideoResponse
+	err := s.executeRequest(ctx, http.MethodPost, apiConetentsGeneration, opts, &resp, httpclient.WithBody(request))
 	return &resp, err
 }

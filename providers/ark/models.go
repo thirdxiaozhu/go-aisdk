@@ -85,3 +85,99 @@ type ImageResponse struct {
 	Error   ImageResponseError  `json:"error"`
 	httpclient.HttpHeader
 }
+
+type VideoRequest struct {
+	models.ModelInfo
+	Content     VideoTextContent `json:"content"`
+	CallbackURL string           `json:"callback_url,omitempty"`
+}
+
+func (v VideoRequest) GetModelInfo() models.ModelInfo {
+	return v.ModelInfo
+}
+
+func (v VideoRequest) MarshalJSON() (b []byte, err error) {
+	// 创建一个别名结构体
+	type Alias VideoRequest
+	temp := struct {
+		Model string `json:"model"`
+		Alias
+	}{
+		Model: v.GetModelInfo().Model,
+		Alias: Alias(v),
+	}
+
+	marsheld, err := json.MarshalIndent(temp, "", "  ")
+	fmt.Println(string(marsheld))
+	return json.Marshal(temp)
+}
+
+type VideoImageRole string
+
+const (
+	VideoImageFirstFrame VideoImageRole = "first_frame"
+	VideoImageLastFrame  VideoImageRole = "last_frame"
+)
+
+type VideoResolution string
+
+const (
+	Resolution_480P  VideoResolution = "480p"
+	Resolution_720P  VideoResolution = "720p"
+	Resolution_1080P VideoResolution = "1080p"
+)
+
+type VideoRatio string
+
+const (
+	Ratio_21_9       VideoRatio = "21:9"
+	Ratio_16_9       VideoRatio = "16:9"
+	Ratio_4_3        VideoRatio = "4_3"
+	Ratio_1_1        VideoRatio = "1:1"
+	Ratio_3_4        VideoRatio = "3:4"
+	Ratio_9_16       VideoRatio = "9:16"
+	Ratio_9_21       VideoRatio = "9:21"
+	Ratio_KEEP_RATIO VideoRatio = "keep_ratio"
+	Ratio_ADAPTIVE   VideoRatio = "adaptive"
+)
+
+type VideoDuration int
+
+const (
+	Duration_5  VideoDuration = 5
+	Duration_10 VideoDuration = 10
+)
+
+type VideoFramePerSecond int
+
+const (
+	VideoFrame_16 VideoFramePerSecond = 16
+	VideoFrame_24 VideoFramePerSecond = 24
+)
+
+type VideoParameters struct {
+	Resolution     VideoResolution     `json:"resolution,omitempty"`
+	Ratio          VideoRatio          `json:"ratio,omitempty"`
+	Duration       VideoDuration       `json:"duration,omitempty"`
+	FramePerSecond VideoFramePerSecond `json:"framepersecond,omitempty"`
+	WaterMark      bool                `json:"watermark,omitempty"`
+	Seed           int                 `json:"seed,omitempty"`
+	CameraFixed    bool                `json:"camerafixed,omitempty"`
+}
+
+type VideoTextContent struct {
+	Type       string            `json:"type"`
+	Text       string            `json:"text"`                 // 文本内容
+	Parameters VideoParameters   `json:"parameters,omitempty"` // 多模态内容
+	Image      ImageResponseData `json:"image_url,omitempty"`
+	Role       VideoImageRole    `json:"role"`
+}
+
+func (v VideoTextContent) MarshalJSON() (b []byte, err error) {
+	return
+}
+
+type VideoResponse struct {
+	ID string `json:"id"`
+	httpclient.HttpHeader
+}

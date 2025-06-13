@@ -161,5 +161,21 @@ func (c *SDKClient) CreateImageGeneration(ctx context.Context, userId string, re
 	return
 }
 
-type MultipleRoundDialogue struct {
+func (c *SDKClient) CreateVideoGeneration(ctx context.Context, userId string, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
+	// 定义处理函数
+	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
+		chatReq := req.(models.Request)
+		// 创建聊天
+		if err = ps.CheckRequestValidation(request); err != nil {
+			return nil, err
+		}
+		return ps.CreateVideoGeneration(ctx, chatReq, opts...)
+	}
+	// 处理请求
+	var resp any
+	if resp, err = c.handlerRequest(ctx, userId, request.GetModelInfo(), "CreateVideoGeneration", request, handler); err != nil {
+		return nil, err
+	}
+	response = resp.(httpclient.Response)
+	return
 }
