@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-11 16:14:30
+ * @LastEditTime: 2025-06-13 19:30:03
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -46,7 +46,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 		ModelInfo: models.ModelInfo{
 			Provider:  consts.OpenAI,
 			ModelType: consts.ChatModel,
-			Model:     consts.OpenAIGPT4o,
+			Model:     consts.OpenAIGPT4oAudioPreview,
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
