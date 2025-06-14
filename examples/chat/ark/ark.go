@@ -116,6 +116,11 @@ func createVideoGeneration(ctx context.Context, client *aisdk.SDKClient) (httpcl
 			{
 				Type: models.ChatUserMsgPartTypeText,
 				Text: "生成一个小孩在走路的视频",
+				Parameters: ark.VideoParameters{
+					Duration:   ark.Duration_5,
+					Resolution: ark.Resolution_480P,
+					Ratio:      ark.Ratio_9_21,
+				},
 			},
 		},
 	}, httpclient.WithTimeout(time.Minute*2))

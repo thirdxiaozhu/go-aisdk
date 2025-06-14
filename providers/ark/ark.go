@@ -118,18 +118,6 @@ func (s *arkProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPCli
 // TODO CreateChatCompletion 创建聊天
 func (s *arkProvider) CreateChatCompletion(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	// 设置客户端选项
-	//for _, opt := range opts {
-	//	opt(s.hClient)
-	//}
-	//// 获取一个APIKey
-	//var setters []httpclient.RequestOption
-	//var req *http.Request
-	//setters, err = s.defaultSetters(request)
-	//if req, err = s.hClient.NewRequest(ctx, http.MethodPost, s.hClient.FullURL(apiChatCompletions), setters...); err != nil {
-	//	return
-	//}
-	//err = s.hClient.SendRequest(req, &response)
-
 	err = s.executeRequest(ctx, http.MethodPost, apiChatCompletions, opts, &response, httpclient.WithBody(request))
 	return
 }
