@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-11 14:21:50
+ * @LastEditTime: 2025-06-16 19:57:43
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -343,30 +343,22 @@ func (c *HTTPClient) handleErrorResp(resp *http.Response) (err error) {
 		return fmt.Errorf("error, reading response body: %w", err)
 	}
 	// 尝试将响应体解析为 JSON
-	var errResp map[string]any
-	if err = json.Unmarshal(body, &errResp); err != nil {
-		// 如果解析失败，返回包含原始响应体的错误
-		return &RequestError{
+	var errRes ErrorResponse
+	err = json.Unmarshal(body, &errRes)
+	if err != nil || errRes.Error == nil {
+		reqErr := &RequestError{
 			HTTPStatus:     resp.Status,
 			HTTPStatusCode: resp.StatusCode,
 			Err:            err,
 			Body:           body,
 		}
-	}
-	// 处理 errResp 为空的情况
-	if len(errResp) == 0 {
-		return &RequestError{
-			HTTPStatus:     resp.Status,
-			HTTPStatusCode: resp.StatusCode,
-			Err:            fmt.Errorf("empty error response"),
-			Body:           body,
+		if errRes.Error != nil {
+			reqErr.Err = errRes.Error
 		}
+		return reqErr
 	}
-	// 成功解析 JSON 后，返回包含错误信息的 RequestError
-	return &RequestError{
-		HTTPStatus:     resp.Status,
-		HTTPStatusCode: resp.StatusCode,
-		Err:            fmt.Errorf("%v", errResp),
-		Body:           body,
-	}
+	// 设置错误响应的 HTTP 状态和状态码
+	errRes.Error.HTTPStatus = resp.Status
+	errRes.Error.HTTPStatusCode = resp.StatusCode
+	return errRes.Error
 }

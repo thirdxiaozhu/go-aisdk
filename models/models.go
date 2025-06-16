@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 16:42:30
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 18:17:41
+ * @LastEditTime: 2025-06-16 16:28:24
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -10,6 +10,12 @@
 package models
 
 import "github.com/liusuxian/go-aisdk/httpclient"
+
+// ListModelsRequest 列出模型请求
+type ListModelsRequest struct {
+	ModelInfo
+	UserInfo
+}
 
 // ListModelsResponse 列出模型响应
 type ListModelsResponse struct {

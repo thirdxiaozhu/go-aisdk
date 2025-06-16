@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-02 04:49:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-16 14:38:47
+ * @LastEditTime: 2025-06-16 15:54:41
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -10,14 +10,6 @@
 package aisdk
 
 import "github.com/liusuxian/go-aisdk/httpclient/middleware"
-
-// SDKClientOption SDK客户端选项
-type SDKClientOption func(c *clientOption)
-
-// clientOption 客户端选项
-type clientOption struct {
-	middlewares []middleware.Middleware
-}
 
 // WithMiddleware 添加中间件
 func WithMiddleware(m middleware.Middleware) (opt SDKClientOption) {

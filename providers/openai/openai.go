@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:56:55
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-13 19:21:46
+ * @LastEditTime: 2025-06-16 15:58:39
  * @Description: OpenAI服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -23,10 +23,10 @@ import (
 
 // openAIProvider OpenAI提供商
 type openAIProvider struct {
-	supportedModels map[consts.ModelType]map[string]bool // 支持的模型
-	providerConfig  *conf.ProviderConfig                 // 提供商配置
-	hClient         *httpclient.HTTPClient               // HTTP 客户端
-	lb              *loadbalancer.LoadBalancer           // 负载均衡器
+	supportedModels map[fmt.Stringer]map[string]bool // 支持的模型
+	providerConfig  *conf.ProviderConfig             // 提供商配置
+	hClient         *httpclient.HTTPClient           // HTTP 客户端
+	lb              *loadbalancer.LoadBalancer       // 负载均衡器
 }
 
 var (
@@ -41,7 +41,7 @@ const (
 // init 包初始化时创建 openAIProvider 实例并注册到工厂
 func init() {
 	openaiService = &openAIProvider{
-		supportedModels: map[consts.ModelType]map[string]bool{
+		supportedModels: map[fmt.Stringer]map[string]bool{
 			consts.ChatModel: {
 				// chat
 				consts.OpenAIO1Mini:                         true,
@@ -161,7 +161,7 @@ func init() {
 }
 
 // GetSupportedModels 获取支持的模型
-func (s *openAIProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]bool) {
+func (s *openAIProvider) GetSupportedModels() (supportedModels map[fmt.Stringer]map[string]bool) {
 	return s.supportedModels
 }
 

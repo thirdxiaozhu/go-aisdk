@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 19:09:15
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 16:24:02
+ * @LastEditTime: 2025-06-16 15:42:03
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -101,8 +101,8 @@ func (m *SDKConfigManager) GetConfig() (configCopy SDKConfig) {
 }
 
 // GetProviderConfig 获取提供商配置
-func (m *SDKConfigManager) GetProviderConfig(provider string) (config ProviderConfig) {
-	if cfg, ok := m.config.Providers[provider]; ok {
+func (m *SDKConfigManager) GetProviderConfig(provider fmt.Stringer) (config ProviderConfig) {
+	if cfg, ok := m.config.Providers[provider.String()]; ok {
 		config = cloneProviderConfig(cfg)
 		return
 	}

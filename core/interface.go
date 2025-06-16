@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:45:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-16 14:56:22
+ * @LastEditTime: 2025-06-16 15:31:28
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,6 +11,7 @@ package core
 
 import (
 	"context"
+	"fmt"
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
@@ -19,7 +20,7 @@ import (
 // ProviderService AI服务提供商的服务接口
 type ProviderService interface {
 	// 获取支持的模型
-	GetSupportedModels() (supportedModels map[string]map[string]bool)
+	GetSupportedModels() (supportedModels map[fmt.Stringer]map[string]bool)
 	// 初始化提供商配置
 	InitializeProviderConfig(config *conf.ProviderConfig)
 

@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-13 19:30:03
+ * @LastEditTime: 2025-06-16 21:08:30
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -17,7 +17,6 @@ import (
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
-	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"log"
 	"os"
 	"path/filepath"
@@ -38,15 +37,25 @@ func getApiKeys(envKey string) (apiKeys string) {
 }
 
 func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
-	return client.ListModels(ctx, "system", consts.OpenAI)
+	return client.ListModels(ctx, models.ListModelsRequest{
+		ModelInfo: models.ModelInfo{
+			Provider: consts.OpenAI,
+		},
+		UserInfo: models.UserInfo{
+			UserID: "123456",
+		},
+	}, httpclient.WithTimeout(time.Minute*2))
 }
 
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
-	return client.CreateChatCompletion(ctx, "system", models.ChatRequest{
+	return client.CreateChatCompletion(ctx, models.ChatRequest{
 		ModelInfo: models.ModelInfo{
 			Provider:  consts.OpenAI,
 			ModelType: consts.ChatModel,
 			Model:     consts.OpenAIGPT4oAudioPreview,
+		},
+		UserInfo: models.UserInfo{
+			UserID: "123456",
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
@@ -96,32 +105,33 @@ func main() {
 	// 列出模型
 	response1, err := listModels(ctx, client)
 	if err != nil {
-		log.Fatalf("listModels error = %v, request_id = %s", err, sdkerrors.RequestID(err))
+		log.Fatalf("listModels error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
 	log.Printf("listModels response: %+v, request_id: %s", response1, response1.RequestID())
 	// 创建聊天
 	response2, err := createChatCompletion(ctx, client)
 	if err != nil {
-		fmt.Println("Cause Error =", sdkerrors.Cause(err))
-		originalErr := sdkerrors.Unwrap(err)
+		originalErr := aisdk.Unwrap(err)
+		fmt.Println("originalErr =", originalErr)
+		fmt.Println("Cause Error =", aisdk.Cause(err))
 		switch {
-		case errors.Is(originalErr, sdkerrors.ErrProviderNotSupported):
+		case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
 			fmt.Println("ErrProviderNotSupported =", true)
-		case errors.Is(originalErr, sdkerrors.ErrModelTypeNotSupported):
+		case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
 			fmt.Println("ErrModelTypeNotSupported =", true)
-		case errors.Is(originalErr, sdkerrors.ErrModelNotSupported):
+		case errors.Is(originalErr, aisdk.ErrModelNotSupported):
 			fmt.Println("ErrModelNotSupported =", true)
-		case errors.Is(originalErr, sdkerrors.ErrMethodNotSupported):
+		case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
 			fmt.Println("ErrMethodNotSupported =", true)
-		case errors.Is(originalErr, sdkerrors.ErrCompletionStreamNotSupported):
+		case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
 			fmt.Println("ErrCompletionStreamNotSupported =", true)
 		case errors.Is(originalErr, context.Canceled):
 			fmt.Println("context.Canceled =", true)
 		case errors.Is(originalErr, context.DeadlineExceeded):
 			fmt.Println("context.DeadlineExceeded =", true)
 		}
-		log.Fatalf("createChatCompletion error = %v, request_id = %s", err, sdkerrors.RequestID(err))
+		log.Fatalf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
 	log.Printf("createChatCompletion response: %+v, request_id: %s", response2, response2.RequestID())

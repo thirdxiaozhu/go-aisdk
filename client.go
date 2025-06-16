@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:09:20
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-16 14:45:42
+ * @LastEditTime: 2025-06-16 15:54:03
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -29,12 +29,20 @@ type SDKClient struct {
 	noCheckMethods  map[string]bool        // 不需要检查模型支持的方法
 }
 
+// SDKClientOption SDK客户端选项
+type SDKClientOption func(c *clientOption)
+
+// clientOption 客户端选项
+type clientOption struct {
+	middlewares []middleware.Middleware
+}
+
 // NewSDKClient 创建一个SDK客户端
 func NewSDKClient(configPath string, opts ...SDKClientOption) (client *SDKClient, err error) {
 	// 创建SDK配置管理器
 	var configManager *conf.SDKConfigManager
 	if configManager, err = conf.NewSDKConfigManager(configPath); err != nil {
-		// TODO
+		err = wrapFailedToCreateConfigManager(err.Error())
 		return
 	}
 	// 创建一个分布式唯一ID生成器
@@ -47,11 +55,12 @@ func NewSDKClient(configPath string, opts ...SDKClientOption) (client *SDKClient
 	for _, provider := range core.ListProviders() {
 		// 获取提供商
 		var ps core.ProviderService
-		if ps, err = core.GetProvider(provider); err != nil {
+		if ps = core.GetProvider(provider); ps == nil {
+			err = wrapProviderNotSupported(provider)
 			return
 		}
 		// 获取提供商配置
-		providerConfig := configManager.GetProviderConfig(provider.String())
+		providerConfig := configManager.GetProviderConfig(provider)
 		// 初始化提供商配置
 		ps.InitializeProviderConfig(&providerConfig)
 	}
@@ -81,9 +90,8 @@ func NewSDKClient(configPath string, opts ...SDKClientOption) (client *SDKClient
 // handlerRequest 处理请求
 func (c *SDKClient) handlerRequest(
 	ctx context.Context,
-	userId string,
 	modelInfo models.ModelInfo,
-	method string,
+	method, userId string,
 	request any,
 	handler func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error),
 ) (resp any, err error) {
@@ -106,14 +114,12 @@ func (c *SDKClient) handlerRequest(
 	// 定义最终处理函数
 	finalHandler := func(ctx context.Context, req any) (resp any, err error) {
 		// 获取提供商
-		var (
-			ps core.ProviderService
-			e  error
-		)
-		if ps, e = core.GetProvider(modelInfo.Provider); e != nil {
-			return nil, e
+		var ps core.ProviderService
+		if ps = core.GetProvider(modelInfo.Provider); ps == nil {
+			return nil, wrapProviderNotSupported(modelInfo.Provider)
 		}
 		// 根据方法名称决定是否需要判断模型支持
+		var e error
 		if !c.noCheckMethods[method] {
 			// 判断模型是否支持
 			if e = c.isModelSupported(ps, modelInfo); e != nil {
