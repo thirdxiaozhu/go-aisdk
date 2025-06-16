@@ -51,10 +51,10 @@ func TestStreamReader_Recv(t *testing.T) {
 			_, err := stream.Recv()
 			if tt.expectedError != nil {
 				if err == nil || !strings.Contains(err.Error(), tt.expectedError.Error()) {
-					t.Errorf("Expected error %v, got %v", tt.expectedError, err)
+					t.Errorf("Expected sdkerror %v, got %v", tt.expectedError, err)
 				}
 			} else if err != nil {
-				t.Errorf("Unexpected error: %v", err)
+				t.Errorf("Unexpected sdkerror: %v", err)
 			}
 		})
 	}
@@ -95,10 +95,10 @@ func TestStreamReader_RecvRaw(t *testing.T) {
 			data, err := stream.RecvRaw()
 			if tt.expectedError != nil {
 				if !errors.Is(err, tt.expectedError) {
-					t.Errorf("Expected error %v, got %v", tt.expectedError, err)
+					t.Errorf("Expected sdkerror %v, got %v", tt.expectedError, err)
 				}
 			} else if err != nil {
-				t.Errorf("Unexpected error: %v", err)
+				t.Errorf("Unexpected sdkerror: %v", err)
 			} else if string(data) != tt.expectedData {
 				t.Errorf("Expected data %s, got %s", tt.expectedData, string(data))
 			}
@@ -119,7 +119,7 @@ func TestStreamReader_Close(t *testing.T) {
 	}
 
 	if err := stream.Close(); err != nil {
-		t.Errorf("Unexpected error while closing: %v", err)
+		t.Errorf("Unexpected sdkerror while closing: %v", err)
 	}
 }
 
@@ -131,8 +131,8 @@ func TestStreamReader_ErrorHandling(t *testing.T) {
 	}{
 		{
 			name:          "Error response",
-			input:         "data: {\"error\":\"Invalid request\"}\n",
-			expectedError: "error, map[error:Invalid request]",
+			input:         "data: {\"sdkerror\":\"Invalid request\"}\n",
+			expectedError: "sdkerror, map[sdkerror:Invalid request]",
 		},
 		{
 			name:          "Too many empty messages",
@@ -158,7 +158,7 @@ func TestStreamReader_ErrorHandling(t *testing.T) {
 
 			_, err := stream.Recv()
 			if err == nil || !strings.Contains(err.Error(), tt.expectedError) {
-				t.Errorf("Expected error containing %q, got %v", tt.expectedError, err)
+				t.Errorf("Expected sdkerror containing %q, got %v", tt.expectedError, err)
 			}
 		})
 	}

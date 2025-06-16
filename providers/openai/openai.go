@@ -179,7 +179,7 @@ func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTP
 }
 
 // CreateChatCompletion 创建聊天
-func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	err = s.executeRequest(ctx, http.MethodPost, apiChatCompletions, opts, &response, httpclient.WithBody(request))
 	return
 }
@@ -206,4 +206,24 @@ func (s *openAIProvider) executeRequest(ctx context.Context, method, apiPath str
 	// 发送请求
 	err = s.hClient.SendRequest(req, response)
 	return
+}
+
+func (s *openAIProvider) CheckRequestValidation(request models.Request) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *openAIProvider) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *openAIProvider) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *openAIProvider) CreateVideoGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
+	//TODO implement me
+	panic("implement me")
 }

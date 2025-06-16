@@ -21,7 +21,7 @@ import (
 
 var (
 	headerData  = []byte("data: ")
-	errorPrefix = []byte(`data: {"error":`)
+	errorPrefix = []byte(`data: {"sdkerror":`)
 )
 
 // Streamable 可流式传输的类型
@@ -78,7 +78,7 @@ func (stream *StreamReader[T]) processLines() (b []byte, err error) {
 		rawLine, readErr := stream.reader.ReadBytes('\n')
 		if readErr != nil || hasErrorPrefix {
 			if respErr := stream.unmarshalError(); respErr != nil {
-				return nil, fmt.Errorf("error, %v", respErr)
+				return nil, fmt.Errorf("sdkerror, %v", respErr)
 			}
 			return nil, readErr
 		}

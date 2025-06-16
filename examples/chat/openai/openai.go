@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
+	aisdk2 "github.com/liusuxian/go-aisdk/error"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"log"
@@ -97,7 +98,7 @@ func main() {
 
 	client, err := aisdk.NewSDKClient(configPath, aisdk.WithDefaultMiddlewares())
 	if err != nil {
-		log.Fatalf("NewSDKClient() error = %v", err)
+		log.Fatalf("NewSDKClient() sdkerror = %v", err)
 		return
 	}
 
@@ -105,33 +106,33 @@ func main() {
 	// 列出模型
 	response1, err := listModels(ctx, client)
 	if err != nil {
-		log.Fatalf("listModels error = %v, request_id = %s", err, aisdk.RequestID(err))
+		log.Fatalf("listModels sdkerror = %v, request_id = %s", err, aisdk2.RequestID(err))
 		return
 	}
 	log.Printf("listModels response: %+v, request_id: %s", response1, response1.RequestID())
 	// 创建聊天
 	response2, err := createChatCompletion(ctx, client)
 	if err != nil {
-		originalErr := aisdk.Unwrap(err)
+		originalErr := aisdk2.Unwrap(err)
 		fmt.Println("originalErr =", originalErr)
-		fmt.Println("Cause Error =", aisdk.Cause(err))
+		fmt.Println("Cause Error =", aisdk2.Cause(err))
 		switch {
-		case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
+		case errors.Is(originalErr, aisdk2.ErrProviderNotSupported):
 			fmt.Println("ErrProviderNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
+		case errors.Is(originalErr, aisdk2.ErrModelTypeNotSupported):
 			fmt.Println("ErrModelTypeNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrModelNotSupported):
+		case errors.Is(originalErr, aisdk2.ErrModelNotSupported):
 			fmt.Println("ErrModelNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
+		case errors.Is(originalErr, aisdk2.ErrMethodNotSupported):
 			fmt.Println("ErrMethodNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
+		case errors.Is(originalErr, aisdk2.ErrCompletionStreamNotSupported):
 			fmt.Println("ErrCompletionStreamNotSupported =", true)
 		case errors.Is(originalErr, context.Canceled):
 			fmt.Println("context.Canceled =", true)
 		case errors.Is(originalErr, context.DeadlineExceeded):
 			fmt.Println("context.DeadlineExceeded =", true)
 		}
-		log.Fatalf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
+		log.Fatalf("createChatCompletion sdkerror = %v, request_id = %s", err, aisdk2.RequestID(err))
 		return
 	}
 	log.Printf("createChatCompletion response: %+v, request_id: %s", response2, response2.RequestID())

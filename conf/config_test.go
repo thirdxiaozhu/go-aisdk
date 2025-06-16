@@ -30,12 +30,12 @@ func TestSDKConfigManager(t *testing.T) {
 	// 1. Test NewSDKConfigManager with non-existent config file
 	_, err = conf.NewSDKConfigManager(configPath)
 	if err == nil {
-		t.Error("NewSDKConfigManager should return an error for non-existent config file")
+		t.Error("NewSDKConfigManager should return an sdkerror for non-existent config file")
 	}
 	// 2. Test NewSDKConfigManager with empty config path
 	_, err = conf.NewSDKConfigManager("")
 	if err == nil {
-		t.Error("NewSDKConfigManager should return an error for empty config path")
+		t.Error("NewSDKConfigManager should return an sdkerror for empty config path")
 	}
 	// 3. Test with existing config file
 	// Create a test config file with sample data
@@ -146,7 +146,7 @@ func TestSDKConfigManager(t *testing.T) {
 	}
 	_, err = conf.NewSDKConfigManager(invalidConfigPath)
 	if err == nil {
-		t.Error("NewSDKConfigManager should return an error for invalid JSON config")
+		t.Error("NewSDKConfigManager should return an sdkerror for invalid JSON config")
 	}
 	// 11. Test GetProviderConfig for Aliyunbl provider
 	providerConfig := manager2.GetProviderConfig(consts.Aliyunbl)

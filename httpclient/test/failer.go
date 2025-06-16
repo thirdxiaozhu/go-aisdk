@@ -12,7 +12,7 @@ package test
 import "errors"
 
 var (
-	ErrTestErrorAccumulatorWriteFailed = errors.New("test error accumulator failed")
+	ErrTestErrorAccumulatorWriteFailed = errors.New("test sdkerror accumulator failed")
 )
 
 type FailingErrorBuffer struct{}

@@ -7,7 +7,7 @@
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package aisdk
+package sdkerror
 
 import (
 	"errors"
@@ -33,7 +33,7 @@ type SDKError struct {
 
 // Error 错误信息
 func (e *SDKError) Error() (errStr string) {
-	return fmt.Sprintf("request_id: %s, error: %v", e.RequestID, e.Err)
+	return fmt.Sprintf("request_id: %s, sdkerror: %v", e.RequestID, e.Err)
 }
 
 // RequestID 获取请求ID
@@ -101,29 +101,29 @@ func doCause(err error) (causeError error) {
 	return doCause(unwrapped)
 }
 
-// wrapFailedToCreateConfigManager 包装创建配置管理器失败错误
-func wrapFailedToCreateConfigManager(text string) (err error) {
+// WrapFailedToCreateConfigManager 包装创建配置管理器失败错误
+func WrapFailedToCreateConfigManager(text string) (err error) {
 	return fmt.Errorf("%s: %w", text, ErrFailedToCreateConfigManager)
 }
 
-// wrapFailedToCreateFlakeInstance 包装创建分布式唯一ID生成器失败错误
-func wrapFailedToCreateFlakeInstance(text string) (err error) {
+// WrapFailedToCreateFlakeInstance 包装创建分布式唯一ID生成器失败错误
+func WrapFailedToCreateFlakeInstance(text string) (err error) {
 	return fmt.Errorf("%s: %w", text, ErrFailedToCreateFlakeInstance)
 }
 
-// wrapProviderNotSupported 包装提供商不支持错误
-func wrapProviderNotSupported(provider fmt.Stringer) (err error) {
+// WrapProviderNotSupported 包装提供商不支持错误
+func WrapProviderNotSupported(provider fmt.Stringer) (err error) {
 	return fmt.Errorf("provider [%s] is not supported: %w", provider.String(), ErrProviderNotSupported)
 }
 
-// wrapModelTypeNotSupported 包装模型类型不支持错误
-func wrapModelTypeNotSupported(provider, modelType fmt.Stringer) (err error) {
+// WrapModelTypeNotSupported 包装模型类型不支持错误
+func WrapModelTypeNotSupported(provider, modelType fmt.Stringer) (err error) {
 	return fmt.Errorf("provider [%s] does not support model type [%s]: %w",
 		provider.String(), modelType.String(), ErrModelTypeNotSupported)
 }
 
-// wrapModelNotSupported 包装模型不支持错误
-func wrapModelNotSupported(provider fmt.Stringer, model string, modelType fmt.Stringer) (err error) {
+// WrapModelNotSupported 包装模型不支持错误
+func WrapModelNotSupported(provider fmt.Stringer, model string, modelType fmt.Stringer) (err error) {
 	return fmt.Errorf("provider [%s] does not support the [%s] model of type [%s]: %w",
 		provider.String(), model, modelType.String(), ErrModelNotSupported)
 }

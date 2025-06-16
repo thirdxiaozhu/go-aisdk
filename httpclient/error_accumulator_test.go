@@ -31,7 +31,7 @@ func TestErrorAccumulatorBytes(t *testing.T) {
 	}
 
 	if errBytes := accumulator.Bytes(); len(errBytes) == 0 {
-		t.Fatalf("did not return error bytes when has error: %s", string(errBytes))
+		t.Fatalf("did not return sdkerror bytes when has sdkerror: %s", string(errBytes))
 	}
 }
 
@@ -41,6 +41,6 @@ func TestErrorByteWriteErrors(t *testing.T) {
 	}
 
 	if err := accumulator.Write([]byte("{")); !errors.Is(err, test.ErrTestErrorAccumulatorWriteFailed) {
-		t.Fatalf("did not return error when write failed: %v", err)
+		t.Fatalf("did not return sdkerror when write failed: %v", err)
 	}
 }

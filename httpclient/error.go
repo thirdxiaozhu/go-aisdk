@@ -93,13 +93,13 @@ type RequestError struct {
 
 // ErrorResponse 错误响应
 type ErrorResponse struct {
-	Error *APIError `json:"error,omitempty"` // 错误信息
+	Error *APIError `json:"sdkerror,omitempty"` // 错误信息
 }
 
-// Error 实现 error 接口的方法
+// Error 实现 sdkerror 接口的方法
 func (e *APIError) Error() (s string) {
 	if e.HTTPStatusCode > 0 {
-		return fmt.Sprintf("error, status code: %d, status: %s, message: %s", e.HTTPStatusCode, e.HTTPStatus, e.Message)
+		return fmt.Sprintf("sdkerror, status code: %d, status: %s, message: %s", e.HTTPStatusCode, e.HTTPStatus, e.Message)
 	}
 	return e.Message
 }
@@ -150,10 +150,10 @@ func (e *APIError) UnmarshalJSON(data []byte) (err error) {
 	return json.Unmarshal(rawMap["code"], &e.Code)
 }
 
-// Error 实现 error 接口的方法
+// Error 实现 sdkerror 接口的方法
 func (e *RequestError) Error() (s string) {
 	return fmt.Sprintf(
-		"error, status code: %d, status: %s, message: %s, body: %s",
+		"sdkerror, status code: %d, status: %s, message: %s, body: %s",
 		e.HTTPStatusCode, e.HTTPStatus, e.Err, e.Body,
 	)
 }

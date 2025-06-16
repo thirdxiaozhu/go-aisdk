@@ -69,9 +69,9 @@ func TestClient_sendRequest(t *testing.T) {
 			expectError:    false,
 		},
 		{
-			name:           "error response",
+			name:           "sdkerror response",
 			responseStatus: http.StatusBadRequest,
-			responseBody:   `{"error": "bad request"}`,
+			responseBody:   `{"sdkerror": "bad request"}`,
 			expectError:    true,
 		},
 	}
@@ -94,11 +94,11 @@ func TestClient_sendRequest(t *testing.T) {
 			err = client.SendRequest(req, response)
 			if tt.expectError {
 				if err == nil {
-					t.Error("Expected error but got nil")
+					t.Error("Expected sdkerror but got nil")
 				}
 			} else {
 				if err != nil {
-					t.Errorf("Unexpected error: %v", err)
+					t.Errorf("Unexpected sdkerror: %v", err)
 				}
 				if response.Message != "success" {
 					t.Errorf("Expected message 'success', got '%s'", response.Message)
@@ -123,7 +123,7 @@ func TestClient_sendRequestRaw(t *testing.T) {
 
 	response, err := client.SendRequestRaw(req)
 	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
+		t.Fatalf("Unexpected sdkerror: %v", err)
 	}
 	defer response.Close()
 
@@ -144,15 +144,15 @@ func TestClient_handleErrorResp(t *testing.T) {
 		expectedError string
 	}{
 		{
-			name:          "json error response",
+			name:          "json sdkerror response",
 			statusCode:    http.StatusBadRequest,
-			responseBody:  `{"error": "invalid request"}`,
+			responseBody:  `{"sdkerror": "invalid request"}`,
 			expectedError: "invalid request",
 		},
 		{
-			name:          "non-json error response",
+			name:          "non-json sdkerror response",
 			statusCode:    http.StatusInternalServerError,
-			responseBody:  "internal server error",
+			responseBody:  "internal server sdkerror",
 			expectedError: "invalid character 'i' looking for beginning of value",
 		},
 	}
@@ -178,10 +178,10 @@ func TestClient_handleErrorResp(t *testing.T) {
 
 			err = client.handleErrorResp(resp)
 			if err == nil {
-				t.Error("Expected error but got nil")
+				t.Error("Expected sdkerror but got nil")
 			}
 			if !strings.Contains(err.Error(), tt.expectedError) {
-				t.Errorf("Expected error to contain '%s', got '%s'", tt.expectedError, err.Error())
+				t.Errorf("Expected sdkerror to contain '%s', got '%s'", tt.expectedError, err.Error())
 			}
 		})
 	}
@@ -376,11 +376,11 @@ func TestDecodeResponse(t *testing.T) {
 
 			if tt.expectError {
 				if err == nil {
-					t.Error("Expected error but got nil")
+					t.Error("Expected sdkerror but got nil")
 				}
 			} else {
 				if err != nil {
-					t.Errorf("Unexpected error: %v", err)
+					t.Errorf("Unexpected sdkerror: %v", err)
 				}
 
 				switch target := tt.target.(type) {
@@ -425,11 +425,11 @@ func TestDecodeString(t *testing.T) {
 
 			if tt.expectError {
 				if err == nil {
-					t.Error("Expected error but got nil")
+					t.Error("Expected sdkerror but got nil")
 				}
 			} else {
 				if err != nil {
-					t.Errorf("Unexpected error: %v", err)
+					t.Errorf("Unexpected sdkerror: %v", err)
 				}
 				if result != tt.body {
 					t.Errorf("Expected %s, got %s", tt.body, result)
@@ -529,9 +529,9 @@ data: [DONE]
 			expectError: false,
 		},
 		{
-			name:           "error response",
+			name:           "sdkerror response",
 			responseStatus: http.StatusBadRequest,
-			responseBody:   `data: {"error":{"message":"parameter error","type":"invalid_request_error"}}`,
+			responseBody:   `data: {"sdkerror":{"message":"parameter sdkerror","type":"invalid_request_error"}}`,
 			expectError:    true,
 		},
 	}
@@ -562,13 +562,13 @@ data: [DONE]
 			stream, err := SendRequestStream[testStreamResponse](client, req)
 			if tt.expectError {
 				if err == nil {
-					t.Error("Expected to get an error, but got nil")
+					t.Error("Expected to get an sdkerror, but got nil")
 				}
 				return
 			}
 
 			if err != nil {
-				t.Fatalf("Unexpected error: %v", err)
+				t.Fatalf("Unexpected sdkerror: %v", err)
 			}
 
 			defer stream.Close()

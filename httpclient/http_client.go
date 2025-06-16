@@ -340,7 +340,7 @@ func (c *HTTPClient) handleErrorResp(resp *http.Response) (err error) {
 	// 读取响应体
 	var body []byte
 	if body, err = io.ReadAll(resp.Body); err != nil {
-		return fmt.Errorf("error, reading response body: %w", err)
+		return fmt.Errorf("sdkerror, reading response body: %w", err)
 	}
 	// 尝试将响应体解析为 JSON
 	var errRes ErrorResponse

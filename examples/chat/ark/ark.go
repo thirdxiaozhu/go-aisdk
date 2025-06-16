@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/liusuxian/go-aisdk/providers/ark"
 	"log"
 	"os"
 	"path/filepath"
@@ -14,6 +13,7 @@ import (
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/providers/ark"
 )
 
 func getApiKeys(envKey string) (apiKeys string) {
@@ -160,7 +160,7 @@ func main() {
 
 	client, err := aisdk.NewSDKClient(configPath, aisdk.WithDefaultMiddlewares())
 	if err != nil {
-		log.Fatalf("NewSDKClient() error = %v", err)
+		log.Fatalf("NewSDKClient() sdkerror = %v", err)
 		return
 	}
 	ctx := context.Background()
@@ -171,7 +171,7 @@ func main() {
 	//response2, err := createImageGeneration(ctx, client)
 	//response2, err := createVideoGeneration(ctx, client)
 	if err != nil || response2 == nil {
-		log.Fatalf("createChatCompletion error = %v", err)
+		log.Fatalf("createChatCompletion sdkerror = %v", err)
 		return
 	}
 	response2a := response2.(*ark.ImageResponse)

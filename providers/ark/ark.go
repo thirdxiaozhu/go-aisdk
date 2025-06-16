@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
+	"github.com/liusuxian/go-aisdk/sdkerror"
 	"io"
 	"net/http"
 
@@ -36,6 +36,7 @@ const (
 
 // init 包初始化时创建 arkProvider 实例并注册到工厂
 func init() {
+
 	arkService = &arkProvider{
 		supportedModels: map[fmt.Stringer]map[string]bool{
 			consts.ChatModel: {
@@ -112,7 +113,7 @@ func (s *arkProvider) executeRequest(ctx context.Context, method, apiPath string
 
 // ListModels  列出模型
 func (s *arkProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (models.ListModelsResponse, error) {
-	return models.ListModelsResponse{}, aisdk.ErrMethodNotSupported
+	return models.ListModelsResponse{}, sdkerror.ErrMethodNotSupported
 }
 
 // TODO CreateChatCompletion 创建聊天
@@ -138,7 +139,7 @@ func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request mo
 
 	defer func() {
 		if closeErr := stream.Close(); closeErr != nil && err == nil {
-			err = fmt.Errorf("stream close error: %w", closeErr)
+			err = fmt.Errorf("stream close sdkerror: %w", closeErr)
 		}
 	}()
 
@@ -171,7 +172,7 @@ func (s *arkProvider) CreateImageGeneration(ctx context.Context, request models.
 }
 
 func (s *arkProvider) CreateVideoGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
-	//var err error
+	//var err sdkerror
 	//for _, opt := range opts {
 	//	opt(s.hClient)
 	//}

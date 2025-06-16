@@ -14,6 +14,7 @@ import (
 	"github.com/liusuxian/go-aisdk/core"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/sdkerror"
 )
 
 // CreateChatCompletion 创建聊天
@@ -23,7 +24,7 @@ func (c *SDKClient) CreateChatCompletion(ctx context.Context, request models.Cha
 		chatReq := req.(models.ChatRequest)
 		// 判断是否流式传输
 		if chatReq.Stream {
-			return nil, ErrCompletionStreamNotSupported
+			return nil, sdkerror.ErrCompletionStreamNotSupported
 		}
 		// 创建聊天
 		return ps.CreateChatCompletion(ctx, chatReq, opts...)

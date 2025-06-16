@@ -62,7 +62,7 @@ func TestGetAPIKey(t *testing.T) {
 		apiKey, err := lb.GetAPIKey()
 
 		if err != errEmptyAPIKeyList {
-			t.Errorf("expected error %v, got %v", errEmptyAPIKeyList, err)
+			t.Errorf("expected sdkerror %v, got %v", errEmptyAPIKeyList, err)
 		}
 		if apiKey != nil {
 			t.Error("expected API key to be nil")
@@ -75,7 +75,7 @@ func TestGetAPIKey(t *testing.T) {
 
 		apiKey, err := lb.GetAPIKey()
 		if err != errNoAPIKeyAvailable {
-			t.Errorf("expected error %v, got %v", errNoAPIKeyAvailable, err)
+			t.Errorf("expected sdkerror %v, got %v", errNoAPIKeyAvailable, err)
 		}
 		if apiKey != nil {
 			t.Error("expected API key to be nil")
@@ -180,7 +180,7 @@ func TestSetAvailability(t *testing.T) {
 
 		err := lb.SetAvailability("nonexistent", false)
 		if err != errAPIKeyNotFound {
-			t.Errorf("expected error %v, got %v", errAPIKeyNotFound, err)
+			t.Errorf("expected sdkerror %v, got %v", errAPIKeyNotFound, err)
 		}
 	})
 }
@@ -224,7 +224,7 @@ func TestRegisterAPIKey(t *testing.T) {
 
 		err := lb.RegisterAPIKey("key1")
 		if err != errAPIKeyAlreadyExists {
-			t.Errorf("expected error %v, got %v", errAPIKeyAlreadyExists, err)
+			t.Errorf("expected sdkerror %v, got %v", errAPIKeyAlreadyExists, err)
 		}
 	})
 
@@ -271,7 +271,7 @@ func TestUnregisterAPIKey(t *testing.T) {
 
 		err := lb.UnregisterAPIKey("nonexistent")
 		if err != errAPIKeyNotFound {
-			t.Errorf("expected error %v, got %v", errAPIKeyNotFound, err)
+			t.Errorf("expected sdkerror %v, got %v", errAPIKeyNotFound, err)
 		}
 	})
 }
@@ -298,7 +298,7 @@ func TestSetWeight(t *testing.T) {
 
 		err := lb.SetWeight("key1", 0)
 		if err != errWeightMustBeGreaterThan0 {
-			t.Errorf("expected error %v, got %v", errWeightMustBeGreaterThan0, err)
+			t.Errorf("expected sdkerror %v, got %v", errWeightMustBeGreaterThan0, err)
 		}
 	})
 
@@ -307,7 +307,7 @@ func TestSetWeight(t *testing.T) {
 
 		err := lb.SetWeight("nonexistent", 5)
 		if err != errAPIKeyNotFound {
-			t.Errorf("expected error %v, got %v", errAPIKeyNotFound, err)
+			t.Errorf("expected sdkerror %v, got %v", errAPIKeyNotFound, err)
 		}
 	})
 }

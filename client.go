@@ -16,6 +16,8 @@ import (
 	"github.com/liusuxian/go-aisdk/flake"
 	"github.com/liusuxian/go-aisdk/httpclient/middleware"
 	"github.com/liusuxian/go-aisdk/models"
+	_ "github.com/liusuxian/go-aisdk/providers"
+	"github.com/liusuxian/go-aisdk/sdkerror"
 	"sort"
 	"time"
 )
@@ -41,13 +43,13 @@ func NewSDKClient(configPath string, opts ...SDKClientOption) (client *SDKClient
 	// 创建SDK配置管理器
 	var configManager *conf.SDKConfigManager
 	if configManager, err = conf.NewSDKConfigManager(configPath); err != nil {
-		err = wrapFailedToCreateConfigManager(err.Error())
+		err = sdkerror.WrapFailedToCreateConfigManager(err.Error())
 		return
 	}
 	// 创建一个分布式唯一ID生成器
 	var flakeInstance *flake.Flake
 	if flakeInstance, err = flake.New(flake.Settings{}); err != nil {
-		err = wrapFailedToCreateFlakeInstance(err.Error())
+		err = sdkerror.WrapFailedToCreateFlakeInstance(err.Error())
 		return
 	}
 	// 初始化所有提供商
@@ -55,7 +57,7 @@ func NewSDKClient(configPath string, opts ...SDKClientOption) (client *SDKClient
 		// 获取提供商
 		var ps core.ProviderService
 		if ps = core.GetProvider(provider); ps == nil {
-			err = wrapProviderNotSupported(provider)
+			err = sdkerror.WrapProviderNotSupported(provider)
 			return
 		}
 		// 获取提供商配置
@@ -97,7 +99,7 @@ func (c *SDKClient) handlerRequest(
 	// 生成唯一请求ID
 	var requestId string
 	if requestId, err = c.flakeInstance.RequestID(); err != nil {
-		err = &SDKError{RequestID: requestId, Err: err}
+		err = &sdkerror.SDKError{RequestID: requestId, Err: err}
 		return
 	}
 	// 设置请求信息到上下文
@@ -115,7 +117,7 @@ func (c *SDKClient) handlerRequest(
 		// 获取提供商
 		var ps core.ProviderService
 		if ps = core.GetProvider(modelInfo.Provider); ps == nil {
-			return nil, wrapProviderNotSupported(modelInfo.Provider)
+			return nil, sdkerror.WrapProviderNotSupported(modelInfo.Provider)
 		}
 		// 根据方法名称决定是否需要判断模型支持
 		var e error
@@ -130,7 +132,7 @@ func (c *SDKClient) handlerRequest(
 	}
 	// 执行中间件链
 	if resp, err = c.middlewareChain.Execute(ctx, request, finalHandler); err != nil {
-		err = &SDKError{RequestID: requestId, Err: err}
+		err = &sdkerror.SDKError{RequestID: requestId, Err: err}
 		return
 	}
 	return
@@ -141,7 +143,7 @@ func (c *SDKClient) isModelSupported(s core.ProviderService, modelInfo models.Mo
 	// 获取支持的模型
 	supportedModels := s.GetSupportedModels()
 	if len(supportedModels) == 0 {
-		return wrapProviderNotSupported(modelInfo.Provider)
+		return sdkerror.WrapProviderNotSupported(modelInfo.Provider)
 	}
 	// 获取指定模型类型支持的模型列表
 	var (
@@ -149,15 +151,15 @@ func (c *SDKClient) isModelSupported(s core.ProviderService, modelInfo models.Mo
 		ok       bool
 	)
 	if modelMap, ok = supportedModels[modelInfo.ModelType]; !ok {
-		return wrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
+		return sdkerror.WrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
 	}
 	// 判断模型是否支持
 	var modelSupported bool
 	if modelSupported, ok = modelMap[modelInfo.Model]; !ok {
-		return wrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
+		return sdkerror.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
 	}
 	if !modelSupported {
-		return wrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
+		return sdkerror.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
 	}
 	return
 }

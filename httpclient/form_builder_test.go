@@ -33,13 +33,13 @@ func TestFormBuilderWithFailingWriter(t *testing.T) {
 		err  error
 	)
 	if file, err = os.CreateTemp(t.TempDir(), ""); err != nil {
-		t.Fatalf("error creating tmp file: %v", err)
+		t.Fatalf("sdkerror creating tmp file: %v", err)
 	}
 	defer file.Close()
 
 	builder := httpclient.NewFormBuilder(&failingWriter{})
 	err = builder.CreateFormFile("file", file)
-	checks.ErrorIs(t, err, errMockFailingWriterError, "formbuilder should return error if writer fails")
+	checks.ErrorIs(t, err, errMockFailingWriterError, "formbuilder should return sdkerror if writer fails")
 }
 
 func TestFormBuilderWithClosedFile(t *testing.T) {
@@ -48,12 +48,12 @@ func TestFormBuilderWithClosedFile(t *testing.T) {
 		err  error
 	)
 	if file, err = os.CreateTemp(t.TempDir(), ""); err != nil {
-		t.Fatalf("error creating tmp file: %v", err)
+		t.Fatalf("sdkerror creating tmp file: %v", err)
 	}
 	file.Close()
 
 	builder := httpclient.NewFormBuilder(&bytes.Buffer{})
 	err = builder.CreateFormFile("file", file)
-	checks.HasError(t, err, "formbuilder should return error if file is closed")
-	checks.ErrorIs(t, err, os.ErrClosed, "formbuilder should return error if file is closed")
+	checks.HasError(t, err, "formbuilder should return sdkerror if file is closed")
+	checks.ErrorIs(t, err, os.ErrClosed, "formbuilder should return sdkerror if file is closed")
 }

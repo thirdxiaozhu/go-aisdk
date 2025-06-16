@@ -89,7 +89,7 @@ type ImageResponse struct {
 	Created int                 `json:"created"`
 	Data    []ImageResponseData `json:"data"`
 	Usage   ImageResponseUsgae  `json:"usage"`
-	Error   ImageResponseError  `json:"error"`
+	Error   ImageResponseError  `json:"sdkerror"`
 	httpclient.HttpHeader
 }
 

@@ -13,13 +13,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/sdkerror"
 	"io"
 	"net/http"
 )
@@ -43,6 +43,7 @@ const (
 
 // init 包初始化时创建 deepseekProvider 实例并注册到工厂
 func init() {
+
 	deepseekService = &deepseekProvider{
 		supportedModels: map[fmt.Stringer]map[string]bool{
 			consts.ChatModel: {
@@ -133,7 +134,7 @@ func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, reque
 
 	defer func() {
 		if closeErr := stream.Close(); closeErr != nil && err == nil {
-			err = fmt.Errorf("stream close error: %w", closeErr)
+			err = fmt.Errorf("stream close sdkerror: %w", closeErr)
 		}
 	}()
 
@@ -159,9 +160,9 @@ func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, reque
 	}
 }
 func (s *deepseekProvider) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
-	return nil, aisdk.ErrMethodNotSupported
+	return nil, sdkerror.ErrMethodNotSupported
 }
 
 func (s *deepseekProvider) CreateVideoGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
-	return nil, aisdk.ErrMethodNotSupported
+	return nil, sdkerror.ErrMethodNotSupported
 }

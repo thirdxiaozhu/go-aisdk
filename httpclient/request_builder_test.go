@@ -30,7 +30,7 @@ func (fm *failingMarshaller) Marshal(_ any) ([]byte, error) {
 func TestRequestBuilderReturnsMarshallerErrors(t *testing.T) {
 	builder := httpclient.NewRequestBuilder(httpclient.WithMarshaller(&failingMarshaller{}))
 	if _, err := builder.Build(context.Background(), "", "", struct{}{}, nil); !errors.Is(err, errTestMarshallerFailed) {
-		t.Fatalf("did not return error when marshaller failed: %v", err)
+		t.Fatalf("did not return sdkerror when marshaller failed: %v", err)
 	}
 }
 

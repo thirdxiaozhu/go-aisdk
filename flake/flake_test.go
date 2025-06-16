@@ -19,12 +19,12 @@ import (
 func TestNextRequestID(t *testing.T) {
 	flake, err := flake.New(flake.Settings{})
 	if err != nil {
-		t.Fatalf("new flake error: %v", err)
+		t.Fatalf("new flake sdkerror: %v", err)
 	}
 
 	requestId, err := flake.RequestID()
 	if err != nil {
-		t.Fatalf("next request id error: %v", err)
+		t.Fatalf("next request id sdkerror: %v", err)
 	}
 	t.Logf("next request id: %v", requestId)
 }
@@ -32,7 +32,7 @@ func TestNextRequestID(t *testing.T) {
 func TestNextRequestIDUniqueness(t *testing.T) {
 	flake, err := flake.New(flake.Settings{})
 	if err != nil {
-		t.Fatalf("new flake error: %v", err)
+		t.Fatalf("new flake sdkerror: %v", err)
 	}
 
 	const numIDs = 1000000
@@ -49,7 +49,7 @@ func TestNextRequestIDUniqueness(t *testing.T) {
 
 			id, err := flake.RequestID()
 			if err != nil {
-				t.Errorf("next request id error: %v", err)
+				t.Errorf("next request id sdkerror: %v", err)
 				return
 			}
 

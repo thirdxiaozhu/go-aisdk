@@ -13,15 +13,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/liusuxian/go-aisdk"
-	"github.com/liusuxian/go-aisdk/consts"
-	"github.com/liusuxian/go-aisdk/httpclient"
-	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/sdkerror"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/liusuxian/go-aisdk"
+	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/models"
+	_ "github.com/liusuxian/go-aisdk/providers/deepseek"
 )
 
 func getApiKeys(envKey string) (apiKeys string) {
@@ -77,11 +80,14 @@ func streamCallback(response models.ChatResponse) error {
 }
 
 func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (interface{}, error) {
-	return client.CreateChatCompletionStream(ctx, "system", models.ChatRequest{
+	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
 		ModelInfo: models.ModelInfo{
 			Provider:  consts.DeepSeek,
 			ModelType: consts.ChatModel,
 			Model:     consts.DeepSeekReasoner,
+		},
+		UserInfo: models.UserInfo{
+			UserID: "123456",
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
@@ -112,14 +118,10 @@ func main() {
     "deepseek": {
 			"base_url": "https://api.deepseek.com",
       "api_keys": [%v]
-    },
-    "ark": {
-      "base_url": "https://ark.cn-beijing.volces.com/api/v3",
-			"api_keys": [%v]
     }
   }
 }`
-	configData = fmt.Sprintf(configData, getApiKeys("DEEPSEEK_API_KEYS"), getApiKeys("ARK_API_KEYS"))
+	configData = fmt.Sprintf(configData, getApiKeys("DEEPSEEK_API_KEYS"))
 	log.Printf("configData: %s", configData)
 	if err := os.WriteFile(configPath, []byte(configData), 0644); err != nil {
 		log.Fatalf("Failed to create empty config file: %v", err)
@@ -128,7 +130,7 @@ func main() {
 
 	client, err := aisdk.NewSDKClient(configPath, aisdk.WithDefaultMiddlewares())
 	if err != nil {
-		log.Fatalf("NewSDKClient() error = %v", err)
+		log.Fatalf("NewSDKClient() sdkerror = %v", err)
 		return
 	}
 
@@ -136,36 +138,38 @@ func main() {
 	// 列出模型
 	response1, err := listModels(ctx, client)
 	if err != nil {
-		log.Fatalf("listModels error = %v, request_id = %s", err, aisdk.RequestID(err))
+		log.Fatalf("listModels sdkerror = %v, request_id = %s", err, sdkerror.RequestID(err))
 		return
 	}
 	log.Printf("listModels response: %+v\n", response1.Object)
 	log.Printf("listModels response: %+v\n", response1.Data)
 
 	// 创建聊天
-	response2, err := createChatCompletion(ctx, client)
+	//response2, err := createChatCompletion(ctx, client)
+	_, err = createChatCompletionStream(ctx, client)
 	if err != nil {
-		originalErr := aisdk.Unwrap(err)
+		originalErr := sdkerror.Unwrap(err)
 		fmt.Println("originalErr =", originalErr)
-		fmt.Println("Cause Error =", aisdk.Cause(err))
+		fmt.Println("Cause Error =", sdkerror.Cause(err))
 		switch {
-		case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
+		case errors.Is(originalErr, sdkerror.ErrProviderNotSupported):
 			fmt.Println("ErrProviderNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
+		case errors.Is(originalErr, sdkerror.ErrModelTypeNotSupported):
 			fmt.Println("ErrModelTypeNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrModelNotSupported):
+		case errors.Is(originalErr, sdkerror.ErrModelNotSupported):
 			fmt.Println("ErrModelNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
+		case errors.Is(originalErr, sdkerror.ErrMethodNotSupported):
 			fmt.Println("ErrMethodNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
+		case errors.Is(originalErr, sdkerror.ErrCompletionStreamNotSupported):
 			fmt.Println("ErrCompletionStreamNotSupported =", true)
 		case errors.Is(originalErr, context.Canceled):
 			fmt.Println("context.Canceled =", true)
 		case errors.Is(originalErr, context.DeadlineExceeded):
 			fmt.Println("context.DeadlineExceeded =", true)
 		}
-		log.Fatalf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
+		log.Fatalf("createChatCompletion sdkerror = %v, request_id = %s", err, sdkerror.RequestID(err))
 		return
 	}
-	log.Printf("createChatCompletion response: %+v, request_id: %s", response2, response2.RequestID())
+	//response2 := response2a.()
+	//log.Printf("createChatCompletion response: %+v, request_id: %s", response2, response2.RequestID())
 }

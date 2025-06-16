@@ -135,7 +135,7 @@ func (m *RetryMiddleware) Process(ctx context.Context, request any, next Handler
 		}
 	}
 	// 返回最后一次的错误
-	return nil, fmt.Errorf("after %d attempts, last error: %w", requestInfo.Attempt, err)
+	return nil, fmt.Errorf("after %d attempts, last sdkerror: %w", requestInfo.Attempt, err)
 }
 
 // Name 返回中间件名称

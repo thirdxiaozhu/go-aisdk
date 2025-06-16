@@ -22,14 +22,14 @@ func TestRequestError_Error(t *testing.T) {
 		expectedError string
 	}{
 		{
-			name: "Basic error with all fields",
+			name: "Basic sdkerror with all fields",
 			requestError: &httpclient.RequestError{
 				HTTPStatus:     "Bad Request",
 				HTTPStatusCode: 400,
 				Err:            errors.New("invalid request"),
-				Body:           []byte("{\"error\":\"invalid input\"}"),
+				Body:           []byte("{\"sdkerror\":\"invalid input\"}"),
 			},
-			expectedError: "error, status code: 400, status: Bad Request, message: invalid request, body: {\"error\":\"invalid input\"}",
+			expectedError: "sdkerror, status code: 400, status: Bad Request, message: invalid request, body: {\"sdkerror\":\"invalid input\"}",
 		},
 		{
 			name: "Error with empty body",
@@ -39,7 +39,7 @@ func TestRequestError_Error(t *testing.T) {
 				Err:            errors.New("resource not found"),
 				Body:           []byte{},
 			},
-			expectedError: "error, status code: 404, status: Not Found, message: resource not found, body: ",
+			expectedError: "sdkerror, status code: 404, status: Not Found, message: resource not found, body: ",
 		},
 	}
 
@@ -53,12 +53,12 @@ func TestRequestError_Error(t *testing.T) {
 }
 
 func TestRequestError_Unwrap(t *testing.T) {
-	originalError := errors.New("original error")
+	originalError := errors.New("original sdkerror")
 	requestError := &httpclient.RequestError{
 		HTTPStatus:     "Internal Server Error",
 		HTTPStatusCode: 500,
 		Err:            originalError,
-		Body:           []byte("error details"),
+		Body:           []byte("sdkerror details"),
 	}
 
 	if got := requestError.Unwrap(); got != originalError {
