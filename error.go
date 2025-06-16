@@ -1,13 +1,13 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-06-05 19:18:02
+ * @Date: 2025-06-16 14:41:41
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-06 10:17:14
+ * @LastEditTime: 2025-06-16 14:43:56
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package sdkerrors
+package aisdk
 
 import (
 	"errors"
@@ -15,6 +15,7 @@ import (
 )
 
 var (
+	ErrFailedToCreateFlakeInstance  = errors.New("failed to create flake instance")                                                    // 创建分布式唯一ID生成器失败
 	ErrProviderNotSupported         = errors.New("provider is not supported")                                                          // 提供商不支持
 	ErrModelTypeNotSupported        = errors.New("model type is not supported")                                                        // 模型类型不支持
 	ErrModelNotSupported            = errors.New("model is not supported")                                                             // 模型不支持
@@ -25,39 +26,7 @@ var (
 	ErrAPIKeyNotFound               = errors.New("api key not found")                                                                  // API密钥不存在
 	ErrAPIKeyAlreadyExists          = errors.New("api key already exists")                                                             // API密钥已存在
 	ErrWeightMustBeGreaterThan0     = errors.New("weight must be greater than 0")                                                      // 权重必须大于0
-	ErrInvalidBitsTime              = errors.New("bit length for time must be 32 or more")                                             // 时间位长度必须大于32
-	ErrInvalidBitsSequence          = errors.New("invalid bit length for sequence number")                                             // 序列号位长度无效
-	ErrInvalidBitsMachineID         = errors.New("invalid bit length for machine id")                                                  // 机器ID位长度无效
-	ErrInvalidTimeUnit              = errors.New("invalid time unit")                                                                  // 时间单位无效
-	ErrInvalidSequence              = errors.New("invalid sequence number")                                                            // 序列号无效
-	ErrInvalidMachineID             = errors.New("invalid machine id")                                                                 // 机器ID无效
-	ErrStartTimeAhead               = errors.New("start time is ahead")                                                                // 起始时间早于当前时间
-	ErrOverTimeLimit                = errors.New("over the time limit")                                                                // 超过时间限制
-	ErrNoPrivateAddress             = errors.New("no private ip address")                                                              // 没有私有IP地址
 )
-
-// WrapProviderNotSupported 包装提供商不支持错误
-func WrapProviderNotSupported(provider fmt.Stringer) (err error) {
-	return fmt.Errorf("provider [%s] is not supported: %w", provider.String(), ErrProviderNotSupported)
-}
-
-// WrapModelTypeNotSupported 包装模型类型不支持错误
-func WrapModelTypeNotSupported(provider, modelType fmt.Stringer) (err error) {
-	return fmt.Errorf("provider [%s] does not support model type [%s]: %w",
-		provider.String(), modelType.String(), ErrModelTypeNotSupported)
-}
-
-// WrapModelNotSupported 包装模型不支持错误
-func WrapModelNotSupported(provider fmt.Stringer, model string, modelType fmt.Stringer) (err error) {
-	return fmt.Errorf("provider [%s] does not support the [%s] model of type [%s]: %w",
-		provider.String(), model, modelType.String(), ErrModelNotSupported)
-}
-
-// WrapMethodNotSupported 包装方法不支持错误
-func WrapMethodNotSupported(provider fmt.Stringer, model string, modelType fmt.Stringer, method string) (err error) {
-	return fmt.Errorf("provider [%s] does not support the [%s] model of type [%s] with method [%s]: %w",
-		provider.String(), model, modelType.String(), method, ErrMethodNotSupported)
-}
 
 // SDKError SDK错误
 type SDKError struct {
@@ -116,4 +85,32 @@ func doCause(err error) (causeError error) {
 	}
 
 	return doCause(unwrapped)
+}
+
+// wrapFailedToCreateFlakeInstance 包装创建分布式唯一ID生成器失败错误
+func wrapFailedToCreateFlakeInstance(text string) (err error) {
+	return fmt.Errorf("%s: %w", text, ErrFailedToCreateFlakeInstance)
+}
+
+// wrapProviderNotSupported 包装提供商不支持错误
+func wrapProviderNotSupported(provider fmt.Stringer) (err error) {
+	return fmt.Errorf("provider [%s] is not supported: %w", provider.String(), ErrProviderNotSupported)
+}
+
+// wrapModelTypeNotSupported 包装模型类型不支持错误
+func wrapModelTypeNotSupported(provider, modelType fmt.Stringer) (err error) {
+	return fmt.Errorf("provider [%s] does not support model type [%s]: %w",
+		provider.String(), modelType.String(), ErrModelTypeNotSupported)
+}
+
+// wrapModelNotSupported 包装模型不支持错误
+func wrapModelNotSupported(provider fmt.Stringer, model string, modelType fmt.Stringer) (err error) {
+	return fmt.Errorf("provider [%s] does not support the [%s] model of type [%s]: %w",
+		provider.String(), model, modelType.String(), ErrModelNotSupported)
+}
+
+// wrapMethodNotSupported 包装方法不支持错误
+func wrapMethodNotSupported(provider fmt.Stringer, model string, modelType fmt.Stringer, method string) (err error) {
+	return fmt.Errorf("provider [%s] does not support the [%s] model of type [%s] with method [%s]: %w",
+		provider.String(), model, modelType.String(), method, ErrMethodNotSupported)
 }

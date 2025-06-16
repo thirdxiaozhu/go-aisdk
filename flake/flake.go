@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-05 15:48:50
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-06 02:47:21
+ * @LastEditTime: 2025-06-16 15:02:14
  * @Description: 分布式唯一ID生成器
  * 默认情况下，ID由以下部分组成：
  * 39位时间（以10毫秒为单位）
@@ -15,11 +15,23 @@ package flake
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
-	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"net"
 	"sync"
 	"time"
+)
+
+var (
+	errInvalidBitsTime      = errors.New("bit length for time must be 32 or more") // 时间位长度必须大于32
+	errInvalidBitsSequence  = errors.New("invalid bit length for sequence number") // 序列号位长度无效
+	errInvalidBitsMachineID = errors.New("invalid bit length for machine id")      // 机器ID位长度无效
+	errInvalidTimeUnit      = errors.New("invalid time unit")                      // 时间单位无效
+	errInvalidSequence      = errors.New("invalid sequence number")                // 序列号无效
+	errInvalidMachineID     = errors.New("invalid machine id")                     // 机器ID无效
+	errStartTimeAhead       = errors.New("start time is ahead")                    // 起始时间早于当前时间
+	errOverTimeLimit        = errors.New("over the time limit")                    // 超过时间限制
+	errNoPrivateAddress     = errors.New("no private ip address")                  // 没有私有IP地址
 )
 
 // InterfaceAddrs 用于获取网络地址的接口
@@ -60,16 +72,16 @@ var defaultInterfaceAddrs = net.InterfaceAddrs
 // New 创建一个分布式唯一ID生成器
 func New(st Settings) (flake *Flake, err error) {
 	if st.BitsSequence < 0 || st.BitsSequence > 30 {
-		return nil, sdkerrors.ErrInvalidBitsSequence
+		return nil, errInvalidBitsSequence
 	}
 	if st.BitsMachineID < 0 || st.BitsMachineID > 30 {
-		return nil, sdkerrors.ErrInvalidBitsMachineID
+		return nil, errInvalidBitsMachineID
 	}
 	if st.TimeUnit < 0 || (st.TimeUnit > 0 && st.TimeUnit < time.Millisecond) {
-		return nil, sdkerrors.ErrInvalidTimeUnit
+		return nil, errInvalidTimeUnit
 	}
 	if st.StartTime.After(time.Now()) {
-		return nil, sdkerrors.ErrStartTimeAhead
+		return nil, errStartTimeAhead
 	}
 
 	f := new(Flake)
@@ -89,7 +101,7 @@ func New(st Settings) (flake *Flake, err error) {
 
 	f.bitsTime = 63 - f.bitsSequence - f.bitsMachine
 	if f.bitsTime < 32 {
-		return nil, sdkerrors.ErrInvalidBitsTime
+		return nil, errInvalidBitsTime
 	}
 
 	if st.TimeUnit == 0 {
@@ -117,11 +129,11 @@ func New(st Settings) (flake *Flake, err error) {
 	}
 
 	if f.machine < 0 || f.machine >= 1<<f.bitsMachine {
-		return nil, sdkerrors.ErrInvalidMachineID
+		return nil, errInvalidMachineID
 	}
 
 	if st.CheckMachineID != nil && !st.CheckMachineID(f.machine) {
-		return nil, sdkerrors.ErrInvalidMachineID
+		return nil, errInvalidMachineID
 	}
 
 	return f, nil
@@ -178,18 +190,18 @@ func (f *Flake) ToTime(id int64) (t time.Time) {
 func (f *Flake) Compose(t time.Time, sequence, machineID int) (id int64, err error) {
 	elapsedTime := f.toInternalTime(t.UTC()) - f.startTime
 	if elapsedTime < 0 {
-		return 0, sdkerrors.ErrStartTimeAhead
+		return 0, errStartTimeAhead
 	}
 	if elapsedTime >= 1<<f.bitsTime {
-		return 0, sdkerrors.ErrOverTimeLimit
+		return 0, errOverTimeLimit
 	}
 
 	if sequence < 0 || sequence >= 1<<f.bitsSequence {
-		return 0, sdkerrors.ErrInvalidSequence
+		return 0, errInvalidSequence
 	}
 
 	if machineID < 0 || machineID >= 1<<f.bitsMachine {
-		return 0, sdkerrors.ErrInvalidMachineID
+		return 0, errInvalidMachineID
 	}
 
 	return elapsedTime<<(f.bitsSequence+f.bitsMachine) |
@@ -230,7 +242,7 @@ func (f *Flake) sleep(overtime int64) {
 // toID 生成ID
 func (f *Flake) toID() (id int64, err error) {
 	if f.elapsedTime >= 1<<f.bitsTime {
-		return 0, sdkerrors.ErrOverTimeLimit
+		return 0, errOverTimeLimit
 	}
 
 	return f.elapsedTime<<(f.bitsSequence+f.bitsMachine) |
@@ -274,7 +286,7 @@ func privateIPv4(interfaceAddrs InterfaceAddrs) (ip net.IP, err error) {
 		}
 	}
 
-	err = sdkerrors.ErrNoPrivateAddress
+	err = errNoPrivateAddress
 	return
 }
 

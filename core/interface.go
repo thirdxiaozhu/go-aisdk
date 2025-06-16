@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:45:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-13 19:25:56
+ * @LastEditTime: 2025-06-16 14:56:22
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -12,16 +12,14 @@ package core
 import (
 	"context"
 	"github.com/liusuxian/go-aisdk/conf"
-	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
-	"github.com/liusuxian/go-aisdk/sdkerrors"
 )
 
 // ProviderService AI服务提供商的服务接口
 type ProviderService interface {
 	// 获取支持的模型
-	GetSupportedModels() (supportedModels map[consts.ModelType]map[string]bool)
+	GetSupportedModels() (supportedModels map[string]map[string]bool)
 	// 初始化提供商配置
 	InitializeProviderConfig(config *conf.ProviderConfig)
 
@@ -36,30 +34,4 @@ type ProviderService interface {
 	// TODO 视频相关
 
 	// TODO 音频相关
-}
-
-// IsModelSupported 判断模型是否支持
-func IsModelSupported(s ProviderService, modelInfo models.ModelInfo) (err error) {
-	// 获取支持的模型
-	supportedModels := s.GetSupportedModels()
-	if len(supportedModels) == 0 {
-		return sdkerrors.WrapProviderNotSupported(modelInfo.Provider)
-	}
-	// 获取指定模型类型支持的模型列表
-	var (
-		modelMap map[string]bool
-		ok       bool
-	)
-	if modelMap, ok = supportedModels[modelInfo.ModelType]; !ok {
-		return sdkerrors.WrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
-	}
-	// 判断模型是否支持
-	var modelSupported bool
-	if modelSupported, ok = modelMap[modelInfo.Model]; !ok {
-		return sdkerrors.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
-	}
-	if !modelSupported {
-		return sdkerrors.WrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
-	}
-	return
 }
