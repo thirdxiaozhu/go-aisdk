@@ -37,3 +37,61 @@ func (c *SDKClient) CreateChatCompletion(ctx context.Context, request models.Cha
 	response = resp.(models.ChatResponse)
 	return
 }
+
+// CreateChatCompletionStream  创建聊天
+func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+	var err error
+
+	// 定义处理函数
+	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
+		chatReq := req.(models.ChatRequest)
+		// 创建聊天
+		if err = ps.CheckRequestValidation(request); err != nil {
+			return nil, err
+		}
+		return ps.CreateChatCompletionStream(ctx, chatReq, cb, opts...)
+	}
+	// 处理请求
+	if _, err = c.handlerRequest(ctx, request.GetModelInfo(), "CreateChatCompletionStream", request.GetUserInfo().UserID, request, handler); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (c *SDKClient) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
+	// 定义处理函数
+	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
+		chatReq := req.(models.Request)
+		// 创建聊天
+		if err = ps.CheckRequestValidation(request); err != nil {
+			return nil, err
+		}
+		return ps.CreateImageGeneration(ctx, chatReq, opts...)
+	}
+	// 处理请求
+	var resp any
+	if resp, err = c.handlerRequest(ctx, request.GetModelInfo(), "CreateImageGeneration", request.GetUserInfo().UserID, request, handler); err != nil {
+		return nil, err
+	}
+	response = resp.(httpclient.Response)
+	return
+}
+
+func (c *SDKClient) CreateVideoGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
+	// 定义处理函数
+	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
+		chatReq := req.(models.Request)
+		// 创建聊天
+		if err = ps.CheckRequestValidation(request); err != nil {
+			return nil, err
+		}
+		return ps.CreateVideoGeneration(ctx, chatReq, opts...)
+	}
+	// 处理请求
+	var resp any
+	if resp, err = c.handlerRequest(ctx, request.GetModelInfo(), "CreateVideoGeneration", request.GetUserInfo().UserID, request, handler); err != nil {
+		return nil, err
+	}
+	response = resp.(httpclient.Response)
+	return
+}

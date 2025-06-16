@@ -47,6 +47,12 @@ func (i ImageRequest) GetModelInfo() models.ModelInfo {
 	}
 }
 
+func (i ImageRequest) GetUserInfo() models.UserInfo {
+	return models.UserInfo{
+		UserID: "undefined",
+	}
+}
+
 func (i ImageRequest) MarshalJSON() (b []byte, err error) {
 	//provider := i.ModelInfo.Provider
 	// 创建一个别名结构体
@@ -95,6 +101,12 @@ type VideoRequest struct {
 
 func (v VideoRequest) GetModelInfo() models.ModelInfo {
 	return v.ModelInfo
+}
+
+func (v VideoRequest) GetUserInfo() models.UserInfo {
+	return models.UserInfo{
+		UserID: "undefined",
+	}
 }
 
 func (v VideoRequest) MarshalJSON() (b []byte, err error) {

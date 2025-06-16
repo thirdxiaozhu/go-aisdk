@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
-	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"io"
 	"net/http"
 
@@ -18,10 +18,10 @@ import (
 
 // arkProvider Ark提供商
 type arkProvider struct {
-	supportedModels map[consts.ModelType]map[string]bool // 支持的模型
-	providerConfig  *conf.ProviderConfig                 // 提供商配置
-	hClient         *httpclient.HTTPClient               // HTTP 客户端
-	lb              *loadbalancer.LoadBalancer           // 负载均衡器
+	supportedModels map[fmt.Stringer]map[string]bool // 支持的模型
+	providerConfig  *conf.ProviderConfig             // 提供商配置
+	hClient         *httpclient.HTTPClient           // HTTP 客户端
+	lb              *loadbalancer.LoadBalancer       // 负载均衡器
 }
 
 var (
@@ -37,7 +37,7 @@ const (
 // init 包初始化时创建 arkProvider 实例并注册到工厂
 func init() {
 	arkService = &arkProvider{
-		supportedModels: map[consts.ModelType]map[string]bool{
+		supportedModels: map[fmt.Stringer]map[string]bool{
 			consts.ChatModel: {
 				consts.ArkThinkingVersion: true,
 			},
@@ -75,7 +75,7 @@ func (s *arkProvider) CheckRequestValidation(request models.Request) (err error)
 }
 
 // GetSupportedModels 获取支持的模型
-func (s *arkProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]bool) {
+func (s *arkProvider) GetSupportedModels() (supportedModels map[fmt.Stringer]map[string]bool) {
 	return s.supportedModels
 }
 
@@ -112,7 +112,7 @@ func (s *arkProvider) executeRequest(ctx context.Context, method, apiPath string
 
 // ListModels  列出模型
 func (s *arkProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (models.ListModelsResponse, error) {
-	return models.ListModelsResponse{}, sdkerrors.ErrMethodNotSupported
+	return models.ListModelsResponse{}, aisdk.ErrMethodNotSupported
 }
 
 // TODO CreateChatCompletion 创建聊天

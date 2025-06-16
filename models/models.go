@@ -34,5 +34,6 @@ type Models struct {
 
 type Request interface {
 	GetModelInfo() ModelInfo
+	GetUserInfo() UserInfo
 	MarshalJSON() (b []byte, err error)
 }

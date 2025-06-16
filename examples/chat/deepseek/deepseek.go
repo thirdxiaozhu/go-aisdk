@@ -17,7 +17,6 @@ import (
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
-	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"log"
 	"os"
 	"path/filepath"

@@ -12,15 +12,12 @@ package aisdk
 import (
 	"context"
 	"github.com/liusuxian/go-aisdk/conf"
-	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
 	"github.com/liusuxian/go-aisdk/flake"
-	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/httpclient/middleware"
 	"github.com/liusuxian/go-aisdk/models"
-	_ "github.com/liusuxian/go-aisdk/providers"
-	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"sort"
+	"time"
 )
 
 // SDKClient SDK客户端

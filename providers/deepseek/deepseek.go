@@ -11,13 +11,16 @@ package deepseek
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
+	"io"
 	"net/http"
 )
 
@@ -53,7 +56,7 @@ func init() {
 }
 
 // GetSupportedModels 获取支持的模型
-func (s *deepseekProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]bool) {
+func (s *deepseekProvider) GetSupportedModels() (supportedModels map[fmt.Stringer]map[string]bool) {
 	return s.supportedModels
 }
 
@@ -156,9 +159,9 @@ func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, reque
 	}
 }
 func (s *deepseekProvider) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
-	return nil, sdkerrors.ErrMethodNotSupported
+	return nil, aisdk.ErrMethodNotSupported
 }
 
 func (s *deepseekProvider) CreateVideoGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
-	return nil, sdkerrors.ErrMethodNotSupported
+	return nil, aisdk.ErrMethodNotSupported
 }

@@ -237,6 +237,10 @@ func (r ChatRequest) GetModelInfo() ModelInfo {
 	return r.ModelInfo
 }
 
+func (r ChatRequest) GetUserInfo() UserInfo {
+	return r.UserInfo
+}
+
 // MarshalJSON 序列化JSON
 func (r ChatRequest) MarshalJSON() (b []byte, err error) {
 	// 获取提供商

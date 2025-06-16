@@ -28,16 +28,15 @@ func getApiKeys(envKey string) (apiKeys string) {
 	return
 }
 
-func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
-	return client.ListModels(ctx, "system", consts.Ark)
-}
-
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
-	return client.CreateChatCompletion(ctx, "system", models.ChatRequest{
+	return client.CreateChatCompletion(ctx, models.ChatRequest{
 		ModelInfo: models.ModelInfo{
 			Provider:  consts.Ark,
 			ModelType: consts.ChatModel,
 			Model:     consts.ArkThinkingVersion,
+		},
+		UserInfo: models.UserInfo{
+			UserID: "1234560",
 		},
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
@@ -58,7 +57,7 @@ func streamCallback(response models.ChatResponse) error {
 }
 
 func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (interface{}, error) {
-	return client.CreateChatCompletionStream(ctx, "system", models.ChatRequest{
+	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
 		ModelInfo: models.ModelInfo{
 			Provider:  consts.Ark,
 			ModelType: consts.ChatModel,
@@ -76,7 +75,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (i
 }
 
 func createChatCompletionPicture(ctx context.Context, client *aisdk.SDKClient) (interface{}, error) {
-	return client.CreateChatCompletionStream(ctx, "system", models.ChatRequest{
+	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
 		ModelInfo: models.ModelInfo{
 			Provider:  consts.Ark,
 			ModelType: consts.ChatModel,
@@ -97,7 +96,7 @@ func createChatCompletionPicture(ctx context.Context, client *aisdk.SDKClient) (
 }
 
 func createImageGeneration(ctx context.Context, client *aisdk.SDKClient) (httpclient.Response, error) {
-	return client.CreateImageGeneration(ctx, "system", ark.ImageRequest{
+	return client.CreateImageGeneration(ctx, ark.ImageRequest{
 		Prompt:         "生成一个飞机",
 		ResponseFormat: ark.ResponseFormatURL,
 		Size:           ark.Size1024x1024,
@@ -106,7 +105,7 @@ func createImageGeneration(ctx context.Context, client *aisdk.SDKClient) (httpcl
 }
 
 func createVideoGeneration(ctx context.Context, client *aisdk.SDKClient) (httpclient.Response, error) {
-	return client.CreateVideoGeneration(ctx, "system", ark.VideoRequest{
+	return client.CreateVideoGeneration(ctx, ark.VideoRequest{
 		ModelInfo: models.ModelInfo{
 			Provider:  consts.Ark,
 			ModelType: consts.VideoModel,
@@ -166,19 +165,15 @@ func main() {
 	}
 	ctx := context.Background()
 	// 列出模型
-	_, err = listModels(ctx, client)
-	if err != nil {
-		log.Printf("listModels error = %v\n", err)
-	}
 
-	//response2, err := createChatCompletionStream(ctx, client)
+	response2, err := createChatCompletionStream(ctx, client)
 	//response2, err := createChatCompletionPicture(ctx, client)
 	//response2, err := createImageGeneration(ctx, client)
-	response2, err := createVideoGeneration(ctx, client)
+	//response2, err := createVideoGeneration(ctx, client)
 	if err != nil || response2 == nil {
 		log.Fatalf("createChatCompletion error = %v", err)
 		return
 	}
-	response2a := response2.(*ark.VideoResponse)
+	response2a := response2.(*ark.ImageResponse)
 	log.Printf("createChatCompletion response: %+v", response2a)
 }

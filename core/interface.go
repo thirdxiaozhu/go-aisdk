@@ -11,11 +11,10 @@ package core
 
 import (
 	"context"
+	"fmt"
 	"github.com/liusuxian/go-aisdk/conf"
-	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
-	"github.com/liusuxian/go-aisdk/sdkerrors"
 )
 
 type StreamCallback func(response models.ChatResponse) error
