@@ -10,6 +10,7 @@
 package models
 
 import (
+	"bytes"
 	"encoding/json"
 
 	"github.com/liusuxian/go-aisdk/consts"
@@ -368,5 +369,16 @@ type ChatResponse struct {
 	ServiceTier       string       `json:"service_tier,omitempty"` // 用于处理请求的服务层级
 	SystemFingerprint string       `json:"system_fingerprint"`     // 此指纹表示模型运行的后端配置。可以与 seed 请求参数一起使用，以了解何时进行了可能影响确定性的后端更改
 	Usage             Usage        `json:"usage"`                  // 该对话补全请求的用量信息
+	httpclient.HttpHeader
+}
+
+type ChatStreamResponse struct {
+	ContentBuffer    []bytes.Buffer
+	ReasoningBuffer  []bytes.Buffer
+	Content          []string `json:"content"`
+	ReasoningContent []string `json:"reasoning_content"`
+	ID               string   `json:"id"`     // 该对话的唯一标识符
+	Model            string   `json:"model"`  // 生成该 completion 的模型名
+	Object           string   `json:"object"` // 对象的类型
 	httpclient.HttpHeader
 }

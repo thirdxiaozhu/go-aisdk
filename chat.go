@@ -40,7 +40,7 @@ func (c *SDKClient) CreateChatCompletion(ctx context.Context, request models.Cha
 }
 
 // CreateChatCompletionStream  创建聊天
-func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
 	var err error
 
 	// 定义处理函数
@@ -53,10 +53,11 @@ func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, request mode
 		return ps.CreateChatCompletionStream(ctx, chatReq, cb, opts...)
 	}
 	// 处理请求
-	if _, err = c.handlerRequest(ctx, request.GetModelInfo(), "CreateChatCompletionStream", request.GetUserInfo().UserID, request, handler); err != nil {
+	var resp any
+	if resp, err = c.handlerRequest(ctx, request.GetModelInfo(), "CreateChatCompletionStream", request.GetUserInfo().UserID, request, handler); err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return resp.(httpclient.Response), nil
 }
 
 func (c *SDKClient) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {

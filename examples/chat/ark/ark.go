@@ -47,7 +47,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 	}, httpclient.WithTimeout(time.Minute*2))
 }
 
-func streamCallback(response models.ChatResponse) error {
+func streamCallback(ctx context.Context, response models.ChatResponse) error {
 	if response.Choices[0].Delta.Content == "" {
 		fmt.Print(response.Choices[0].Delta.ReasoningContent)
 	} else {
@@ -166,14 +166,18 @@ func main() {
 	ctx := context.Background()
 	// 列出模型
 
-	response2, err := createChatCompletionStream(ctx, client)
+	resp, err := createChatCompletionStream(ctx, client)
 	//response2, err := createChatCompletionPicture(ctx, client)
 	//response2, err := createImageGeneration(ctx, client)
 	//response2, err := createVideoGeneration(ctx, client)
-	if err != nil || response2 == nil {
+	if err != nil || resp == nil {
 		log.Fatalf("createChatCompletion sdkerror = %v", err)
 		return
 	}
-	response2a := response2.(*ark.ImageResponse)
-	log.Printf("createChatCompletion response: %+v", response2a)
+	//response2a := response2.(*ark.ImageResponse)
+	//log.Printf("createChatCompletion response: %+v", response2a)
+	response2 := resp.(*models.ChatStreamResponse)
+	//log.Printf("createChatCompletion response: %+v, request_id: %s", response2., response2.RequestID())
+	log.Println("response2 Content", response2.Content, len(response2.Content))
+	log.Println("response2 ReasoningContent", response2.ReasoningContent, len(response2.ReasoningContent))
 }

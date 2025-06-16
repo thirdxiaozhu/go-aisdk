@@ -69,7 +69,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 	}, httpclient.WithTimeout(time.Minute*2))
 }
 
-func streamCallback(response models.ChatResponse) error {
+func streamCallback(ctx context.Context, response models.ChatResponse) error {
 	//if response.Choices[0].Delta.Content == "" {
 	//	fmt.Print(response.Choices[0].Delta.ReasoningContent)
 	//} else {
@@ -79,7 +79,7 @@ func streamCallback(response models.ChatResponse) error {
 	return nil
 }
 
-func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (interface{}, error) {
+func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (httpclient.Response, error) {
 	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
 		ModelInfo: models.ModelInfo{
 			Provider:  consts.DeepSeek,
@@ -146,7 +146,7 @@ func main() {
 
 	// 创建聊天
 	//response2, err := createChatCompletion(ctx, client)
-	_, err = createChatCompletionStream(ctx, client)
+	resp, err := createChatCompletionStream(ctx, client)
 	if err != nil {
 		originalErr := sdkerror.Unwrap(err)
 		fmt.Println("originalErr =", originalErr)
@@ -170,6 +170,8 @@ func main() {
 		log.Fatalf("createChatCompletion sdkerror = %v, request_id = %s", err, sdkerror.RequestID(err))
 		return
 	}
-	//response2 := response2a.()
-	//log.Printf("createChatCompletion response: %+v, request_id: %s", response2, response2.RequestID())
+	response2 := resp.(*models.ChatStreamResponse)
+	//log.Printf("createChatCompletion response: %+v, request_id: %s", response2., response2.RequestID())
+	log.Println("response2 Content", response2.Content, len(response2.Content))
+	log.Println("response2 ReasoningContent", response2.ReasoningContent, len(response2.ReasoningContent))
 }

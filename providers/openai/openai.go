@@ -213,7 +213,7 @@ func (s *openAIProvider) CheckRequestValidation(request models.Request) error {
 	panic("implement me")
 }
 
-func (s *openAIProvider) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+func (s *openAIProvider) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
 	//TODO implement me
 	panic("implement me")
 }

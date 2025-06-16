@@ -10,6 +10,7 @@
 package deepseek
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -108,7 +109,7 @@ func (s *deepseekProvider) executeRequest(ctx context.Context, method, apiPath s
 	return
 }
 
-func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
+func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
 	// 设置客户端选项
 	for _, opt := range opts {
 		opt(s.hClient)
@@ -131,6 +132,7 @@ func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, reque
 	}
 
 	stream, err := httpclient.SendRequestStream[models.ChatResponse](s.hClient, req)
+	var resp models.ChatStreamResponse
 
 	defer func() {
 		if closeErr := stream.Close(); closeErr != nil && err == nil {
@@ -147,12 +149,30 @@ func (s *deepseekProvider) CreateChatCompletionStream(ctx context.Context, reque
 			msg, err = stream.Recv()
 			switch {
 			case errors.Is(err, io.EOF):
-				return nil, nil // 正常结束
+				for i := 0; i < len(resp.ContentBuffer); i++ {
+					resp.Content[i] = resp.ContentBuffer[i].String()
+					resp.ReasoningContent[i] = resp.ReasoningBuffer[i].String()
+				}
+				return &resp, nil // 正常结束
 			case err != nil:
 				return nil, err // 错误处理
 			default:
+				resp.ID = msg.ID
+				resp.Model = msg.Model
+				resp.Object = msg.Object
+				resp.HttpHeader = msg.HttpHeader
+				for _, v := range msg.Choices {
+					for v.Index >= len(resp.ContentBuffer) {
+						resp.ReasoningBuffer = append(resp.ReasoningBuffer, bytes.Buffer{})
+						resp.ContentBuffer = append(resp.ContentBuffer, bytes.Buffer{})
+						resp.Content = append(resp.Content, "")
+						resp.ReasoningContent = append(resp.ReasoningContent, "")
+					}
+					resp.ReasoningBuffer[v.Index].WriteString(v.Delta.ReasoningContent)
+					resp.ContentBuffer[v.Index].WriteString(v.Delta.Content)
+				}
 				// 使用回调处理消息
-				if err = cb(msg); err != nil {
+				if err = cb(ctx, msg); err != nil {
 					return nil, err
 				}
 			}
