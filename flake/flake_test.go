@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-05 16:29:54
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-06 02:48:05
+ * @LastEditTime: 2025-06-16 11:48:55
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -42,7 +42,7 @@ func TestNextRequestIDUniqueness(t *testing.T) {
 	duplicateCount := 0
 	start := time.Now()
 
-	for i := 0; i < numIDs; i++ {
+	for range numIDs {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()

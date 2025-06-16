@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-03 11:46:01
+ * @LastEditTime: 2025-06-16 16:41:01
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -200,6 +200,7 @@ type ChatThinking struct {
 // ChatRequest 聊天请求
 type ChatRequest struct {
 	ModelInfo
+	UserInfo
 	Messages            []ChatMessage           `json:"messages"`                        // 消息数组
 	Audio               *ChatAudioOutputArgs    `json:"audio,omitempty"`                 // 音频输出的参数
 	FrequencyPenalty    float32                 `json:"frequency_penalty,omitempty"`     // 介于 -2.0 和 2.0 之间的数值。正值会根据文本中已有内容的出现频率对新 token 进行惩罚，从而降低模型逐字重复相同内容的可能性
@@ -245,7 +246,8 @@ func (r ChatRequest) MarshalJSON() (b []byte, err error) {
 	temp := struct {
 		Provider  string `json:"provider,omitempty"`
 		ModelType string `json:"model_type,omitempty"`
-		Model     string `json:"model"`
+		Model     string `json:"model,omitempty"`
+		UserID    string `json:"user_id,omitempty"`
 		MaxTokens int    `json:"max_tokens,omitempty"`
 		Alias
 	}{

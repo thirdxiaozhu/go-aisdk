@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 19:11:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 16:23:09
+ * @LastEditTime: 2025-06-16 15:44:46
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -40,8 +40,8 @@ func TestSDKConfigManager(t *testing.T) {
 	// 3. Test with existing config file
 	// Create a test config file with sample data
 	testConfig := conf.SDKConfig{
-		Providers: map[consts.Provider]conf.ProviderConfig{
-			consts.OpenAI: {
+		Providers: map[string]conf.ProviderConfig{
+			"openai": {
 				BaseURL:          "https://api.openai.com/v1",
 				APIKeys:          []string{"test-key-1", "test-key-2"},
 				OrgID:            "test-org-id",
@@ -52,7 +52,7 @@ func TestSDKConfigManager(t *testing.T) {
 					"key2": "value2",
 				},
 			},
-			consts.DeepSeek: {
+			"deepseek": {
 				BaseURL: "https://api.deepseek.com",
 				APIKeys: []string{"deepseek-key"},
 			},
@@ -83,7 +83,7 @@ func TestSDKConfigManager(t *testing.T) {
 	// 6. Test GetProviderConfig for OpenAI
 	openaiConfig := manager2.GetProviderConfig(consts.OpenAI)
 	// Verify OpenAI configuration
-	expectedOpenAI := testConfig.Providers[consts.OpenAI]
+	expectedOpenAI := testConfig.Providers[consts.OpenAI.String()]
 	if openaiConfig.BaseURL != expectedOpenAI.BaseURL {
 		t.Errorf("OpenAI BaseURL mismatch, got: %v, want: %v", openaiConfig.BaseURL, expectedOpenAI.BaseURL)
 	}
@@ -104,7 +104,7 @@ func TestSDKConfigManager(t *testing.T) {
 	}
 	// 7. Test GetProviderConfig for DeepSeek
 	deepseekConfig := manager2.GetProviderConfig(consts.DeepSeek)
-	deepseekConfig2 := testConfig.Providers[consts.DeepSeek]
+	deepseekConfig2 := testConfig.Providers[consts.DeepSeek.String()]
 	if deepseekConfig.BaseURL != deepseekConfig2.BaseURL {
 		t.Errorf("Anthropic BaseURL mismatch, got: %v, want: %v", deepseekConfig.BaseURL, deepseekConfig2.BaseURL)
 	}
@@ -130,9 +130,9 @@ func TestSDKConfigManager(t *testing.T) {
 	// 9. Test GetConfig deep copy functionality
 	fullConfig := manager2.GetConfig()
 	// Modify the returned config
-	if providerConfig, ok := fullConfig.Providers[consts.OpenAI]; ok {
+	if providerConfig, ok := fullConfig.Providers[consts.OpenAI.String()]; ok {
 		providerConfig.BaseURL = "modified-full-config-url"
-		fullConfig.Providers[consts.OpenAI] = providerConfig
+		fullConfig.Providers[consts.OpenAI.String()] = providerConfig
 	}
 	// Verify internal config is unchanged
 	openaiConfig3 := manager2.GetProviderConfig(consts.OpenAI)
@@ -148,9 +148,9 @@ func TestSDKConfigManager(t *testing.T) {
 	if err == nil {
 		t.Error("NewSDKConfigManager should return an error for invalid JSON config")
 	}
-	// 11. Test GetProviderConfig for non-existent provider
-	providerConfig := manager2.GetProviderConfig("non-existent-provider")
+	// 11. Test GetProviderConfig for Aliyunbl provider
+	providerConfig := manager2.GetProviderConfig(consts.Aliyunbl)
 	if providerConfig.BaseURL != "" {
-		t.Error("GetProviderConfig should return an empty config for non-existent provider")
+		t.Error("GetProviderConfig should return an empty config for Aliyunbl provider")
 	}
 }

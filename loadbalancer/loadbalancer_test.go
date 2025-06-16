@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-27 21:30:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-06 02:41:58
+ * @LastEditTime: 2025-06-16 15:12:45
  * @Description: 负载均衡器测试
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -10,7 +10,6 @@
 package loadbalancer
 
 import (
-	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"sync"
 	"testing"
 )
@@ -62,8 +61,8 @@ func TestGetAPIKey(t *testing.T) {
 		lb := NewLoadBalancer([]string{})
 		apiKey, err := lb.GetAPIKey()
 
-		if err != sdkerrors.ErrEmptyAPIKeyList {
-			t.Errorf("expected error %v, got %v", sdkerrors.ErrEmptyAPIKeyList, err)
+		if err != errEmptyAPIKeyList {
+			t.Errorf("expected error %v, got %v", errEmptyAPIKeyList, err)
 		}
 		if apiKey != nil {
 			t.Error("expected API key to be nil")
@@ -75,8 +74,8 @@ func TestGetAPIKey(t *testing.T) {
 		lb.SetAvailabilityForAll(false)
 
 		apiKey, err := lb.GetAPIKey()
-		if err != sdkerrors.ErrNoAPIKeyAvailable {
-			t.Errorf("expected error %v, got %v", sdkerrors.ErrNoAPIKeyAvailable, err)
+		if err != errNoAPIKeyAvailable {
+			t.Errorf("expected error %v, got %v", errNoAPIKeyAvailable, err)
 		}
 		if apiKey != nil {
 			t.Error("expected API key to be nil")
@@ -119,7 +118,7 @@ func TestGetAPIKey(t *testing.T) {
 
 		// Get multiple times to verify weight effect
 		counts := make(map[string]int)
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			apiKey, err := lb.GetAPIKey()
 			if err != nil {
 				t.Fatalf("failed to get API key: %v", err)
@@ -133,7 +132,7 @@ func TestGetAPIKey(t *testing.T) {
 		}
 
 		var wg sync.WaitGroup
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
@@ -180,8 +179,8 @@ func TestSetAvailability(t *testing.T) {
 		lb := NewLoadBalancer([]string{"key1"})
 
 		err := lb.SetAvailability("nonexistent", false)
-		if err != sdkerrors.ErrAPIKeyNotFound {
-			t.Errorf("expected error %v, got %v", sdkerrors.ErrAPIKeyNotFound, err)
+		if err != errAPIKeyNotFound {
+			t.Errorf("expected error %v, got %v", errAPIKeyNotFound, err)
 		}
 	})
 }
@@ -224,8 +223,8 @@ func TestRegisterAPIKey(t *testing.T) {
 		lb := NewLoadBalancer([]string{"key1"})
 
 		err := lb.RegisterAPIKey("key1")
-		if err != sdkerrors.ErrAPIKeyAlreadyExists {
-			t.Errorf("expected error %v, got %v", sdkerrors.ErrAPIKeyAlreadyExists, err)
+		if err != errAPIKeyAlreadyExists {
+			t.Errorf("expected error %v, got %v", errAPIKeyAlreadyExists, err)
 		}
 	})
 
@@ -271,8 +270,8 @@ func TestUnregisterAPIKey(t *testing.T) {
 		lb := NewLoadBalancer([]string{"key1"})
 
 		err := lb.UnregisterAPIKey("nonexistent")
-		if err != sdkerrors.ErrAPIKeyNotFound {
-			t.Errorf("expected error %v, got %v", sdkerrors.ErrAPIKeyNotFound, err)
+		if err != errAPIKeyNotFound {
+			t.Errorf("expected error %v, got %v", errAPIKeyNotFound, err)
 		}
 	})
 }
@@ -298,8 +297,8 @@ func TestSetWeight(t *testing.T) {
 		lb := NewLoadBalancer([]string{"key1"})
 
 		err := lb.SetWeight("key1", 0)
-		if err != sdkerrors.ErrWeightMustBeGreaterThan0 {
-			t.Errorf("expected error %v, got %v", sdkerrors.ErrWeightMustBeGreaterThan0, err)
+		if err != errWeightMustBeGreaterThan0 {
+			t.Errorf("expected error %v, got %v", errWeightMustBeGreaterThan0, err)
 		}
 	})
 
@@ -307,8 +306,8 @@ func TestSetWeight(t *testing.T) {
 		lb := NewLoadBalancer([]string{"key1"})
 
 		err := lb.SetWeight("nonexistent", 5)
-		if err != sdkerrors.ErrAPIKeyNotFound {
-			t.Errorf("expected error %v, got %v", sdkerrors.ErrAPIKeyNotFound, err)
+		if err != errAPIKeyNotFound {
+			t.Errorf("expected error %v, got %v", errAPIKeyNotFound, err)
 		}
 	})
 }
@@ -422,11 +421,11 @@ func TestConcurrency(t *testing.T) {
 		numGoroutines := 100
 		numRequests := 10
 
-		for i := 0; i < numGoroutines; i++ {
+		for range numGoroutines {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				for j := 0; j < numRequests; j++ {
+				for range numRequests {
 					_, err := lb.GetAPIKey()
 					if err != nil {
 						t.Errorf("concurrent get API key failed: %v", err)
@@ -452,7 +451,7 @@ func TestConcurrency(t *testing.T) {
 		numGoroutines := 50
 
 		// Concurrent set availability
-		for i := 0; i < numGoroutines; i++ {
+		for i := range numGoroutines {
 			wg.Add(1)
 			go func(index int) {
 				defer wg.Done()
@@ -462,7 +461,7 @@ func TestConcurrency(t *testing.T) {
 		}
 
 		// Concurrent register and unregister
-		for i := 0; i < numGoroutines; i++ {
+		for i := range numGoroutines {
 			wg.Add(1)
 			go func(index int) {
 				defer wg.Done()
@@ -511,8 +510,7 @@ func BenchmarkGetAPIKey(b *testing.B) {
 func BenchmarkSetAvailability(b *testing.B) {
 	lb := NewLoadBalancer([]string{"key1", "key2", "key3", "key4", "key5"})
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for i := 0; b.Loop(); i++ {
 		key := "key" + string(rune(i%5+1))
 		available := i%2 == 0
 		lb.SetAvailability(key, available)

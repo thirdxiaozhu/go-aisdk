@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:56:55
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-11 16:48:51
+ * @LastEditTime: 2025-06-13 19:21:46
  * @Description: OpenAI服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -18,16 +18,15 @@ import (
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
-	"github.com/liusuxian/go-aisdk/sdkerrors"
 	"net/http"
 )
 
 // openAIProvider OpenAI提供商
 type openAIProvider struct {
-	supportedModels map[consts.ModelType]map[string]bool // 支持的模型
-	providerConfig  *conf.ProviderConfig                 // 提供商配置
-	hClient         *httpclient.HTTPClient               // HTTP 客户端
-	lb              *loadbalancer.LoadBalancer           // 负载均衡器
+	supportedModels map[fmt.Stringer]map[string]bool // 支持的模型
+	providerConfig  *conf.ProviderConfig             // 提供商配置
+	hClient         *httpclient.HTTPClient           // HTTP 客户端
+	lb              *loadbalancer.LoadBalancer       // 负载均衡器
 }
 
 var (
@@ -42,7 +41,7 @@ const (
 // init 包初始化时创建 openAIProvider 实例并注册到工厂
 func init() {
 	openaiService = &openAIProvider{
-		supportedModels: map[consts.ModelType]map[string]bool{
+		supportedModels: map[fmt.Stringer]map[string]bool{
 			consts.ChatModel: {
 				// chat
 				consts.OpenAIO1Mini:                         true,
@@ -161,12 +160,8 @@ func init() {
 	core.RegisterProvider(consts.OpenAI, openaiService)
 }
 
-func (s *openAIProvider) CheckRequestValidation(request models.Request) (err error) {
-	return nil
-}
-
 // GetSupportedModels 获取支持的模型
-func (s *openAIProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]bool) {
+func (s *openAIProvider) GetSupportedModels() (supportedModels map[fmt.Stringer]map[string]bool) {
 	return s.supportedModels
 }
 
@@ -184,7 +179,7 @@ func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTP
 }
 
 // CreateChatCompletion 创建聊天
-func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
+func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
 	err = s.executeRequest(ctx, http.MethodPost, apiChatCompletions, opts, &response, httpclient.WithBody(request))
 	return
 }
@@ -211,21 +206,4 @@ func (s *openAIProvider) executeRequest(ctx context.Context, method, apiPath str
 	// 发送请求
 	err = s.hClient.SendRequest(req, response)
 	return
-}
-
-// TODO CreateChatCompletionStream 创建聊天
-func (s *openAIProvider) CreateChatCompletionStream(ctx context.Context, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
-	// 设置客户端选项
-	for _, opt := range opts {
-		opt(s.hClient)
-	}
-	return nil, nil
-}
-
-func (s *openAIProvider) CreateImageGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
-	return nil, sdkerrors.ErrMethodNotSupported
-}
-
-func (s *openAIProvider) CreateVideoGeneration(ctx context.Context, request models.Request, opts ...httpclient.HTTPClientOption) (httpclient.Response, error) {
-	return nil, sdkerrors.ErrMethodNotSupported
 }

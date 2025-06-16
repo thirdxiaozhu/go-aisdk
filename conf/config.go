@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 19:09:15
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-05-28 16:24:02
+ * @LastEditTime: 2025-06-16 15:42:03
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -13,10 +13,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/liusuxian/go-aisdk/consts"
 	"maps"
 	"os"
 	"slices"
+)
+
+var (
+	errConfigFileEmpty = errors.New("config file path is empty")
 )
 
 // ProviderConfig AI服务提供商的配置
@@ -31,7 +34,7 @@ type ProviderConfig struct {
 
 // SDKConfig SDK整体配置
 type SDKConfig struct {
-	Providers map[consts.Provider]ProviderConfig `json:"providers"` // AI服务提供商的配置
+	Providers map[string]ProviderConfig `json:"providers"` // AI服务提供商的配置
 }
 
 // SDKConfigManager SDK配置管理器
@@ -43,14 +46,14 @@ type SDKConfigManager struct {
 // NewSDKConfigManager 创建SDK配置管理器
 func NewSDKConfigManager(configPath string) (manager *SDKConfigManager, err error) {
 	if configPath == "" {
-		err = errors.New("config file path is empty")
+		err = errConfigFileEmpty
 		return
 	}
 
 	manager = &SDKConfigManager{
 		configPath: configPath,
 		config: SDKConfig{
-			Providers: make(map[consts.Provider]ProviderConfig),
+			Providers: make(map[string]ProviderConfig),
 		},
 	}
 	// 尝试加载配置
@@ -88,7 +91,7 @@ func (m *SDKConfigManager) Load() (err error) {
 func (m *SDKConfigManager) GetConfig() (configCopy SDKConfig) {
 	// 返回配置的副本，防止外部修改
 	configCopy = SDKConfig{
-		Providers: make(map[consts.Provider]ProviderConfig),
+		Providers: make(map[string]ProviderConfig),
 	}
 
 	for k, v := range m.config.Providers {
@@ -98,8 +101,8 @@ func (m *SDKConfigManager) GetConfig() (configCopy SDKConfig) {
 }
 
 // GetProviderConfig 获取提供商配置
-func (m *SDKConfigManager) GetProviderConfig(provider consts.Provider) (config ProviderConfig) {
-	if cfg, ok := m.config.Providers[provider]; ok {
+func (m *SDKConfigManager) GetProviderConfig(provider fmt.Stringer) (config ProviderConfig) {
+	if cfg, ok := m.config.Providers[provider.String()]; ok {
 		config = cloneProviderConfig(cfg)
 		return
 	}

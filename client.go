@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:09:20
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-05 19:12:22
+ * @LastEditTime: 2025-06-06 02:50:01
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -31,23 +31,34 @@ type SDKClient struct {
 	noCheckMethods  map[string]bool        // 不需要检查模型支持的方法
 }
 
+// SDKClientOption SDK客户端选项
+type SDKClientOption func(c *clientOption)
+
+// clientOption 客户端选项
+type clientOption struct {
+	middlewares []middleware.Middleware
+}
+
 // NewSDKClient 创建一个SDK客户端
 func NewSDKClient(configPath string, opts ...SDKClientOption) (client *SDKClient, err error) {
 	// 创建SDK配置管理器
 	var configManager *conf.SDKConfigManager
 	if configManager, err = conf.NewSDKConfigManager(configPath); err != nil {
+		err = wrapFailedToCreateConfigManager(err.Error())
 		return
 	}
 	// 创建一个分布式唯一ID生成器
 	var flakeInstance *flake.Flake
 	if flakeInstance, err = flake.New(flake.Settings{}); err != nil {
+		err = wrapFailedToCreateFlakeInstance(err.Error())
 		return
 	}
 	// 初始化所有提供商
 	for _, provider := range core.ListProviders() {
 		// 获取提供商
 		var ps core.ProviderService
-		if ps, err = core.GetProvider(provider); err != nil {
+		if ps = core.GetProvider(provider); ps == nil {
+			err = wrapProviderNotSupported(provider)
 			return
 		}
 		// 获取提供商配置
@@ -78,104 +89,78 @@ func NewSDKClient(configPath string, opts ...SDKClientOption) (client *SDKClient
 	return
 }
 
-// ListModels 列出模型
-func (c *SDKClient) ListModels(ctx context.Context, userId string, provider consts.Provider, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
-	// 定义处理函数
-	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
-		// 列出模型
-		return ps.ListModels(ctx, opts...)
-	}
-	// 处理请求
-	var resp any
-	if resp, err = c.handlerRequest(ctx, userId, models.ModelInfo{Provider: provider}, "ListModels", nil, handler); err != nil {
+// handlerRequest 处理请求
+func (c *SDKClient) handlerRequest(
+	ctx context.Context,
+	modelInfo models.ModelInfo,
+	method, userId string,
+	request any,
+	handler func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error),
+) (resp any, err error) {
+	// 生成唯一请求ID
+	var requestId string
+	if requestId, err = c.flakeInstance.RequestID(); err != nil {
+		err = &SDKError{RequestID: requestId, Err: err}
 		return
 	}
-	// 返回结果
-	response = resp.(models.ListModelsResponse)
-	return
-}
-
-// CreateChatCompletion 创建聊天
-func (c *SDKClient) CreateChatCompletion(ctx context.Context, userId string, request models.Request, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
-	// 定义处理函数
-	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
-		chatReq := req.(models.ChatRequest)
-		// 判断是否流式传输
-		if chatReq.Stream {
-			return nil, sdkerrors.ErrCompletionStreamNotSupported
+	// 设置请求信息到上下文
+	ctx = middleware.SetRequestInfo(ctx, &middleware.RequestInfo{
+		Provider:  string(modelInfo.Provider),
+		ModelType: string(modelInfo.ModelType),
+		Model:     modelInfo.Model,
+		Method:    method,
+		StartTime: time.Now(),
+		RequestID: requestId,
+		UserID:    userId,
+	})
+	// 定义最终处理函数
+	finalHandler := func(ctx context.Context, req any) (resp any, err error) {
+		// 获取提供商
+		var ps core.ProviderService
+		if ps = core.GetProvider(modelInfo.Provider); ps == nil {
+			return nil, wrapProviderNotSupported(modelInfo.Provider)
 		}
-
-		if err = ps.CheckRequestValidation(request); err != nil {
-			return nil, err
+		// 根据方法名称决定是否需要判断模型支持
+		var e error
+		if !c.noCheckMethods[method] {
+			// 判断模型是否支持
+			if e = c.isModelSupported(ps, modelInfo); e != nil {
+				return nil, e
+			}
 		}
-
-		// 创建聊天
-		return ps.CreateChatCompletion(ctx, chatReq, opts...)
+		// 执行具体的处理逻辑
+		return handler(ctx, ps, req)
 	}
-	// 处理请求
-	var resp any
-	if resp, err = c.handlerRequest(ctx, userId, request.GetModelInfo(), "CreateChatCompletion", request, handler); err != nil {
+	// 执行中间件链
+	if resp, err = c.middlewareChain.Execute(ctx, request, finalHandler); err != nil {
+		err = &SDKError{RequestID: requestId, Err: err}
 		return
 	}
-	// 返回结果
-	response = resp.(models.ChatResponse)
 	return
 }
 
-// CreateChatCompletionStream  创建聊天
-func (c *SDKClient) CreateChatCompletionStream(ctx context.Context, userId string, request models.Request, cb core.StreamCallback, opts ...httpclient.HTTPClientOption) (interface{}, error) {
-	var err error
-
-	// 定义处理函数
-	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
-		chatReq := req.(models.ChatRequest)
-		// 创建聊天
-		if err = ps.CheckRequestValidation(request); err != nil {
-			return nil, err
-		}
-		return ps.CreateChatCompletionStream(ctx, chatReq, cb, opts...)
+// isModelSupported 判断模型是否支持
+func (c *SDKClient) isModelSupported(s core.ProviderService, modelInfo models.ModelInfo) (err error) {
+	// 获取支持的模型
+	supportedModels := s.GetSupportedModels()
+	if len(supportedModels) == 0 {
+		return wrapProviderNotSupported(modelInfo.Provider)
 	}
-	// 处理请求
-	if _, err = c.handlerRequest(ctx, userId, request.GetModelInfo(), "CreateChatCompletionStream", request, handler); err != nil {
-		return nil, err
+	// 获取指定模型类型支持的模型列表
+	var (
+		modelMap map[string]bool
+		ok       bool
+	)
+	if modelMap, ok = supportedModels[modelInfo.ModelType]; !ok {
+		return wrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
 	}
-	return nil, nil
-}
-
-func (c *SDKClient) CreateImageGeneration(ctx context.Context, userId string, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
-	// 定义处理函数
-	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
-		chatReq := req.(models.Request)
-		// 创建聊天
-		if err = ps.CheckRequestValidation(request); err != nil {
-			return nil, err
-		}
-		return ps.CreateImageGeneration(ctx, chatReq, opts...)
+	// 判断模型是否支持
+	var modelSupported bool
+	if modelSupported, ok = modelMap[modelInfo.Model]; !ok {
+		return wrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
 	}
-	// 处理请求
-	var resp any
-	if resp, err = c.handlerRequest(ctx, userId, request.GetModelInfo(), "CreateImageGeneration", request, handler); err != nil {
-		return nil, err
+	if !modelSupported {
+		return wrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
 	}
-	response = resp.(httpclient.Response)
-	return
-}
-
-func (c *SDKClient) CreateVideoGeneration(ctx context.Context, userId string, request models.Request, opts ...httpclient.HTTPClientOption) (response httpclient.Response, err error) {
-	// 定义处理函数
-	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
-		chatReq := req.(models.Request)
-		// 创建聊天
-		if err = ps.CheckRequestValidation(request); err != nil {
-			return nil, err
-		}
-		return ps.CreateVideoGeneration(ctx, chatReq, opts...)
-	}
-	// 处理请求
-	var resp any
-	if resp, err = c.handlerRequest(ctx, userId, request.GetModelInfo(), "CreateVideoGeneration", request, handler); err != nil {
-		return nil, err
-	}
-	response = resp.(httpclient.Response)
 	return
 }
