@@ -2,12 +2,12 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-06 04:07:41
+ * @LastEditTime: 2025-06-17 18:31:57
  * @Description: 中间件接口定义
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package middleware
+package httpclient
 
 import (
 	"context"
@@ -81,7 +81,7 @@ type RequestInfo struct {
 type ContextKey string
 
 const (
-	RequestInfoKey ContextKey = "middleware_request_info" // 请求信息在上下文中的键
+	RequestInfoKey ContextKey = "go_aisdk_middleware_request_info" // 请求信息在上下文中的键
 )
 
 // GetRequestInfo 从上下文中获取请求信息

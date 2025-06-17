@@ -2,12 +2,12 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-04 11:56:13
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-06 01:59:26
+ * @LastEditTime: 2025-06-17 19:35:42
  * @Description: 重试中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package middleware
+package httpclient
 
 import (
 	"context"
@@ -16,12 +16,49 @@ import (
 	"math"
 	"math/rand/v2"
 	"net"
-	"strings"
+	"slices"
 	"time"
 )
 
 // rng 随机数生成器
 var rng *rand.Rand
+
+// 可重试的HTTP状态码列表
+var retryableHTTPStatusCodes = []int{
+	// 4xx 客户端错误中可重试的状态码
+	407, // Proxy Authentication Required - 代理认证需要，可能是临时的
+	408, // Request Timeout - 请求超时，网络问题导致
+	409, // Conflict - 资源冲突，可能是并发导致的临时问题
+	421, // Misdirected Request - 请求被错误定向，可能是负载均衡问题
+	423, // Locked - 资源被锁定，可能是临时锁定
+	424, // Failed Dependency - 依赖操作失败，依赖可能临时不可用
+	425, // Too Early - 请求过早发送，服务器要求稍后重试
+	429, // Too Many Requests - 请求频率过高，需要限流重试
+	449, // Retry With - 微软扩展，明确要求客户端重试
+	// 5xx 服务器错误中可重试的状态码
+	500, // Internal Server Error - 服务器内部错误，可能是临时故障
+	502, // Bad Gateway - 网关错误，上游服务器问题
+	503, // Service Unavailable - 服务不可用，通常是临时维护或过载
+	504, // Gateway Timeout - 网关超时，上游服务器响应太慢
+	507, // Insufficient Storage - 存储空间不足，可能是临时问题
+	508, // Loop Detected - 检测到无限循环，可能是配置临时问题
+	509, // Bandwidth Limit Exceeded - 带宽限制超出，可以稍后重试
+	510, // Not Extended - 服务器需要扩展请求，可能是临时配置问题
+	511, // Network Authentication Required - 网络认证需要，可能是临时的
+	// Cloudflare 扩展状态码 (网络基础设施相关，通常是临时问题)
+	520, // Web Server Returned an Unknown Error - 源服务器返回未知错误
+	521, // Web Server Is Down - 源服务器宕机
+	522, // Connection Timed Out - 连接超时
+	523, // Origin Is Unreachable - 源服务器不可达
+	524, // A Timeout Occurred - 发生超时
+	525, // SSL Handshake Failed - SSL握手失败
+	526, // Invalid SSL Certificate - SSL证书无效
+	527, // Railgun Error - Railgun连接错误
+	// 其他CDN/代理服务商扩展状态码
+	530, // Site Frozen - 站点被冻结，可能是临时的
+	598, // Network Read Timeout Error - 网络读取超时 (非标准)
+	599, // Network Connect Timeout Error - 网络连接超时 (非标准)
+}
 
 // 包初始化时设置随机数种子
 func init() {
@@ -117,8 +154,8 @@ func (m *RetryMiddleware) Process(ctx context.Context, request any, next Handler
 		}
 		// 如果重试回调不为空，则执行重试回调
 		if m.config.OnRetry != nil && attempt > 0 {
-			// TODO
-			m.config.OnRetry(ctx, *requestInfo)
+			// 深度拷贝 RequestInfo，避免回调函数修改原始数据
+			m.config.OnRetry(ctx, m.deepCopyRequestInfo(requestInfo))
 		}
 		// 如果是最后一次尝试，不需要等待
 		if attempt == m.config.MaxAttempts {
@@ -206,11 +243,43 @@ func (m *RetryMiddleware) calculateExponentialDelay(attempt int) (delay time.Dur
 	return time.Duration(delayFloat)
 }
 
+// deepCopyRequestInfo 深度拷贝 RequestInfo
+func (m *RetryMiddleware) deepCopyRequestInfo(original *RequestInfo) (requestInfo RequestInfo) {
+	if original == nil {
+		return RequestInfo{}
+	}
+	// 创建一个新的 RequestInfo 副本
+	requestInfo = RequestInfo{
+		Provider:    original.Provider,
+		ModelType:   original.ModelType,
+		Model:       original.Model,
+		Method:      original.Method,
+		StartTime:   original.StartTime, // time.Time 是值类型，可以直接拷贝
+		EndTime:     original.EndTime,   // time.Time 是值类型，可以直接拷贝
+		Duration:    original.Duration,  // time.Duration 是值类型，可以直接拷贝
+		IsSuccess:   original.IsSuccess,
+		RequestID:   original.RequestID,
+		UserID:      original.UserID,
+		Attempt:     original.Attempt,
+		MaxAttempts: original.MaxAttempts,
+	}
+	// 深度拷贝 error 类型（如果不为 nil）
+	if original.LastError != nil {
+		// error 是接口类型，这里创建一个新的 error 实例
+		// 使用 fmt.Errorf 来创建一个新的 error，保持原始错误消息
+		requestInfo.LastError = fmt.Errorf("%v", original.LastError)
+	}
+	return
+}
+
 // DefaultRetryCondition 默认重试条件
 func DefaultRetryCondition(attempt int, err error) (ok bool) {
 	if err == nil {
 		return false
 	}
+	fmt.Printf("DefaultRetryCondition Error Type = %T\n", err)
+	fmt.Printf("DefaultRetryCondition NetworkError = %v\n", isNetworkError(err))
+	fmt.Printf("DefaultRetryCondition RetryableHTTPError = %v\n", isRetryableHTTPError(err))
 	// 网络错误通常可以重试
 	if isNetworkError(err) {
 		return true
@@ -219,87 +288,27 @@ func DefaultRetryCondition(attempt int, err error) (ok bool) {
 	if isRetryableHTTPError(err) {
 		return true
 	}
-	// 超时错误
-	if isTimeoutError(err) {
-		return true
-	}
-	// 临时错误
-	if isTemporaryError(err) {
-		return true
-	}
 	return false
 }
 
 // isNetworkError 判断是否为网络错误
 func isNetworkError(err error) (ok bool) {
+	// 检查 net.Error 接口
 	var netErr net.Error
-	if errors.As(err, &netErr) {
-		return true
-	}
-	// DNS错误
-	var dnsErr *net.DNSError
-	if errors.As(err, &dnsErr) {
-		return true
-	}
-	// 连接错误
-	if strings.Contains(err.Error(), "connection refused") ||
-		strings.Contains(err.Error(), "connection reset") ||
-		strings.Contains(err.Error(), "broken pipe") {
-		return true
-	}
-	return false
+	return errors.As(err, &netErr)
 }
 
 // isRetryableHTTPError 判断是否为可重试的HTTP错误
 func isRetryableHTTPError(err error) (ok bool) {
-	// 检查是否包含HTTP状态码
-	errStr := err.Error()
-	// 5xx 服务器错误通常可以重试
-	if strings.Contains(errStr, "500") || // Internal Server Error
-		strings.Contains(errStr, "502") || // Bad Gateway
-		strings.Contains(errStr, "503") || // Service Unavailable
-		strings.Contains(errStr, "504") || // Gateway Timeout
-		strings.Contains(errStr, "507") || // Insufficient Storage
-		strings.Contains(errStr, "508") || // Loop Detected
-		strings.Contains(errStr, "509") || // Bandwidth Limit Exceeded
-		strings.Contains(errStr, "510") { // Not Extended
-		return true
+	// 检查是否为API错误
+	var apiError *APIError
+	if errors.As(err, &apiError) {
+		return slices.Contains(retryableHTTPStatusCodes, apiError.HTTPStatusCode)
 	}
-	// 429 Too Many Requests 也可以重试
-	if strings.Contains(errStr, "429") {
-		return true
-	}
-	// 408 Request Timeout
-	if strings.Contains(errStr, "408") {
-		return true
-	}
-	return false
-}
-
-// isTimeoutError 判断是否为超时错误
-func isTimeoutError(err error) (ok bool) {
-	// 检查是否实现了Timeout接口
-	type timeoutError interface {
-		Timeout() (ok bool)
-	}
-	if te, ok := err.(timeoutError); ok {
-		return te.Timeout()
-	}
-	// 检查错误信息中是否包含超时关键字
-	errStr := strings.ToLower(err.Error())
-	return strings.Contains(errStr, "timeout") ||
-		strings.Contains(errStr, "deadline exceeded") ||
-		strings.Contains(errStr, "context deadline exceeded")
-}
-
-// isTemporaryError 判断是否为临时错误
-func isTemporaryError(err error) (ok bool) {
-	// 检查是否实现了Temporary接口
-	type temporaryError interface {
-		Temporary() (ok bool)
-	}
-	if te, ok := err.(temporaryError); ok {
-		return te.Temporary()
+	// 检查是否为请求错误
+	var requestError *RequestError
+	if errors.As(err, &requestError) {
+		return slices.Contains(retryableHTTPStatusCodes, requestError.HTTPStatusCode)
 	}
 	return false
 }

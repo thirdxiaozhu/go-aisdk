@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-16 21:11:15
+ * @LastEditTime: 2025-06-17 20:18:39
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -16,6 +16,7 @@ import (
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/internal/utils"
 	"github.com/liusuxian/go-aisdk/models"
 	"log"
 	"os"
@@ -69,7 +70,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 func main() {
 	tempDir, err := os.MkdirTemp("", "config-test")
 	if err != nil {
-		log.Fatalf("Failed to create temporary test directory: %v", err)
+		log.Printf("Failed to create temporary test directory: %v", err)
 		return
 	}
 	defer os.RemoveAll(tempDir)
@@ -77,7 +78,7 @@ func main() {
 	configPath := filepath.Join(tempDir, "test-config.json")
 	configDir := filepath.Dir(configPath)
 	if err := os.MkdirAll(configDir, 0755); err != nil {
-		log.Fatalf("Failed to create config directory: %v", err)
+		log.Printf("Failed to create config directory: %v", err)
 		return
 	}
 	configData := `{
@@ -91,21 +92,25 @@ func main() {
 	configData = fmt.Sprintf(configData, getApiKeys("DEEPSEEK_API_KEYS"))
 	log.Printf("configData: %s", configData)
 	if err := os.WriteFile(configPath, []byte(configData), 0644); err != nil {
-		log.Fatalf("Failed to create empty config file: %v", err)
+		log.Printf("Failed to create empty config file: %v", err)
 		return
 	}
 
 	client, err := aisdk.NewSDKClient(configPath, aisdk.WithDefaultMiddlewares())
 	if err != nil {
-		log.Fatalf("NewSDKClient() error = %v", err)
+		log.Printf("NewSDKClient() error = %v", err)
 		return
 	}
+	defer func() {
+		metrics := client.GetMetrics()
+		log.Printf("metrics: %s\n", utils.MustString(metrics))
+	}()
 
 	ctx := context.Background()
 	// 列出模型
 	response1, err := listModels(ctx, client)
 	if err != nil {
-		log.Fatalf("listModels error = %v, request_id = %s", err, aisdk.RequestID(err))
+		log.Printf("listModels error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
 	log.Printf("listModels response: %+v, request_id: %s", response1, response1.RequestID())
@@ -131,7 +136,7 @@ func main() {
 		case errors.Is(originalErr, context.DeadlineExceeded):
 			fmt.Println("context.DeadlineExceeded =", true)
 		}
-		log.Fatalf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
+		log.Printf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
 	log.Printf("createChatCompletion response: %+v, request_id: %s", response2, response2.RequestID())
