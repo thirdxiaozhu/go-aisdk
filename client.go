@@ -14,9 +14,10 @@ import (
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/core"
 	"github.com/liusuxian/go-aisdk/flake"
-	"github.com/liusuxian/go-aisdk/httpclient/middleware"
+	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	_ "github.com/liusuxian/go-aisdk/providers"
+	"github.com/liusuxian/go-aisdk/sdkerror"
 	"sort"
 	"time"
 )
@@ -74,7 +75,7 @@ func NewSDKClient(configPath string, opts ...SDKClientOption) (client *SDKClient
 		return cliOpt.middlewares[i].Priority() < cliOpt.middlewares[j].Priority()
 	})
 	// 创建中间件链
-	middlewareChain := middleware.NewChain(cliOpt.middlewares...)
+	middlewareChain := httpclient.NewChain(cliOpt.middlewares...)
 	// 创建SDK客户端
 	client = &SDKClient{
 		configManager:   configManager,
