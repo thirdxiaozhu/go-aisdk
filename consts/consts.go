@@ -45,3 +45,16 @@ const (
 	ModerationModel ModelType = "moderation" // 内容审核模型
 	EmbedModel      ModelType = "embed"      // 嵌入模型
 )
+
+type RoleType string
+
+func (m RoleType) String() (str string) {
+	return string(m)
+}
+
+const (
+	SystemRole    RoleType = "system"
+	UserRole      RoleType = "user"
+	AssistantRole RoleType = "assistant"
+	ToolRole      RoleType = "tool"
+)

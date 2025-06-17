@@ -372,13 +372,15 @@ type ChatResponse struct {
 	httpclient.HttpHeader
 }
 
+type ChatStreamContentBlock struct {
+	ContentBuffer   bytes.Buffer
+	ReasoningBuffer bytes.Buffer
+}
+
 type ChatStreamResponse struct {
-	ContentBuffer    []bytes.Buffer
-	ReasoningBuffer  []bytes.Buffer
-	Content          []string `json:"content"`
-	ReasoningContent []string `json:"reasoning_content"`
-	ID               string   `json:"id"`     // 该对话的唯一标识符
-	Model            string   `json:"model"`  // 生成该 completion 的模型名
-	Object           string   `json:"object"` // 对象的类型
+	ID       string                   `json:"id"`     // 该对话的唯一标识符
+	Model    string                   `json:"model"`  // 生成该 completion 的模型名
+	Object   string                   `json:"object"` // 对象的类型
+	Contents []ChatStreamContentBlock `json:"-"`
 	httpclient.HttpHeader
 }

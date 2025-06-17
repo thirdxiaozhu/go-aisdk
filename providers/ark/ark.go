@@ -1,7 +1,6 @@
 package ark
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -154,10 +153,6 @@ func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request mo
 			msg, err = stream.Recv()
 			switch {
 			case errors.Is(err, io.EOF):
-				for i := 0; i < len(resp.ContentBuffer); i++ {
-					resp.Content[i] = resp.ContentBuffer[i].String()
-					resp.ReasoningContent[i] = resp.ReasoningBuffer[i].String()
-				}
 				return &resp, nil // 正常结束
 			case err != nil:
 				return nil, err // 错误处理
@@ -167,14 +162,11 @@ func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request mo
 				resp.Object = msg.Object
 				resp.HttpHeader = msg.HttpHeader
 				for _, v := range msg.Choices {
-					for v.Index >= len(resp.ContentBuffer) {
-						resp.ReasoningBuffer = append(resp.ReasoningBuffer, bytes.Buffer{})
-						resp.ContentBuffer = append(resp.ContentBuffer, bytes.Buffer{})
-						resp.Content = append(resp.Content, "")
-						resp.ReasoningContent = append(resp.ReasoningContent, "")
+					for v.Index >= len(resp.Contents) {
+						resp.Contents = append(resp.Contents, models.ChatStreamContentBlock{})
 					}
-					resp.ReasoningBuffer[v.Index].WriteString(v.Delta.ReasoningContent)
-					resp.ContentBuffer[v.Index].WriteString(v.Delta.Content)
+					resp.Contents[v.Index].ReasoningBuffer.WriteString(v.Delta.ReasoningContent)
+					resp.Contents[v.Index].ContentBuffer.WriteString(v.Delta.Content)
 				}
 				// 使用回调处理消息
 				if err = cb(ctx, msg); err != nil {

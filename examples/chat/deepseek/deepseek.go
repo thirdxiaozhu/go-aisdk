@@ -175,6 +175,6 @@ func main() {
 	}
 	response2 := resp.(*models.ChatStreamResponse)
 	//log.Printf("createChatCompletion response: %+v, request_id: %s", response2., response2.RequestID())
-	log.Println("response2 Content", response2.Content, len(response2.Content))
-	log.Println("response2 ReasoningContent", response2.ReasoningContent, len(response2.ReasoningContent))
+	log.Println("response2 Content", response2.Contents[0].ContentBuffer.String(), len(response2.Contents))
+	log.Println("response2 ReasoningContent", response2.Contents[0].ReasoningBuffer.String())
 }
