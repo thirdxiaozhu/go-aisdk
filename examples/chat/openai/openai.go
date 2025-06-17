@@ -15,7 +15,6 @@ import (
 	"fmt"
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
-	aisdk2 "github.com/liusuxian/go-aisdk/error"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"log"
@@ -101,6 +100,10 @@ func main() {
 		log.Fatalf("NewSDKClient() sdkerror = %v", err)
 		return
 	}
+	defer func() {
+		metrics := client.GetMetrics()
+		log.Printf("metrics: %s\n", utils.MustString(metrics))
+	}()
 
 	ctx := context.Background()
 	// 列出模型

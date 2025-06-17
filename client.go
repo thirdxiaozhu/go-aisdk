@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:09:20
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-06 02:50:01
+ * @LastEditTime: 2025-06-16 15:54:03
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -17,7 +17,6 @@ import (
 	"github.com/liusuxian/go-aisdk/httpclient/middleware"
 	"github.com/liusuxian/go-aisdk/models"
 	_ "github.com/liusuxian/go-aisdk/providers"
-	"github.com/liusuxian/go-aisdk/sdkerror"
 	"sort"
 	"time"
 )
@@ -26,7 +25,7 @@ import (
 type SDKClient struct {
 	configManager   *conf.SDKConfigManager // 配置管理器
 	flakeInstance   *flake.Flake           // 分布式唯一ID生成器
-	middlewareChain *middleware.Chain      // 中间件链
+	middlewareChain *httpclient.Chain      // 中间件链
 	noCheckMethods  map[string]bool        // 不需要检查模型支持的方法
 }
 
@@ -35,7 +34,7 @@ type SDKClientOption func(c *clientOption)
 
 // clientOption 客户端选项
 type clientOption struct {
-	middlewares []middleware.Middleware
+	middlewares []httpclient.Middleware
 }
 
 // NewSDKClient 创建一个SDK客户端
@@ -103,7 +102,7 @@ func (c *SDKClient) handlerRequest(
 		return
 	}
 	// 设置请求信息到上下文
-	ctx = middleware.SetRequestInfo(ctx, &middleware.RequestInfo{
+	ctx = httpclient.SetRequestInfo(ctx, &httpclient.RequestInfo{
 		Provider:  string(modelInfo.Provider),
 		ModelType: string(modelInfo.ModelType),
 		Model:     modelInfo.Model,

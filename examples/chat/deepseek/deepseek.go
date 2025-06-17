@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-11 14:56:11
+ * @LastEditTime: 2025-06-16 21:11:15
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -13,18 +13,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/liusuxian/go-aisdk/sdkerror"
+	"github.com/liusuxian/go-aisdk"
+	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/models"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/liusuxian/go-aisdk"
-	"github.com/liusuxian/go-aisdk/consts"
-	"github.com/liusuxian/go-aisdk/httpclient"
-	"github.com/liusuxian/go-aisdk/models"
-	_ "github.com/liusuxian/go-aisdk/providers/deepseek"
 )
 
 func getApiKeys(envKey string) (apiKeys string) {
@@ -102,7 +99,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (h
 func main() {
 	tempDir, err := os.MkdirTemp("", "config-test")
 	if err != nil {
-		log.Fatalf("Failed to create temporary test directory: %v", err)
+		log.Printf("Failed to create temporary test directory: %v", err)
 		return
 	}
 	defer os.RemoveAll(tempDir)
@@ -110,7 +107,7 @@ func main() {
 	configPath := filepath.Join(tempDir, "test-config.json")
 	configDir := filepath.Dir(configPath)
 	if err := os.MkdirAll(configDir, 0755); err != nil {
-		log.Fatalf("Failed to create config directory: %v", err)
+		log.Printf("Failed to create config directory: %v", err)
 		return
 	}
 	configData := `{
@@ -124,7 +121,7 @@ func main() {
 	configData = fmt.Sprintf(configData, getApiKeys("DEEPSEEK_API_KEYS"))
 	log.Printf("configData: %s", configData)
 	if err := os.WriteFile(configPath, []byte(configData), 0644); err != nil {
-		log.Fatalf("Failed to create empty config file: %v", err)
+		log.Printf("Failed to create empty config file: %v", err)
 		return
 	}
 
@@ -133,6 +130,10 @@ func main() {
 		log.Fatalf("NewSDKClient() sdkerror = %v", err)
 		return
 	}
+	defer func() {
+		metrics := client.GetMetrics()
+		log.Printf("metrics: %s\n", utils.MustString(metrics))
+	}()
 
 	ctx := context.Background()
 	// 列出模型
