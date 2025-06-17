@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-17 18:24:31
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-17 20:30:41
+ * @LastEditTime: 2025-06-17 20:47:17
  * @Description: 监控中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -73,13 +73,14 @@ func NewDefaultMetricsCollector() (collector *DefaultMetricsCollector) {
 
 // getKey 获取指标键值
 func (c *DefaultMetricsCollector) getKey(provider, modelType, model, method string) (key string) {
-	if provider != "" && modelType != "" && model != "" && method != "" {
-		return fmt.Sprintf("%s:%s:%s:%s", provider, modelType, model, method)
+	for i, v := range []string{provider, modelType, model, method} {
+		if i == 0 {
+			key = v // provider必需存在
+		} else if v != "" {
+			key = fmt.Sprintf("%s:%s", key, v)
+		}
 	}
-	if provider != "" && method != "" {
-		return fmt.Sprintf("%s:%s", provider, method)
-	}
-	return fmt.Sprintf("%s:%s:%s:%s", provider, modelType, model, method)
+	return
 }
 
 // RecordRequestStart 记录请求开始
