@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 18:00:38
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-02 04:32:13
+ * @LastEditTime: 2025-06-18 23:02:22
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -48,7 +48,7 @@ func TestStreamReader_Recv(t *testing.T) {
 				unmarshaler: &JSONUnmarshaler{},
 			}
 
-			_, err := stream.Recv()
+			_, _, err := stream.Recv()
 			if tt.expectedError != nil {
 				if err == nil || !strings.Contains(err.Error(), tt.expectedError.Error()) {
 					t.Errorf("Expected error %v, got %v", tt.expectedError, err)
@@ -156,7 +156,7 @@ func TestStreamReader_ErrorHandling(t *testing.T) {
 				errAccumulator:     NewErrorAccumulator(),
 			}
 
-			_, err := stream.Recv()
+			_, _, err := stream.Recv()
 			if err == nil || !strings.Contains(err.Error(), tt.expectedError) {
 				t.Errorf("Expected error containing %q, got %v", tt.expectedError, err)
 			}

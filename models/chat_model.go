@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 14:48:39
+ * @LastEditTime: 2025-06-18 22:26:43
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -389,14 +389,20 @@ type Usage struct {
 
 // ChatBaseResponse 聊天响应基础信息
 type ChatBaseResponse struct {
-	Choices           []ChatChoice `json:"choices"`                // 模型生成的 completion 的选择列表
-	Created           int64        `json:"created"`                // 创建聊天完成时的 Unix 时间戳（以秒为单位）
-	ID                string       `json:"id"`                     // 该对话的唯一标识符
-	Model             string       `json:"model"`                  // 生成该 completion 的模型名
-	Object            string       `json:"object"`                 // 对象的类型
-	ServiceTier       string       `json:"service_tier,omitempty"` // 用于处理请求的服务层级
-	SystemFingerprint string       `json:"system_fingerprint"`     // 此指纹表示模型运行的后端配置。可以与 seed 请求参数一起使用，以了解何时进行了可能影响确定性的后端更改
-	Usage             Usage        `json:"usage"`                  // 该对话补全请求的用量信息
+	Choices           []ChatChoice            `json:"choices"`                // 模型生成的 completion 的选择列表
+	Created           int64                   `json:"created"`                // 创建聊天完成时的 Unix 时间戳（以秒为单位）
+	ID                string                  `json:"id"`                     // 该对话的唯一标识符
+	Model             string                  `json:"model"`                  // 生成该 completion 的模型名
+	Object            string                  `json:"object"`                 // 对象的类型
+	ServiceTier       string                  `json:"service_tier,omitempty"` // 用于处理请求的服务层级
+	SystemFingerprint string                  `json:"system_fingerprint"`     // 此指纹表示模型运行的后端配置。可以与 seed 请求参数一起使用，以了解何时进行了可能影响确定性的后端更改
+	Usage             *Usage                  `json:"usage,omitempty"`        // 该对话补全请求的用量信息
+	StreamStats       *httpclient.StreamStats `json:"stream_stats,omitempty"` // 流式传输统计信息
+}
+
+// SetStreamStats 设置流式传输统计信息
+func (c *ChatBaseResponse) SetStreamStats(stats httpclient.StreamStats) {
+	c.StreamStats = &stats
 }
 
 // ChatResponse 聊天响应

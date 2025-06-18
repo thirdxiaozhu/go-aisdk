@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 15:09:48
+ * @LastEditTime: 2025-06-18 23:15:47
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -18,7 +18,6 @@ import (
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/internal/utils"
 	"github.com/liusuxian/go-aisdk/models"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -116,7 +115,7 @@ func main() {
 	}
 	defer func() {
 		metrics := client.GetMetrics()
-		log.Printf("metrics: %s\n", utils.MustString(metrics))
+		log.Printf("metrics = %s\n", utils.MustString(metrics))
 	}()
 
 	ctx := context.Background()
@@ -126,7 +125,7 @@ func main() {
 		log.Printf("listModels error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
-	log.Printf("listModels response: %+v, request_id: %s", response1, response1.RequestID())
+	log.Printf("listModels response = %+v, request_id = %s", response1, response1.RequestID())
 	// 创建聊天
 	response2, err := createChatCompletion(ctx, client)
 	if err != nil {
@@ -152,8 +151,7 @@ func main() {
 		log.Printf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
-	log.Printf("createChatCompletion response: %+v, request_id: %s", response2, response2.RequestID())
-	log.Printf("createChatCompletion content: %s", response2.Choices[0].Message.Content)
+	log.Printf("createChatCompletion response = %+v, request_id = %s", response2, response2.RequestID())
 	// 创建流式聊天
 	response3, err := createChatCompletionStream(ctx, client)
 	if err != nil {
@@ -181,24 +179,23 @@ func main() {
 	}
 	defer response3.Close()
 	// 读取流式聊天
-	usage := models.Usage{}
+	log.Printf("createChatCompletionStream request_id = %s", response3.RequestID())
 	for {
-		var item models.ChatBaseResponse
-		if item, err = response3.StreamReader.Recv(); err != nil {
-			if errors.Is(err, io.EOF) {
-				err = nil
-				break
-			}
+		var (
+			item       models.ChatBaseResponse
+			isFinished bool
+		)
+		if item, isFinished, err = response3.StreamReader.Recv(); err != nil {
 			log.Printf("createChatCompletionStream error = %v, request_id = %s", err, aisdk.RequestID(err))
 			break
 		}
-		usage = item.Usage
-		if item.Choices[0].Delta.ReasoningContent != "" {
-			log.Printf("createChatCompletionStream reasoning_content: %+v", item.Choices[0].Delta.ReasoningContent)
+		if isFinished {
+			break
 		}
-		if item.Choices[0].Delta.Content != "" {
-			log.Printf("createChatCompletionStream content: %+v", item.Choices[0].Delta.Content)
+		log.Printf("createChatCompletionStream item = %+v", item)
+		if item.Usage != nil && item.StreamStats != nil {
+			log.Printf("createChatCompletionStream usage = %+v", utils.MustString(item.Usage))
+			log.Printf("createChatCompletionStream stream_stats = %+v", utils.MustString(item.StreamStats))
 		}
 	}
-	log.Printf("createChatCompletionStream usage: %+v", usage)
 }

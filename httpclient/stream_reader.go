@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 18:00:38
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-02 04:31:54
+ * @LastEditTime: 2025-06-18 23:12:58
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 var (
@@ -35,27 +36,60 @@ type StreamReader[T Streamable] struct {
 	errAccumulator     ErrorAccumulator
 	unmarshaler        Unmarshaler
 	HttpHeader
+	// 统计字段
+	startTime  time.Time
+	chunkCount int
+}
+
+// StreamStatsReceiver 流式传输统计信息接收器
+type StreamStatsReceiver interface {
+	SetStreamStats(stats StreamStats) // 设置流式传输统计信息
+}
+
+// StreamStats 流式传输统计信息
+type StreamStats struct {
+	TotalDurationMs int64     `json:"total_duration_ms"` // 传输总耗时（持续更新）
+	DurationMs      int64     `json:"duration_ms"`       // 传输单次耗时（持续更新）
+	ChunkCount      int       `json:"chunk_count"`       // 传输的 chunk 数量（持续更新）
+	StartTime       time.Time `json:"start_time"`        // 传输开始时间
+	EndTime         time.Time `json:"end_time"`          // 传输结束时间（持续更新）
 }
 
 // Recv 接收数据
-func (stream *StreamReader[T]) Recv() (response T, err error) {
-	var rawLine []byte
-	if rawLine, err = stream.RecvRaw(); err != nil {
+func (stream *StreamReader[T]) Recv() (response T, isFinished bool, err error) {
+	var (
+		processingStartTime = time.Now()
+		rawLine             []byte
+	)
+	if rawLine, err = stream.processLines(); err != nil {
+		if stream.isFinished {
+			isFinished = true
+			err = nil
+		}
 		return
 	}
-
+	// 解析数据
 	if err = stream.unmarshaler.Unmarshal(rawLine, &response); err != nil {
 		return
+	}
+	// 更新统计信息
+	stream.chunkCount++
+	if statsReceiver, ok := Streamable(&response).(StreamStatsReceiver); ok {
+		now := time.Now()
+		stats := StreamStats{
+			TotalDurationMs: int64(now.Sub(stream.startTime).Milliseconds()),
+			DurationMs:      int64(now.Sub(processingStartTime).Milliseconds()),
+			ChunkCount:      stream.chunkCount,
+			StartTime:       stream.startTime,
+			EndTime:         now,
+		}
+		statsReceiver.SetStreamStats(stats)
 	}
 	return
 }
 
 // RecvRaw 接收原始数据
 func (stream *StreamReader[T]) RecvRaw() (b []byte, err error) {
-	if stream.isFinished {
-		return nil, io.EOF
-	}
-
 	return stream.processLines()
 }
 

@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-17 19:04:55
+ * @LastEditTime: 2025-06-18 22:27:28
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -318,6 +318,7 @@ func SendRequestStream[T Streamable](client *HTTPClient, req *http.Request) (str
 		errAccumulator:     NewErrorAccumulator(),
 		unmarshaler:        &JSONUnmarshaler{},
 		HttpHeader:         HttpHeader(resp.Header),
+		startTime:          time.Now(),
 	}
 	return
 }

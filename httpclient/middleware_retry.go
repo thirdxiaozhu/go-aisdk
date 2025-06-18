@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-04 11:56:13
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 12:09:25
+ * @LastEditTime: 2025-06-18 19:16:28
  * @Description: 重试中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -80,7 +80,7 @@ const (
 type RetryCondition func(attempt int, err error) (ok bool)
 
 // RetryCallback 重试失败回调函数
-type RetryCallback func(ctx context.Context, requestInfo RequestInfo)
+type RetryCallback func(ctx context.Context, requestInfo *RequestInfo)
 
 // RetryMiddlewareConfig 重试中间件配置
 type RetryMiddlewareConfig struct {
@@ -155,7 +155,7 @@ func (m *RetryMiddleware) Process(ctx context.Context, request any, next Handler
 		// 如果重试回调不为空，则执行重试回调
 		if m.config.OnRetry != nil && attempt > 0 {
 			// 深度拷贝 RequestInfo，避免回调函数修改原始数据
-			m.config.OnRetry(ctx, m.deepCopyRequestInfo(requestInfo))
+			m.config.OnRetry(ctx, deepCopyRequestInfo(requestInfo))
 		}
 		// 如果是最后一次尝试，不需要等待
 		if attempt == m.config.MaxAttempts {
@@ -241,35 +241,6 @@ func (m *RetryMiddleware) calculateExponentialDelay(attempt int) (delay time.Dur
 	}
 	// 返回延迟时间
 	return time.Duration(delayFloat)
-}
-
-// deepCopyRequestInfo 深度拷贝 RequestInfo
-func (m *RetryMiddleware) deepCopyRequestInfo(original *RequestInfo) (requestInfo RequestInfo) {
-	if original == nil {
-		return RequestInfo{}
-	}
-	// 创建一个新的 RequestInfo 副本
-	requestInfo = RequestInfo{
-		Provider:        original.Provider,
-		ModelType:       original.ModelType,
-		Model:           original.Model,
-		Method:          original.Method,
-		StartTime:       original.StartTime, // time.Time 是值类型，可以直接拷贝
-		EndTime:         original.EndTime,   // time.Time 是值类型，可以直接拷贝
-		TotalDurationMs: original.TotalDurationMs,
-		IsSuccess:       original.IsSuccess,
-		RequestID:       original.RequestID,
-		UserID:          original.UserID,
-		Attempt:         original.Attempt,
-		MaxAttempts:     original.MaxAttempts,
-	}
-	// 深度拷贝 error 类型（如果不为 nil）
-	if original.Error != nil {
-		// error 是接口类型，这里创建一个新的 error 实例
-		// 使用 fmt.Errorf 来创建一个新的 error，保持原始错误消息
-		requestInfo.Error = fmt.Errorf("%v", original.Error)
-	}
-	return
 }
 
 // DefaultRetryCondition 默认重试条件

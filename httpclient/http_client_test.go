@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-03 11:43:30
+ * @LastEditTime: 2025-06-18 23:03:59
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -573,7 +573,7 @@ data: [DONE]
 
 			defer stream.Close()
 
-			msg1, err := stream.Recv()
+			msg1, _, err := stream.Recv()
 			if err != nil {
 				t.Fatalf("Error receiving first message: %v", err)
 			}
@@ -583,7 +583,7 @@ data: [DONE]
 					msg1.ID, msg1.Message)
 			}
 
-			msg2, err := stream.Recv()
+			msg2, _, err := stream.Recv()
 			if err != nil {
 				t.Fatalf("Error receiving second message: %v", err)
 			}
@@ -593,8 +593,8 @@ data: [DONE]
 					msg2.ID, msg2.Message)
 			}
 
-			_, err = stream.Recv()
-			if err != io.EOF {
+			_, _, err = stream.Recv()
+			if err != nil {
 				t.Errorf("Expected third message to return EOF, got %v", err)
 			}
 		})

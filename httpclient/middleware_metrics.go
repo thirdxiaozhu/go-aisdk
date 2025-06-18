@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-17 18:24:31
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 12:26:15
+ * @LastEditTime: 2025-06-18 21:08:51
  * @Description: 监控中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -227,7 +227,7 @@ func NewMetricsMiddleware(config MetricsMiddlewareConfig) (mm *MetricsMiddleware
 }
 
 // Process 处理请求
-func (m *MetricsMiddleware) Process(ctx context.Context, req any, next Handler) (resp any, err error) {
+func (m *MetricsMiddleware) Process(ctx context.Context, request any, next Handler) (response any, err error) {
 	// 从上下文中获取请求信息
 	requestInfo := GetRequestInfo(ctx)
 	// 记录请求开始
@@ -238,7 +238,7 @@ func (m *MetricsMiddleware) Process(ctx context.Context, req any, next Handler) 
 		requestInfo.Method,
 	)
 	// 执行下一个处理器
-	resp, err = next(ctx, req)
+	response, err = next(ctx, request)
 	// 记录请求完成
 	m.config.Collector.RecordRequestComplete(
 		requestInfo.Provider,

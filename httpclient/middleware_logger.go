@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:39
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 12:20:38
+ * @LastEditTime: 2025-06-18 21:07:21
  * @Description: 日志中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -134,10 +134,37 @@ func NewLoggingMiddleware(config LoggingMiddlewareConfig) (lm *LoggingMiddleware
 func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handler) (response any, err error) {
 	// 从上下文中获取请求信息
 	requestInfo := GetRequestInfo(ctx)
-	// 创建一个别名结构体
-	type Alias RequestInfo
+	// 记录请求开始日志
+	m.logRequestStart(ctx, request, requestInfo)
+	// 执行下一个处理器
+	processingStartTime := time.Now()
+	response, err = next(ctx, request)
+	// 更新请求信息
+	requestInfo.EndTime = time.Now()
+	requestInfo.TotalDurationMs = requestInfo.EndTime.Sub(requestInfo.StartTime).Milliseconds()
+	requestInfo.IsSuccess = err == nil
+	requestInfo.Error = err
+	// 记录请求结束日志
+	m.logRequestEnd(ctx, processingStartTime, response, err, requestInfo)
+	return
+}
+
+// Name 返回中间件名称
+func (m *LoggingMiddleware) Name() (name string) {
+	return "logging"
+}
+
+// Priority 返回中间件优先级
+func (m *LoggingMiddleware) Priority() (priority int) {
+	return 100 // 日志中间件优先级较低，在其他中间件执行后记录
+}
+
+// logRequestStart 记录请求开始日志
+func (m *LoggingMiddleware) logRequestStart(ctx context.Context, request any, requestInfo *RequestInfo) {
 	// 是否记录请求
 	if m.config.LogRequest {
+		// 创建一个别名结构体
+		type Alias RequestInfo
 		startTemp := struct {
 			EndTime         *time.Time `json:"end_time,omitempty"`
 			TotalDurationMs int64      `json:"total_duration_ms,omitempty"`
@@ -159,35 +186,46 @@ func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handl
 		}
 		m.config.Logger.Info(ctx, "request started: %s", utils.MustString(startTemp))
 	}
-	// 执行下一个处理器
-	processingStartTime := time.Now()
-	response, err = next(ctx, request)
-	requestInfo.EndTime = time.Now()
-	requestInfo.TotalDurationMs = requestInfo.EndTime.Sub(requestInfo.StartTime).Milliseconds()
-	requestInfo.IsSuccess = err == nil
-	requestInfo.Error = err
-	endTemp := struct {
-		DurationMs      int64  `json:"duration_ms,omitempty"`
-		TotalDurationMs int64  `json:"total_duration_ms,omitempty"`
-		Error           string `json:"error,omitempty"`
-		Response        *any   `json:"response,omitempty"`
-		Alias
-	}{
-		DurationMs:      requestInfo.EndTime.Sub(processingStartTime).Milliseconds(),
-		TotalDurationMs: requestInfo.TotalDurationMs,
-		Error:           "",
-		Response:        nil,
-		Alias:           Alias(*requestInfo),
-	}
+}
+
+// logRequestEnd 记录请求结束日志
+func (m *LoggingMiddleware) logRequestEnd(ctx context.Context, processingStartTime time.Time, response any, err error, requestInfo *RequestInfo) {
 	if err != nil {
 		// 是否记录错误
 		if m.config.LogError {
-			endTemp.Error = requestInfo.Error.Error()
+			// 创建一个别名结构体
+			type Alias RequestInfo
+			endTemp := struct {
+				DurationMs      int64  `json:"duration_ms,omitempty"`
+				TotalDurationMs int64  `json:"total_duration_ms,omitempty"`
+				Error           string `json:"error,omitempty"`
+				Alias
+			}{
+				DurationMs:      requestInfo.EndTime.Sub(processingStartTime).Milliseconds(),
+				TotalDurationMs: requestInfo.TotalDurationMs,
+				Error:           requestInfo.Error.Error(),
+				Alias:           Alias(*requestInfo),
+			}
 			m.config.Logger.Error(ctx, "request failed: %s", utils.MustString(endTemp))
 		}
 	} else {
 		// 是否跳过成功请求的日志
 		if !m.config.SkipSuccessLog {
+			// 创建一个别名结构体
+			type Alias RequestInfo
+			endTemp := struct {
+				DurationMs      int64  `json:"duration_ms,omitempty"`
+				TotalDurationMs int64  `json:"total_duration_ms,omitempty"`
+				Error           string `json:"error,omitempty"`
+				Response        *any   `json:"response,omitempty"`
+				Alias
+			}{
+				DurationMs:      requestInfo.EndTime.Sub(processingStartTime).Milliseconds(),
+				TotalDurationMs: requestInfo.TotalDurationMs,
+				Error:           "",
+				Response:        nil,
+				Alias:           Alias(*requestInfo),
+			}
 			// 是否记录响应
 			if m.config.LogResponse {
 				// 脱敏处理响应数据
@@ -198,17 +236,6 @@ func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handl
 			m.config.Logger.Info(ctx, "request completed: %s", utils.MustString(endTemp))
 		}
 	}
-	return
-}
-
-// Name 返回中间件名称
-func (m *LoggingMiddleware) Name() (name string) {
-	return "logging"
-}
-
-// Priority 返回中间件优先级
-func (m *LoggingMiddleware) Priority() (priority int) {
-	return 100 // 日志中间件优先级较低，在其他中间件执行后记录
 }
 
 // sanitizeData 脱敏数据
