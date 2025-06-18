@@ -10,6 +10,7 @@
 package models
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
@@ -414,4 +415,8 @@ type ChatResponse struct {
 // ChatResponseStream 流式传输的聊天响应
 type ChatResponseStream struct {
 	*httpclient.StreamReader[ChatBaseResponse]
+}
+type ChatStreamContentBlock struct {
+	ContentBuffer   bytes.Buffer
+	ReasoningBuffer bytes.Buffer
 }
