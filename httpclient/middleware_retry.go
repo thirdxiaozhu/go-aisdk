@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-04 11:56:13
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-17 19:35:42
+ * @LastEditTime: 2025-06-18 12:09:25
  * @Description: 重试中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -250,24 +250,24 @@ func (m *RetryMiddleware) deepCopyRequestInfo(original *RequestInfo) (requestInf
 	}
 	// 创建一个新的 RequestInfo 副本
 	requestInfo = RequestInfo{
-		Provider:    original.Provider,
-		ModelType:   original.ModelType,
-		Model:       original.Model,
-		Method:      original.Method,
-		StartTime:   original.StartTime, // time.Time 是值类型，可以直接拷贝
-		EndTime:     original.EndTime,   // time.Time 是值类型，可以直接拷贝
-		Duration:    original.Duration,  // time.Duration 是值类型，可以直接拷贝
-		IsSuccess:   original.IsSuccess,
-		RequestID:   original.RequestID,
-		UserID:      original.UserID,
-		Attempt:     original.Attempt,
-		MaxAttempts: original.MaxAttempts,
+		Provider:        original.Provider,
+		ModelType:       original.ModelType,
+		Model:           original.Model,
+		Method:          original.Method,
+		StartTime:       original.StartTime, // time.Time 是值类型，可以直接拷贝
+		EndTime:         original.EndTime,   // time.Time 是值类型，可以直接拷贝
+		TotalDurationMs: original.TotalDurationMs,
+		IsSuccess:       original.IsSuccess,
+		RequestID:       original.RequestID,
+		UserID:          original.UserID,
+		Attempt:         original.Attempt,
+		MaxAttempts:     original.MaxAttempts,
 	}
 	// 深度拷贝 error 类型（如果不为 nil）
-	if original.LastError != nil {
+	if original.Error != nil {
 		// error 是接口类型，这里创建一个新的 error 实例
 		// 使用 fmt.Errorf 来创建一个新的 error，保持原始错误消息
-		requestInfo.LastError = fmt.Errorf("%v", original.LastError)
+		requestInfo.Error = fmt.Errorf("%v", original.Error)
 	}
 	return
 }

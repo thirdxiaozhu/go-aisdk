@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-17 18:31:57
+ * @LastEditTime: 2025-06-18 11:59:13
  * @Description: 中间件接口定义
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -62,19 +62,19 @@ func (c *Chain) GetMiddlewares() (middlewares []Middleware) {
 
 // RequestInfo 请求信息
 type RequestInfo struct {
-	Provider    string        `json:"provider"`     // 提供商
-	ModelType   string        `json:"model_type"`   // 模型类型
-	Model       string        `json:"model"`        // 模型名称
-	Method      string        `json:"method"`       // 方法名称
-	StartTime   time.Time     `json:"start_time"`   // 请求开始时间
-	EndTime     time.Time     `json:"end_time"`     // 最新一次请求结束时间（重试过程中会更新）
-	Duration    time.Duration `json:"duration"`     // 累计请求耗时（包含所有重试）
-	IsSuccess   bool          `json:"is_success"`   // 当前请求状态（重试过程中会更新，最终表示是否成功）
-	LastError   error         `json:"last_error"`   // 最后一次的错误信息（重试过程中会更新）
-	RequestID   string        `json:"request_id"`   // 请求ID
-	UserID      string        `json:"user_id"`      // 用户ID
-	Attempt     int           `json:"attempt"`      // 第几次重试
-	MaxAttempts int           `json:"max_attempts"` // 最大重试次数
+	Provider        string    `json:"provider"`          // 提供商
+	ModelType       string    `json:"model_type"`        // 模型类型
+	Model           string    `json:"model"`             // 模型名称
+	Method          string    `json:"method"`            // 方法名称
+	StartTime       time.Time `json:"start_time"`        // 请求开始时间
+	EndTime         time.Time `json:"end_time"`          // 最后一次的请求结束时间（重试过程中会更新）
+	TotalDurationMs int64     `json:"total_duration_ms"` // 累计请求耗时（包含所有重试）
+	IsSuccess       bool      `json:"is_success"`        // 最后一次的请求状态（重试过程中会更新，最终表示是否成功）
+	Error           error     `json:"error"`             // 最后一次的错误信息（重试过程中会更新）
+	RequestID       string    `json:"request_id"`        // 请求ID
+	UserID          string    `json:"user_id"`           // 用户ID
+	Attempt         int       `json:"attempt"`           // 第几次重试
+	MaxAttempts     int       `json:"max_attempts"`      // 最大重试次数
 }
 
 // ContextKey 上下文键类型

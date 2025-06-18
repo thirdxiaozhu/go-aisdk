@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:39
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-17 18:34:15
+ * @LastEditTime: 2025-06-18 12:20:38
  * @Description: 日志中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -132,25 +132,26 @@ func NewLoggingMiddleware(config LoggingMiddlewareConfig) (lm *LoggingMiddleware
 
 // Process 处理请求
 func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handler) (response any, err error) {
+	// 从上下文中获取请求信息
 	requestInfo := GetRequestInfo(ctx)
 	// 创建一个别名结构体
 	type Alias RequestInfo
 	// 是否记录请求
 	if m.config.LogRequest {
 		startTemp := struct {
-			EndTime   *time.Time     `json:"end_time,omitempty"`
-			Duration  *time.Duration `json:"duration,omitempty"`
-			IsSuccess *bool          `json:"is_success,omitempty"`
-			LastError *string        `json:"last_error,omitempty"`
-			Request   any            `json:"request"`
+			EndTime         *time.Time `json:"end_time,omitempty"`
+			TotalDurationMs int64      `json:"total_duration_ms,omitempty"`
+			IsSuccess       *bool      `json:"is_success,omitempty"`
+			Error           string     `json:"error,omitempty"`
+			Request         any        `json:"request"`
 			Alias
 		}{
-			EndTime:   nil,
-			Duration:  nil,
-			IsSuccess: nil,
-			LastError: nil,
-			Request:   nil,
-			Alias:     Alias(*requestInfo),
+			EndTime:         nil,
+			TotalDurationMs: 0,
+			IsSuccess:       nil,
+			Error:           "",
+			Request:         nil,
+			Alias:           Alias(*requestInfo),
 		}
 		// 脱敏处理请求数据
 		if reqData := m.sanitizeData(request); reqData != nil {
@@ -162,26 +163,26 @@ func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handl
 	processingStartTime := time.Now()
 	response, err = next(ctx, request)
 	requestInfo.EndTime = time.Now()
-	requestInfo.Duration = requestInfo.EndTime.Sub(requestInfo.StartTime)
+	requestInfo.TotalDurationMs = requestInfo.EndTime.Sub(requestInfo.StartTime).Milliseconds()
 	requestInfo.IsSuccess = err == nil
-	requestInfo.LastError = err
+	requestInfo.Error = err
 	endTemp := struct {
-		ProcessingDuration string `json:"processing_duration,omitempty"`
-		Duration           string `json:"duration,omitempty"`
-		LastError          string `json:"last_error,omitempty"`
-		Response           *any   `json:"response,omitempty"`
+		DurationMs      int64  `json:"duration_ms,omitempty"`
+		TotalDurationMs int64  `json:"total_duration_ms,omitempty"`
+		Error           string `json:"error,omitempty"`
+		Response        *any   `json:"response,omitempty"`
 		Alias
 	}{
-		ProcessingDuration: requestInfo.EndTime.Sub(processingStartTime).String(),
-		Duration:           requestInfo.Duration.String(),
-		LastError:          "",
-		Response:           nil,
-		Alias:              Alias(*requestInfo),
+		DurationMs:      requestInfo.EndTime.Sub(processingStartTime).Milliseconds(),
+		TotalDurationMs: requestInfo.TotalDurationMs,
+		Error:           "",
+		Response:        nil,
+		Alias:           Alias(*requestInfo),
 	}
 	if err != nil {
 		// 是否记录错误
 		if m.config.LogError {
-			endTemp.LastError = requestInfo.LastError.Error()
+			endTemp.Error = requestInfo.Error.Error()
 			m.config.Logger.Error(ctx, "request failed: %s", utils.MustString(endTemp))
 		}
 	} else {
