@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-17 20:18:39
+ * @LastEditTime: 2025-06-18 15:09:48
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -18,6 +18,7 @@ import (
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/internal/utils"
 	"github.com/liusuxian/go-aisdk/models"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -39,32 +40,44 @@ func getApiKeys(envKey string) (apiKeys string) {
 
 func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
 	return client.ListModels(ctx, models.ListModelsRequest{
-		ModelInfo: models.ModelInfo{
-			Provider: consts.DeepSeek,
-		},
 		UserInfo: models.UserInfo{
 			UserID: "123456",
 		},
+		Provider: consts.DeepSeek,
 	}, httpclient.WithTimeout(time.Minute*2))
 }
 
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
 	return client.CreateChatCompletion(ctx, models.ChatRequest{
-		ModelInfo: models.ModelInfo{
-			Provider:  consts.DeepSeek,
-			ModelType: consts.ChatModel,
-			Model:     consts.DeepSeekReasoner,
-		},
 		UserInfo: models.UserInfo{
 			UserID: "123456",
 		},
+		Provider: consts.DeepSeek,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
 				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
 			},
 		},
+		Model:               consts.DeepSeekChat,
 		MaxCompletionTokens: 4096,
 	}, httpclient.WithTimeout(time.Minute*2))
+}
+
+func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponseStream, err error) {
+	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
+		UserInfo: models.UserInfo{
+			UserID: "123456",
+		},
+		Provider: consts.DeepSeek,
+		Messages: []models.ChatMessage{
+			&models.UserMessage{
+				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+			},
+		},
+		Model:               consts.DeepSeekReasoner,
+		MaxCompletionTokens: 4096,
+		Stream:              true,
+	}, httpclient.WithTimeout(time.Minute*5))
 }
 
 func main() {
@@ -140,4 +153,52 @@ func main() {
 		return
 	}
 	log.Printf("createChatCompletion response: %+v, request_id: %s", response2, response2.RequestID())
+	log.Printf("createChatCompletion content: %s", response2.Choices[0].Message.Content)
+	// 创建流式聊天
+	response3, err := createChatCompletionStream(ctx, client)
+	if err != nil {
+		originalErr := aisdk.Unwrap(err)
+		fmt.Println("originalErr =", originalErr)
+		fmt.Println("Cause Error =", aisdk.Cause(err))
+		switch {
+		case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
+			fmt.Println("ErrProviderNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
+			fmt.Println("ErrModelTypeNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrModelNotSupported):
+			fmt.Println("ErrModelNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
+			fmt.Println("ErrMethodNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
+			fmt.Println("ErrCompletionStreamNotSupported =", true)
+		case errors.Is(originalErr, context.Canceled):
+			fmt.Println("context.Canceled =", true)
+		case errors.Is(originalErr, context.DeadlineExceeded):
+			fmt.Println("context.DeadlineExceeded =", true)
+		}
+		log.Printf("createChatCompletionStream error = %v, request_id = %s", err, aisdk.RequestID(err))
+		return
+	}
+	defer response3.Close()
+	// 读取流式聊天
+	usage := models.Usage{}
+	for {
+		var item models.ChatBaseResponse
+		if item, err = response3.StreamReader.Recv(); err != nil {
+			if errors.Is(err, io.EOF) {
+				err = nil
+				break
+			}
+			log.Printf("createChatCompletionStream error = %v, request_id = %s", err, aisdk.RequestID(err))
+			break
+		}
+		usage = item.Usage
+		if item.Choices[0].Delta.ReasoningContent != "" {
+			log.Printf("createChatCompletionStream reasoning_content: %+v", item.Choices[0].Delta.ReasoningContent)
+		}
+		if item.Choices[0].Delta.Content != "" {
+			log.Printf("createChatCompletionStream content: %+v", item.Choices[0].Delta.Content)
+		}
+	}
+	log.Printf("createChatCompletionStream usage: %+v", usage)
 }

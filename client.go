@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:09:20
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-17 20:15:21
+ * @LastEditTime: 2025-06-18 14:56:06
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -91,7 +91,8 @@ func NewSDKClient(configPath string, opts ...SDKClientOption) (client *SDKClient
 func (c *SDKClient) handlerRequest(
 	ctx context.Context,
 	modelInfo models.ModelInfo,
-	method, userId string,
+	userInfo models.UserInfo,
+	method string,
 	request any,
 	handler func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error),
 ) (resp any, err error) {
@@ -109,7 +110,7 @@ func (c *SDKClient) handlerRequest(
 		Method:    method,
 		StartTime: time.Now(),
 		RequestID: requestId,
-		UserID:    userId,
+		UserID:    userInfo.UserID,
 	})
 	// 定义最终处理函数
 	finalHandler := func(ctx context.Context, req any) (resp any, err error) {

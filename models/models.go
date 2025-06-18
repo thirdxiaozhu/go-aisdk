@@ -9,12 +9,15 @@
  */
 package models
 
-import "github.com/liusuxian/go-aisdk/httpclient"
+import (
+	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/httpclient"
+)
 
 // ListModelsRequest 列出模型请求
 type ListModelsRequest struct {
-	ModelInfo
 	UserInfo
+	Provider consts.Provider `json:"provider"` // 提供商
 }
 
 // ListModelsResponse 列出模型响应

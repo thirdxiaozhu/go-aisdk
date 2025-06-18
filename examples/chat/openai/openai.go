@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 12:28:39
+ * @LastEditTime: 2025-06-18 15:15:27
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -39,30 +39,25 @@ func getApiKeys(envKey string) (apiKeys string) {
 
 func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
 	return client.ListModels(ctx, models.ListModelsRequest{
-		ModelInfo: models.ModelInfo{
-			Provider: consts.OpenAI,
-		},
 		UserInfo: models.UserInfo{
 			UserID: "123456",
 		},
+		Provider: consts.OpenAI,
 	}, httpclient.WithTimeout(time.Minute*2))
 }
 
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
 	return client.CreateChatCompletion(ctx, models.ChatRequest{
-		ModelInfo: models.ModelInfo{
-			Provider:  consts.OpenAI,
-			ModelType: consts.ChatModel,
-			Model:     consts.OpenAIGPT4o,
-		},
 		UserInfo: models.UserInfo{
 			UserID: "123456",
 		},
+		Provider: consts.OpenAI,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
 				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
 			},
 		},
+		Model:               consts.OpenAIGPT4o,
 		MaxCompletionTokens: 4096,
 	}, httpclient.WithTimeout(time.Minute*2))
 }
@@ -140,4 +135,5 @@ func main() {
 		return
 	}
 	log.Printf("createChatCompletion response: %+v, request_id: %s", response2, response2.RequestID())
+	log.Printf("createChatCompletion content: %s", response2.Choices[0].Message.Content)
 }

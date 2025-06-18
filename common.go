@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-16 16:16:29
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-16 16:16:37
+ * @LastEditTime: 2025-06-18 14:56:23
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -25,7 +25,9 @@ func (c *SDKClient) ListModels(ctx context.Context, request models.ListModelsReq
 	}
 	// 处理请求
 	var resp any
-	if resp, err = c.handlerRequest(ctx, request.ModelInfo, "ListModels", request.UserInfo.UserID, nil, handler); err != nil {
+	if resp, err = c.handlerRequest(ctx, models.ModelInfo{
+		Provider: request.Provider,
+	}, request.UserInfo, "ListModels", nil, handler); err != nil {
 		return
 	}
 	// 返回结果

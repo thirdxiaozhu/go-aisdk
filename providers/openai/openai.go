@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:56:55
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-16 15:58:39
+ * @LastEditTime: 2025-06-18 15:07:52
  * @Description: OpenAI服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -34,8 +34,7 @@ var (
 )
 
 const (
-	apiModels          = "/models"
-	apiChatCompletions = "/chat/completions"
+	apiModels = "/models"
 )
 
 // init 包初始化时创建 openAIProvider 实例并注册到工厂
@@ -175,35 +174,5 @@ func (s *openAIProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 // ListModels 列出模型
 func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
 	err = s.executeRequest(ctx, http.MethodGet, apiModels, opts, &response)
-	return
-}
-
-// CreateChatCompletion 创建聊天
-func (s *openAIProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
-	err = s.executeRequest(ctx, http.MethodPost, apiChatCompletions, opts, &response, httpclient.WithBody(request))
-	return
-}
-
-// executeRequest 执行请求
-func (s *openAIProvider) executeRequest(ctx context.Context, method, apiPath string, opts []httpclient.HTTPClientOption, response httpclient.Response, reqSetters ...httpclient.RequestOption) (err error) {
-	// 设置客户端选项
-	for _, opt := range opts {
-		opt(s.hClient)
-	}
-	// 获取一个APIKey
-	var apiKey *loadbalancer.APIKey
-	if apiKey, err = s.lb.GetAPIKey(); err != nil {
-		return
-	}
-	// 创建请求
-	var (
-		setters = append(reqSetters, httpclient.WithKeyValue("Authorization", fmt.Sprintf("Bearer %s", apiKey.Key)))
-		req     *http.Request
-	)
-	if req, err = s.hClient.NewRequest(ctx, method, s.hClient.FullURL(apiPath), setters...); err != nil {
-		return
-	}
-	// 发送请求
-	err = s.hClient.SendRequest(req, response)
 	return
 }

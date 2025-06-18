@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-16 16:41:01
+ * @LastEditTime: 2025-06-18 14:48:39
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -121,6 +121,13 @@ type ChatToolChoiceFunction struct {
 	Name string `json:"name"` // 工具调用函数名称
 }
 
+// ToolType 工具类型
+type ToolType string
+
+const (
+	ToolTypeFunction ToolType = "function" // 函数
+)
+
 // ChatToolChoice 模型是否调用工具
 type ChatToolChoice struct {
 	ToolChoiceType ChatToolChoiceType      // 工具调用类型
@@ -194,9 +201,10 @@ type ChatWebSearchOptions struct {
 
 // ChatRequest 聊天请求
 type ChatRequest struct {
-	ModelInfo
 	UserInfo
+	Provider            consts.Provider         `json:"provider"`                        // 提供商
 	Messages            []ChatMessage           `json:"messages"`                        // 消息数组
+	Model               string                  `json:"model"`                           // 模型名称
 	Audio               *ChatAudioOutputArgs    `json:"audio,omitempty"`                 // 音频输出的参数
 	FrequencyPenalty    float32                 `json:"frequency_penalty,omitempty"`     // 介于 -2.0 和 2.0 之间的数值。正值会根据文本中已有内容的出现频率对新 token 进行惩罚，从而降低模型逐字重复相同内容的可能性
 	LogitBias           map[string]int          `json:"logit_bias,omitempty"`            // 修改指定标记在补全中出现的可能性
@@ -228,19 +236,17 @@ type ChatRequest struct {
 // MarshalJSON 序列化JSON
 func (r ChatRequest) MarshalJSON() (b []byte, err error) {
 	// 获取提供商
-	provider := r.ModelInfo.Provider
+	provider := r.Provider
 	// 创建一个别名结构体
 	type Alias ChatRequest
 	temp := struct {
 		Provider  string `json:"provider,omitempty"`
-		ModelType string `json:"model_type,omitempty"`
-		Model     string `json:"model,omitempty"`
 		UserID    string `json:"user_id,omitempty"`
 		MaxTokens int    `json:"max_tokens,omitempty"`
 		Alias
 	}{
-		Model: r.ModelInfo.Model,
-		Alias: Alias(r),
+		Provider: "",
+		Alias:    Alias(r),
 	}
 	// 根据提供商设置最大令牌数
 	switch provider {
@@ -293,14 +299,6 @@ type ChatLogProbs struct {
 	Refusal []ChatLogProb `json:"refusal,omitempty"` // 一个带有对数概率信息的消息拒绝 token 列表
 }
 
-// ChatAudioOutput 音频响应数据
-type ChatAudioOutput struct {
-	Data       string `json:"data"`       // Base64 编码的音频字节，格式在请求中指定
-	ExpiresAt  int64  `json:"expires_at"` // 音频响应在服务器上不再可访问的 Unix 时间戳（秒）
-	ID         string `json:"id"`         // 音频响应的唯一标识符
-	Transcript string `json:"transcript"` // 模型生成的音频文本转录
-}
-
 // ChatAnnotationType 消息的注释类型
 type ChatAnnotationType string
 
@@ -322,6 +320,28 @@ type ChatAnnotation struct {
 	URLCitation ChatAnnotationURLCitation `json:"url_citation"` // 网络搜索工具的 URL 引用
 }
 
+// ChatAudioOutput 音频响应数据
+type ChatAudioOutput struct {
+	Data       string `json:"data"`       // Base64 编码的音频字节，格式在请求中指定
+	ExpiresAt  int64  `json:"expires_at"` // 音频响应在服务器上不再可访问的 Unix 时间戳（秒）
+	ID         string `json:"id"`         // 音频响应的唯一标识符
+	Transcript string `json:"transcript"` // 模型生成的音频文本转录
+}
+
+// ToolCallsFunction 函数
+type ToolCallsFunction struct {
+	Arguments string `json:"arguments"` // 函数参数
+	Name      string `json:"name"`      // 函数名
+}
+
+// ToolCalls 工具调用
+type ToolCalls struct {
+	Index    int                `json:"index,omitempty"` // 索引
+	Function *ToolCallsFunction `json:"function"`        // 函数调用
+	ID       string             `json:"id"`              // 工具ID
+	Type     ToolType           `json:"type"`            // 工具类型
+}
+
 // ChatCompletionMessage 模型生成的 completion 消息
 type ChatCompletionMessage struct {
 	Content          string           `json:"content,omitempty"`           // 文本内容
@@ -330,19 +350,45 @@ type ChatCompletionMessage struct {
 	Role             string           `json:"role"`                        // 角色
 	Annotations      []ChatAnnotation `json:"annotations,omitempty"`       // 消息的注释，在适用情况下提供，例如使用网络搜索工具时
 	Audio            *ChatAudioOutput `json:"audio,omitempty"`             // 音频响应数据
-	ToolCalls        []ToolCalls      `json:"tool_calls"`                  // 工具调用
+	ToolCalls        []ToolCalls      `json:"tool_calls,omitempty"`        // 工具调用
 }
 
 // ChatChoice 模型生成的 completion
 type ChatChoice struct {
-	FinishReason ChatFinishReason      `json:"finish_reason"`      // 模型停止生成 token 的原因
-	Index        int                   `json:"index"`              // 该 completion 在模型生成的 completion 的选择列表中的索引
-	LogProbs     *ChatLogProbs         `json:"logprobs,omitempty"` // 该 choice 的对数概率信息
-	Message      ChatCompletionMessage `json:"message"`            // 模型生成的 completion 消息
+	FinishReason ChatFinishReason       `json:"finish_reason"`      // 模型停止生成 token 的原因
+	Index        int                    `json:"index"`              // 该 completion 在模型生成的 completion 的选择列表中的索引
+	LogProbs     *ChatLogProbs          `json:"logprobs,omitempty"` // 该 choice 的对数概率信息
+	Message      *ChatCompletionMessage `json:"message,omitempty"`  // 模型生成的 completion 消息
+	Delta        *ChatCompletionMessage `json:"delta,omitempty"`    // 流式传输的增量信息
 }
 
-// ChatResponse 聊天响应
-type ChatResponse struct {
+// CompletionTokensDetails completion tokens 的详细信息
+type CompletionTokensDetails struct {
+	AcceptedPredictionTokens int `json:"accepted_prediction_tokens,omitempty"` // 使用预测输出时，预测中出现在 completion 中的 token 数量
+	AudioTokens              int `json:"audio_tokens,omitempty"`               // 模型生成的音频输入 token 数
+	ReasoningTokens          int `json:"reasoning_tokens,omitempty"`           // 模型生成的用于推理的 token 数
+	RejectedPredictionTokens int `json:"rejected_prediction_tokens,omitempty"` // 使用预测输出时，预测中未出现在 completion 中的 token 数量
+}
+
+// PromptTokensDetails prompt tokens 的详细信息
+type PromptTokensDetails struct {
+	AudioTokens  int `json:"audio_tokens"`  // prompt 中存在的音频输入 token 数
+	CachedTokens int `json:"cached_tokens"` // prompt 中存在的缓存 token 数
+}
+
+// Usage 该对话补全请求的用量信息
+type Usage struct {
+	CompletionTokens        int                     `json:"completion_tokens"`                  // 模型 completion 产生的 token 数
+	PromptTokens            int                     `json:"prompt_tokens"`                      // 用户 prompt 所包含的 token 数
+	PromptCacheHitTokens    int                     `json:"prompt_cache_hit_tokens,omitempty"`  // 用户 prompt 中，命中上下文缓存的 token 数
+	PromptCacheMissTokens   int                     `json:"prompt_cache_miss_tokens,omitempty"` // 用户 prompt 中，未命中上下文缓存的 token 数
+	TotalTokens             int                     `json:"total_tokens"`                       // 该请求中，所有 token 的数量（prompt + completion）
+	CompletionTokensDetails CompletionTokensDetails `json:"completion_tokens_details"`          // completion tokens 的详细信息
+	PromptTokensDetails     *PromptTokensDetails    `json:"prompt_tokens_details,omitempty"`    // prompt tokens 的详细信息
+}
+
+// ChatBaseResponse 聊天响应基础信息
+type ChatBaseResponse struct {
 	Choices           []ChatChoice `json:"choices"`                // 模型生成的 completion 的选择列表
 	Created           int64        `json:"created"`                // 创建聊天完成时的 Unix 时间戳（以秒为单位）
 	ID                string       `json:"id"`                     // 该对话的唯一标识符
@@ -351,5 +397,15 @@ type ChatResponse struct {
 	ServiceTier       string       `json:"service_tier,omitempty"` // 用于处理请求的服务层级
 	SystemFingerprint string       `json:"system_fingerprint"`     // 此指纹表示模型运行的后端配置。可以与 seed 请求参数一起使用，以了解何时进行了可能影响确定性的后端更改
 	Usage             Usage        `json:"usage"`                  // 该对话补全请求的用量信息
+}
+
+// ChatResponse 聊天响应
+type ChatResponse struct {
+	ChatBaseResponse
 	httpclient.HttpHeader
+}
+
+// ChatResponseStream 流式传输的聊天响应
+type ChatResponseStream struct {
+	*httpclient.StreamReader[ChatBaseResponse]
 }
