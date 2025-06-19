@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 14:07:07
+ * @LastEditTime: 2025-06-19 14:24:11
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -21,8 +21,8 @@ import (
 )
 
 const (
-	defaultHTTPClientTimeout           time.Duration = 5 * time.Second      // 默认HTTP客户端请求超时时间
-	defaultStreamReturnIntervalTimeout time.Duration = 10 * time.Second     // 默认流式传输返回的间隔超时时间
+	defaultHTTPClientTimeout           time.Duration = 10 * time.Second     // 默认HTTP客户端请求超时时间
+	defaultStreamReturnIntervalTimeout time.Duration = 15 * time.Second     // 默认流式传输返回的间隔超时时间
 	defaultEmptyMessagesLimit          uint          = 300                  // 默认空消息限制
 	requestIdHeaderKey                 string        = "X-AISDK-Request-Id" // 请求ID头键
 )
