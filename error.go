@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-16 14:41:41
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-16 21:07:15
+ * @LastEditTime: 2025-06-19 18:26:00
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/internal/utils"
 )
 
 var (
@@ -22,7 +23,9 @@ var (
 	ErrModelTypeNotSupported        = errors.New("model type is not supported")                                                        // 模型类型不支持
 	ErrModelNotSupported            = errors.New("model is not supported")                                                             // 模型不支持
 	ErrCompletionStreamNotSupported = errors.New("streaming is not supported with this method, please use CreateChatCompletionStream") // 流式传输不支持
-	ErrMethodNotSupported           = errors.New("method is not supported")                                                            // 方法不支持
+	ErrMethodNotSupported           = utils.ErrMethodNotSupported                                                                      // 方法不支持
+	ErrTooManyEmptyStreamMessages   = utils.ErrTooManyEmptyStreamMessages                                                              // 流式传输发送了太多空消息
+	ErrStreamReturnIntervalTimeout  = utils.ErrStreamReturnIntervalTimeout                                                             // 流式传输返回间隔超时
 )
 
 // SDKError SDK错误
@@ -126,15 +129,4 @@ func wrapModelTypeNotSupported(provider, modelType fmt.Stringer) (err error) {
 func wrapModelNotSupported(provider fmt.Stringer, model string, modelType fmt.Stringer) (err error) {
 	return fmt.Errorf("provider [%s] does not support the [%s] model of type [%s]: %w",
 		provider.String(), model, modelType.String(), ErrModelNotSupported)
-}
-
-// wrapMethodNotSupported 包装方法不支持错误
-func wrapMethodNotSupported(provider fmt.Stringer, model string, modelType fmt.Stringer, method string) (err error) {
-	return fmt.Errorf("provider [%s] does not support the [%s] model of type [%s] with method [%s]: %w",
-		provider.String(), model, modelType.String(), method, ErrMethodNotSupported)
-}
-
-// wrapMethodNotSupportedByProvider 包装方法不支持错误
-func wrapMethodNotSupportedByProvider(provider fmt.Stringer, method string) (err error) {
-	return fmt.Errorf("provider [%s] does not support the [%s] method: %w", provider.String(), method, ErrMethodNotSupported)
 }

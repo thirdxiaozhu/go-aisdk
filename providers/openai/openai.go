@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:56:55
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 14:15:01
+ * @LastEditTime: 2025-06-19 18:17:22
  * @Description: OpenAI服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -23,6 +23,7 @@ import (
 
 // openAIProvider OpenAI提供商
 type openAIProvider struct {
+	core.DefaultProviderService
 	supportedModels map[fmt.Stringer]map[string]bool // 支持的模型
 	providerConfig  *conf.ProviderConfig             // 提供商配置
 	lb              *loadbalancer.LoadBalancer       // 负载均衡器
@@ -170,7 +171,7 @@ func (s *openAIProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 }
 
 // ListModels 列出模型
-func (s *openAIProvider) ListModels(ctx context.Context, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
+func (s *openAIProvider) ListModels(ctx context.Context, provider fmt.Stringer, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
 	err = s.executeRequest(ctx, http.MethodGet, apiModels, opts, &response)
 	return
 }

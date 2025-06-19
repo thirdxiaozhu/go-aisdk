@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 22:26:43
+ * @LastEditTime: 2025-06-19 19:13:01
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -376,8 +376,8 @@ type PromptTokensDetails struct {
 	CachedTokens int `json:"cached_tokens"` // prompt 中存在的缓存 token 数
 }
 
-// Usage 该对话补全请求的用量信息
-type Usage struct {
+// ChatUsage 该对话补全请求的用量信息
+type ChatUsage struct {
 	CompletionTokens        int                     `json:"completion_tokens"`                  // 模型 completion 产生的 token 数
 	PromptTokens            int                     `json:"prompt_tokens"`                      // 用户 prompt 所包含的 token 数
 	PromptCacheHitTokens    int                     `json:"prompt_cache_hit_tokens,omitempty"`  // 用户 prompt 中，命中上下文缓存的 token 数
@@ -396,7 +396,7 @@ type ChatBaseResponse struct {
 	Object            string                  `json:"object"`                 // 对象的类型
 	ServiceTier       string                  `json:"service_tier,omitempty"` // 用于处理请求的服务层级
 	SystemFingerprint string                  `json:"system_fingerprint"`     // 此指纹表示模型运行的后端配置。可以与 seed 请求参数一起使用，以了解何时进行了可能影响确定性的后端更改
-	Usage             *Usage                  `json:"usage,omitempty"`        // 该对话补全请求的用量信息
+	Usage             *ChatUsage              `json:"usage,omitempty"`        // 该对话补全请求的用量信息
 	StreamStats       *httpclient.StreamStats `json:"stream_stats,omitempty"` // 流式传输统计信息
 }
 
