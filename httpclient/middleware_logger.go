@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:39
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 21:07:21
+ * @LastEditTime: 2025-06-19 11:12:52
  * @Description: 日志中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -131,7 +131,7 @@ func NewLoggingMiddleware(config LoggingMiddlewareConfig) (lm *LoggingMiddleware
 }
 
 // Process 处理请求
-func (m *LoggingMiddleware) Process(ctx context.Context, request any, next Handler) (response any, err error) {
+func (m *LoggingMiddleware) Process(ctx context.Context, request any, next MWHandler) (response any, err error) {
 	// 从上下文中获取请求信息
 	requestInfo := GetRequestInfo(ctx)
 	// 记录请求开始日志

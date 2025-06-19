@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-17 18:24:31
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 21:08:51
+ * @LastEditTime: 2025-06-19 11:22:45
  * @Description: 监控中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -16,6 +16,7 @@ import (
 	"maps"
 	"net"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 )
@@ -201,8 +202,18 @@ func (c *DefaultMetricsCollector) Reset() {
 }
 
 // getKey 获取指标键值
-func (c *DefaultMetricsCollector) getKey(provider, modelType, model, method string) (key string) {
-	return fmt.Sprintf("%s:%s:%s:%s", provider, modelType, model, method)
+func (c *DefaultMetricsCollector) getKey(subKeys ...string) (key string) {
+	subKeyList := make([]string, 0, len(subKeys))
+	for _, subKey := range subKeys {
+		if subKey != "" {
+			subKeyList = append(subKeyList, subKey)
+		}
+	}
+
+	if len(subKeyList) == 0 {
+		return "unknown"
+	}
+	return strings.Join(subKeyList, ":")
 }
 
 // MetricsMiddlewareConfig 监控中间件配置
@@ -227,7 +238,7 @@ func NewMetricsMiddleware(config MetricsMiddlewareConfig) (mm *MetricsMiddleware
 }
 
 // Process 处理请求
-func (m *MetricsMiddleware) Process(ctx context.Context, request any, next Handler) (response any, err error) {
+func (m *MetricsMiddleware) Process(ctx context.Context, request any, next MWHandler) (response any, err error) {
 	// 从上下文中获取请求信息
 	requestInfo := GetRequestInfo(ctx)
 	// 记录请求开始

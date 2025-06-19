@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 15:15:27
+ * @LastEditTime: 2025-06-19 18:28:55
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -19,6 +19,7 @@ import (
 	"github.com/liusuxian/go-aisdk/internal/utils"
 	"github.com/liusuxian/go-aisdk/models"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -62,6 +63,23 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 	}, httpclient.WithTimeout(time.Minute*2))
 }
 
+func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponseStream, err error) {
+	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
+		UserInfo: models.UserInfo{
+			UserID: "123456",
+		},
+		Provider: consts.OpenAI,
+		Messages: []models.ChatMessage{
+			&models.UserMessage{
+				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+			},
+		},
+		Model:               consts.OpenAIGPT4o,
+		MaxCompletionTokens: 4096,
+		Stream:              true,
+	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*10))
+}
+
 func main() {
 	tempDir, err := os.MkdirTemp("", "config-test")
 	if err != nil {
@@ -98,7 +116,7 @@ func main() {
 	}
 	defer func() {
 		metrics := client.GetMetrics()
-		log.Printf("metrics: %s\n", utils.MustString(metrics))
+		log.Printf("metrics = %s\n", utils.MustString(metrics))
 	}()
 
 	ctx := context.Background()
@@ -108,7 +126,7 @@ func main() {
 		log.Printf("listModels error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
-	log.Printf("listModels response: %+v, request_id: %s", response1, response1.RequestID())
+	log.Printf("listModels response = %+v, request_id = %s", response1, response1.RequestID())
 	// 创建聊天
 	response2, err := createChatCompletion(ctx, client)
 	if err != nil {
@@ -134,6 +152,59 @@ func main() {
 		log.Printf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
-	log.Printf("createChatCompletion response: %+v, request_id: %s", response2, response2.RequestID())
-	log.Printf("createChatCompletion content: %s", response2.Choices[0].Message.Content)
+	log.Printf("createChatCompletion response = %+v, request_id = %s", response2, response2.RequestID())
+	// 创建流式聊天
+	response3, err := createChatCompletionStream(ctx, client)
+	if err != nil {
+		originalErr := aisdk.Unwrap(err)
+		fmt.Println("originalErr =", originalErr)
+		fmt.Println("Cause Error =", aisdk.Cause(err))
+		switch {
+		case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
+			fmt.Println("ErrProviderNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
+			fmt.Println("ErrModelTypeNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrModelNotSupported):
+			fmt.Println("ErrModelNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
+			fmt.Println("ErrMethodNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
+			fmt.Println("ErrCompletionStreamNotSupported =", true)
+		case errors.Is(originalErr, context.Canceled):
+			fmt.Println("context.Canceled =", true)
+		case errors.Is(originalErr, context.DeadlineExceeded):
+			fmt.Println("context.DeadlineExceeded =", true)
+		}
+		log.Printf("createChatCompletionStream error = %v, request_id = %s", err, aisdk.RequestID(err))
+		return
+	}
+	// 读取流式聊天
+	log.Printf("createChatCompletionStream request_id = %s", response3.RequestID())
+	if err = response3.ForEach(func(item models.ChatBaseResponse, isFinished bool) (err error) {
+		if isFinished {
+			return nil
+		}
+		log.Printf("createChatCompletionStream item = %+v", item)
+		if item.Usage != nil {
+			log.Printf("createChatCompletionStream usage = %+v", utils.MustString(item.Usage))
+		}
+		if item.StreamStats != nil {
+			log.Printf("createChatCompletionStream stream_stats = %+v", utils.MustString(item.StreamStats))
+		}
+		return nil
+	}); err != nil {
+		switch {
+		case errors.Is(err, aisdk.ErrTooManyEmptyStreamMessages):
+			fmt.Println("ErrTooManyEmptyStreamMessages =", true)
+		case errors.Is(err, aisdk.ErrStreamReturnIntervalTimeout):
+			fmt.Println("ErrStreamReturnIntervalTimeout =", true)
+		default:
+			var netErr net.Error
+			if errors.As(err, &netErr) {
+				fmt.Println("net.Error =", true)
+			}
+		}
+		log.Printf("createChatCompletionStream item error = %v", err)
+		return
+	}
 }

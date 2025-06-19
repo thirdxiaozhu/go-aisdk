@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 23:15:47
+ * @LastEditTime: 2025-06-19 16:49:23
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -76,7 +76,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		Model:               consts.DeepSeekReasoner,
 		MaxCompletionTokens: 4096,
 		Stream:              true,
-	}, httpclient.WithTimeout(time.Minute*5))
+	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*5))
 }
 
 func main() {
@@ -177,25 +177,22 @@ func main() {
 		log.Printf("createChatCompletionStream error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
-	defer response3.Close()
 	// 读取流式聊天
 	log.Printf("createChatCompletionStream request_id = %s", response3.RequestID())
-	for {
-		var (
-			item       models.ChatBaseResponse
-			isFinished bool
-		)
-		if item, isFinished, err = response3.StreamReader.Recv(); err != nil {
-			log.Printf("createChatCompletionStream error = %v, request_id = %s", err, aisdk.RequestID(err))
-			break
-		}
+	if err = response3.ForEach(func(item models.ChatBaseResponse, isFinished bool) (err error) {
 		if isFinished {
-			break
+			return nil
 		}
 		log.Printf("createChatCompletionStream item = %+v", item)
-		if item.Usage != nil && item.StreamStats != nil {
+		if item.Usage != nil {
 			log.Printf("createChatCompletionStream usage = %+v", utils.MustString(item.Usage))
+		}
+		if item.StreamStats != nil {
 			log.Printf("createChatCompletionStream stream_stats = %+v", utils.MustString(item.StreamStats))
 		}
+		return nil
+	}); err != nil {
+		log.Printf("createChatCompletionStream item error = %v", err)
+		return
 	}
 }

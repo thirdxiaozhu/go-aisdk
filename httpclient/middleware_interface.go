@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 21:06:39
+ * @LastEditTime: 2025-06-19 11:11:55
  * @Description: 中间件接口定义
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -15,14 +15,14 @@ import (
 	"time"
 )
 
-// Handler 处理器函数类型
-type Handler func(ctx context.Context, request any) (response any, err error)
+// MWHandler 处理器函数类型
+type MWHandler func(ctx context.Context, request any) (response any, err error)
 
 // Middleware 中间件接口
 type Middleware interface {
-	Process(ctx context.Context, request any, next Handler) (response any, err error) // 处理请求，next是下一个处理器
-	Name() (name string)                                                              // 返回中间件名称，用于标识和排序
-	Priority() (priority int)                                                         // 返回中间件优先级，数值越小优先级越高
+	Process(ctx context.Context, request any, next MWHandler) (response any, err error) // 处理请求，next是下一个处理器
+	Name() (name string)                                                                // 返回中间件名称，用于标识和排序
+	Priority() (priority int)                                                           // 返回中间件优先级，数值越小优先级越高
 }
 
 // Chain 中间件链
@@ -38,7 +38,7 @@ func NewChain(middlewares ...Middleware) (chain *Chain) {
 }
 
 // Execute 执行中间件链
-func (c *Chain) Execute(ctx context.Context, request any, finalHandler Handler) (response any, err error) {
+func (c *Chain) Execute(ctx context.Context, request any, finalHandler MWHandler) (response any, err error) {
 	if len(c.middlewares) == 0 {
 		return finalHandler(ctx, request)
 	}
