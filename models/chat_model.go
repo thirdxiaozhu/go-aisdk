@@ -417,6 +417,8 @@ type ChatResponseStream struct {
 	*httpclient.StreamReader[ChatBaseResponse]
 }
 type ChatStreamContentBlock struct {
-	ContentBuffer   bytes.Buffer
-	ReasoningBuffer bytes.Buffer
+	ContentID         string
+	SystemFingerprint string
+	ContentBuffer     bytes.Buffer
+	ReasoningBuffer   bytes.Buffer
 }
