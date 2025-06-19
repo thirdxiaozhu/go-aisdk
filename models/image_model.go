@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-19 17:11:50
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 19:26:27
+ * @LastEditTime: 2025-06-19 20:09:47
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -10,6 +10,7 @@
 package models
 
 import (
+	"encoding/json"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 )
@@ -96,6 +97,22 @@ type ImageRequest struct {
 	Size              ImageSize           `json:"size,omitempty"`               // 图像尺寸
 	Style             ImageStyle          `json:"style,omitempty"`              // 图像风格
 	User              string              `json:"user,omitempty"`               // 用户标识符，用于监控和滥用检测
+}
+
+// MarshalJSON 序列化JSON
+func (r ImageRequest) MarshalJSON() (b []byte, err error) {
+	// 创建一个别名结构体
+	type Alias ImageRequest
+	temp := struct {
+		Provider string `json:"provider,omitempty"`
+		UserID   string `json:"user_id,omitempty"`
+		Alias
+	}{
+		Provider: "",
+		Alias:    Alias(r),
+	}
+	// 序列化JSON
+	return json.Marshal(temp)
 }
 
 // ImageResponseData 生成图像的列表
