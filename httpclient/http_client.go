@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 14:24:11
+ * @LastEditTime: 2025-06-19 15:03:19
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -316,13 +316,13 @@ func SendRequestStream[T Streamable](client *HTTPClient, req *http.Request) (str
 	client.setRequestID(req, resp)
 	stream = &StreamReader[T]{
 		emptyMessagesLimit:          client.config.EmptyMessagesLimit,
-		streamReturnIntervalTimeout: client.config.StreamReturnIntervalTimeout,
 		reader:                      bufio.NewReader(resp.Body),
 		response:                    resp,
+		streamReturnIntervalTimeout: client.config.StreamReturnIntervalTimeout,
 		errAccumulator:              NewErrorAccumulator(),
 		unmarshaler:                 &JSONUnmarshaler{},
-		HttpHeader:                  HttpHeader(resp.Header),
 		startTime:                   time.Now(),
+		HttpHeader:                  HttpHeader(resp.Header),
 	}
 	return
 }
