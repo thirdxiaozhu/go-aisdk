@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:57:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 15:03:54
+ * @LastEditTime: 2025-06-19 14:11:35
  * @Description: DeepSeek服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -25,7 +25,6 @@ import (
 type deepseekProvider struct {
 	supportedModels map[fmt.Stringer]map[string]bool // 支持的模型
 	providerConfig  *conf.ProviderConfig             // 提供商配置
-	hClient         *httpclient.HTTPClient           // HTTP 客户端
 	lb              *loadbalancer.LoadBalancer       // 负载均衡器
 }
 
@@ -59,7 +58,6 @@ func (s *deepseekProvider) GetSupportedModels() (supportedModels map[fmt.Stringe
 // InitializeProviderConfig 初始化提供商配置
 func (s *deepseekProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 	s.providerConfig = config
-	s.hClient = httpclient.NewHTTPClient(s.providerConfig.BaseURL)
 	s.lb = loadbalancer.NewLoadBalancer(s.providerConfig.APIKeys)
 }
 

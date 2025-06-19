@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 23:15:47
+ * @LastEditTime: 2025-06-19 12:41:27
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -76,7 +76,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		Model:               consts.DeepSeekReasoner,
 		MaxCompletionTokens: 4096,
 		Stream:              true,
-	}, httpclient.WithTimeout(time.Minute*5))
+	}, httpclient.WithTimeout(time.Second*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*20))
 }
 
 func main() {
@@ -186,7 +186,7 @@ func main() {
 			isFinished bool
 		)
 		if item, isFinished, err = response3.StreamReader.Recv(); err != nil {
-			log.Printf("createChatCompletionStream error = %v, request_id = %s", err, aisdk.RequestID(err))
+			log.Printf("createChatCompletionStream error = %v", err)
 			break
 		}
 		if isFinished {

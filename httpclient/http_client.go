@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 22:27:28
+ * @LastEditTime: 2025-06-19 14:07:07
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -21,7 +21,10 @@ import (
 )
 
 const (
-	defaultEmptyMessagesLimit uint = 300 // 默认空消息限制
+	defaultHTTPClientTimeout           time.Duration = 5 * time.Second      // 默认HTTP客户端请求超时时间
+	defaultStreamReturnIntervalTimeout time.Duration = 10 * time.Second     // 默认流式传输返回的间隔超时时间
+	defaultEmptyMessagesLimit          uint          = 300                  // 默认空消息限制
+	requestIdHeaderKey                 string        = "X-AISDK-Request-Id" // 请求ID头键
 )
 
 // HTTPDoer HTTP 请求执行器接口
@@ -49,7 +52,7 @@ func NewDefaultHTTPDoer(timeout time.Duration) (doer *DefaultHTTPDoer) {
 	}
 }
 
-// SetTimeout 设置请求超时时间，零值表示无超时限制
+// SetTimeout 设置请求超时时间，零值表示无超时限制（非并发安全）
 func (doer *DefaultHTTPDoer) SetTimeout(timeout time.Duration) {
 	if timeout <= 0 {
 		timeout = 0
@@ -97,10 +100,11 @@ func decodeString(body io.Reader, output *string) (err error) {
 
 // HTTPClientConfig 客户端配置
 type HTTPClientConfig struct {
-	BaseURL            string          // API 的基础 URL 地址
-	HTTPClient         HTTPDoer        // HTTP 客户端实现，用于发送请求
-	ResponseDecoder    ResponseDecoder // 响应数据解码器
-	EmptyMessagesLimit uint            // 空消息限制
+	BaseURL                     string          // API 的基础 URL 地址
+	HTTPClient                  HTTPDoer        // HTTP 客户端实现，用于发送请求
+	ResponseDecoder             ResponseDecoder // 响应数据解码器
+	EmptyMessagesLimit          uint            // 空消息限制
+	StreamReturnIntervalTimeout time.Duration   // 流式传输返回的间隔超时时间，用于防止流式传输返回的间隔时间过长
 }
 
 // HTTPClient 客户端
@@ -113,10 +117,17 @@ type HTTPClient struct {
 // HTTPClientOption 客户端选项
 type HTTPClientOption func(c *HTTPClient)
 
-// WithTimeout 设置请求超时时间
+// WithTimeout 设置请求超时时间（非并发安全）
 func WithTimeout(timeout time.Duration) (opt HTTPClientOption) {
 	return func(c *HTTPClient) {
 		c.config.HTTPClient.SetTimeout(timeout)
+	}
+}
+
+// WithStreamReturnIntervalTimeout 设置流式传输返回的间隔超时时间（非并发安全）
+func WithStreamReturnIntervalTimeout(timeout time.Duration) (opt HTTPClientOption) {
+	return func(c *HTTPClient) {
+		c.config.StreamReturnIntervalTimeout = timeout
 	}
 }
 
@@ -140,7 +151,7 @@ func (h *HttpHeader) Header() (header http.Header) {
 
 // RequestID 获取请求ID
 func (h *HttpHeader) RequestID() (requestID string) {
-	return h.Header().Get("X-AISDK-Request-Id")
+	return h.Header().Get(requestIdHeaderKey)
 }
 
 // RawResponse 原始响应
@@ -152,10 +163,11 @@ type RawResponse struct {
 // NewHTTPClient 新建 HTTP 客户端
 func NewHTTPClient(baseURL string, opts ...RequestBuilderOption) (c *HTTPClient) {
 	return NewHTTPClientWithConfig(HTTPClientConfig{
-		BaseURL:            baseURL,
-		HTTPClient:         NewDefaultHTTPDoer(10 * time.Second),
-		ResponseDecoder:    &DefaultResponseDecoder{},
-		EmptyMessagesLimit: defaultEmptyMessagesLimit,
+		BaseURL:                     baseURL,
+		HTTPClient:                  NewDefaultHTTPDoer(defaultHTTPClientTimeout),
+		ResponseDecoder:             &DefaultResponseDecoder{},
+		EmptyMessagesLimit:          defaultEmptyMessagesLimit,
+		StreamReturnIntervalTimeout: defaultStreamReturnIntervalTimeout,
 	}, opts...)
 }
 
@@ -246,10 +258,7 @@ func (c *HTTPClient) SendRequest(req *http.Request, v Response) (err error) {
 	defer resp.Body.Close()
 
 	if v != nil {
-		reqInfo := GetRequestInfo(req.Context())
-		if reqInfo.RequestID != "" && reqInfo.RequestID != "unknown" {
-			resp.Header.Set("X-AISDK-Request-Id", reqInfo.RequestID)
-		}
+		c.setRequestID(req, resp)
 		v.SetHeader(resp.Header)
 	}
 
@@ -272,10 +281,7 @@ func (c *HTTPClient) SendRequestRaw(req *http.Request) (response RawResponse, er
 		return
 	}
 
-	reqInfo := GetRequestInfo(req.Context())
-	if reqInfo.RequestID != "" && reqInfo.RequestID != "unknown" {
-		resp.Header.Set("X-AISDK-Request-Id", reqInfo.RequestID)
-	}
+	c.setRequestID(req, resp)
 	response.SetHeader(resp.Header)
 	response.ReadCloser = resp.Body
 	return
@@ -307,18 +313,16 @@ func SendRequestStream[T Streamable](client *HTTPClient, req *http.Request) (str
 		return
 	}
 
-	reqInfo := GetRequestInfo(req.Context())
-	if reqInfo.RequestID != "" && reqInfo.RequestID != "unknown" {
-		resp.Header.Set("X-AISDK-Request-Id", reqInfo.RequestID)
-	}
+	client.setRequestID(req, resp)
 	stream = &StreamReader[T]{
-		emptyMessagesLimit: client.config.EmptyMessagesLimit,
-		reader:             bufio.NewReader(resp.Body),
-		response:           resp,
-		errAccumulator:     NewErrorAccumulator(),
-		unmarshaler:        &JSONUnmarshaler{},
-		HttpHeader:         HttpHeader(resp.Header),
-		startTime:          time.Now(),
+		emptyMessagesLimit:          client.config.EmptyMessagesLimit,
+		streamReturnIntervalTimeout: client.config.StreamReturnIntervalTimeout,
+		reader:                      bufio.NewReader(resp.Body),
+		response:                    resp,
+		errAccumulator:              NewErrorAccumulator(),
+		unmarshaler:                 &JSONUnmarshaler{},
+		HttpHeader:                  HttpHeader(resp.Header),
+		startTime:                   time.Now(),
 	}
 	return
 }
@@ -333,6 +337,14 @@ func (c *HTTPClient) FullURL(suffix string) (url string) {
 	baseURL := strings.TrimRight(c.config.BaseURL, "/")
 	url = fmt.Sprintf("%s%s", baseURL, suffix)
 	return
+}
+
+// setRequestID 设置请求ID
+func (c *HTTPClient) setRequestID(request *http.Request, response *http.Response) {
+	requestInfo := GetRequestInfo(request.Context())
+	if requestInfo.RequestID != "" && requestInfo.RequestID != "unknown" {
+		response.Header.Set(requestIdHeaderKey, requestInfo.RequestID)
+	}
 }
 
 // handleErrorResp 处理错误响应

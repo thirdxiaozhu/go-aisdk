@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-04 11:56:13
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 19:16:28
+ * @LastEditTime: 2025-06-19 11:27:05
  * @Description: 重试中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -139,7 +139,7 @@ func NewRetryMiddleware(config RetryMiddlewareConfig) (retry *RetryMiddleware) {
 }
 
 // Process 处理请求
-func (m *RetryMiddleware) Process(ctx context.Context, request any, next Handler) (response any, err error) {
+func (m *RetryMiddleware) Process(ctx context.Context, request any, next MWHandler) (response any, err error) {
 	// 从上下文中获取请求信息
 	requestInfo := GetRequestInfo(ctx)
 	requestInfo.MaxAttempts = m.config.MaxAttempts
@@ -248,9 +248,6 @@ func DefaultRetryCondition(attempt int, err error) (ok bool) {
 	if err == nil {
 		return false
 	}
-	fmt.Printf("DefaultRetryCondition Error Type = %T\n", err)
-	fmt.Printf("DefaultRetryCondition NetworkError = %v\n", isNetworkError(err))
-	fmt.Printf("DefaultRetryCondition RetryableHTTPError = %v\n", isRetryableHTTPError(err))
 	// 网络错误通常可以重试
 	if isNetworkError(err) {
 		return true

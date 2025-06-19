@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 18:00:38
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 23:12:58
+ * @LastEditTime: 2025-06-19 12:35:46
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -29,12 +29,13 @@ type Streamable interface {
 
 // StreamReader 流读取器
 type StreamReader[T Streamable] struct {
-	emptyMessagesLimit uint
-	isFinished         bool
-	reader             *bufio.Reader
-	response           *http.Response
-	errAccumulator     ErrorAccumulator
-	unmarshaler        Unmarshaler
+	emptyMessagesLimit          uint
+	streamReturnIntervalTimeout time.Duration
+	isFinished                  bool
+	reader                      *bufio.Reader
+	response                    *http.Response
+	errAccumulator              ErrorAccumulator
+	unmarshaler                 Unmarshaler
 	HttpHeader
 	// 统计字段
 	startTime  time.Time
@@ -49,7 +50,7 @@ type StreamStatsReceiver interface {
 // StreamStats 流式传输统计信息
 type StreamStats struct {
 	TotalDurationMs int64     `json:"total_duration_ms"` // 传输总耗时（持续更新）
-	DurationMs      int64     `json:"duration_ms"`       // 传输单次耗时（持续更新）
+	DurationMs      int64     `json:"duration_ms"`       // 单次传输耗时
 	ChunkCount      int       `json:"chunk_count"`       // 传输的 chunk 数量（持续更新）
 	StartTime       time.Time `json:"start_time"`        // 传输开始时间
 	EndTime         time.Time `json:"end_time"`          // 传输结束时间（持续更新）
@@ -77,8 +78,8 @@ func (stream *StreamReader[T]) Recv() (response T, isFinished bool, err error) {
 	if statsReceiver, ok := Streamable(&response).(StreamStatsReceiver); ok {
 		now := time.Now()
 		stats := StreamStats{
-			TotalDurationMs: int64(now.Sub(stream.startTime).Milliseconds()),
-			DurationMs:      int64(now.Sub(processingStartTime).Milliseconds()),
+			TotalDurationMs: now.Sub(stream.startTime).Milliseconds(),
+			DurationMs:      now.Sub(processingStartTime).Milliseconds(),
 			ChunkCount:      stream.chunkCount,
 			StartTime:       stream.startTime,
 			EndTime:         now,
