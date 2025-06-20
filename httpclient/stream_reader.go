@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 18:00:38
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 18:24:47
+ * @LastEditTime: 2025-06-20 22:58:27
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -24,11 +24,11 @@ var (
 	errorPrefix = []byte(`data: {"error":`)
 )
 
-// StreamDataHandler 流式数据处理函数
-type StreamDataHandler[T Streamable] func(response T, isFinished bool) (err error)
-
 // Streamable 可流式传输的类型
 type Streamable any
+
+// StreamDataHandler 流式数据处理函数
+type StreamDataHandler[T Streamable] func(response T, isFinished bool) (err error)
 
 // StreamReader 流读取器
 type StreamReader[T Streamable] struct {

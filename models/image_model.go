@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-19 17:11:50
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 20:09:47
+ * @LastEditTime: 2025-06-21 05:24:42
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
+	"io"
 )
 
 // ImageBackground 背景透明度类型
@@ -50,6 +51,7 @@ const (
 	ImageQualityHigh     ImageQuality = "high"     // 高
 	ImageQualityMedium   ImageQuality = "medium"   // 中
 	ImageQualityLow      ImageQuality = "low"      // 低
+	ImageQualityAuto     ImageQuality = "auto"     // 自动
 )
 
 // ImageResponseFormat 响应格式
@@ -64,6 +66,7 @@ const (
 type ImageSize string
 
 const (
+	ImageSizeAuto      ImageSize = "auto"      // 自动
 	ImageSize256x256   ImageSize = "256x256"   // 256x256
 	ImageSize512x512   ImageSize = "512x512"   // 512x512
 	ImageSize1024x1024 ImageSize = "1024x1024" // 1024x1024
@@ -87,7 +90,7 @@ type ImageRequest struct {
 	Provider          consts.Provider     `json:"provider"`                     // 提供商
 	Prompt            string              `json:"prompt"`                       // 提示词
 	Background        ImageBackground     `json:"background,omitempty"`         // 设置生成图像的背景透明度
-	Model             string              `json:"model"`                        // 模型名称
+	Model             string              `json:"model,omitempty"`              // 模型名称
 	Moderation        ImageModeration     `json:"moderation,omitempty"`         // 内容审核级别
 	N                 int                 `json:"n,omitempty"`                  // 生成图像数量
 	OutputCompression int                 `json:"output_compression,omitempty"` // 图像压缩级别(0-100%)
@@ -142,4 +145,38 @@ type ImageResponse struct {
 	Data    []ImageResponseData `json:"data"`            // 生成图像的列表
 	Usage   *ImageUsage         `json:"usage,omitempty"` // 图像生成的token使用信息
 	httpclient.HttpHeader
+}
+
+// ImageEditRequest 编辑图像请求
+type ImageEditRequest struct {
+	UserInfo
+	Provider          consts.Provider     `json:"provider"`                     // 提供商
+	Image             []io.Reader         `json:"image,omitempty"`              // 要编辑的图像源数组
+	Prompt            string              `json:"prompt"`                       // 提示词
+	Background        ImageBackground     `json:"background,omitempty"`         // 设置生成图像的背景透明度
+	Mask              io.Reader           `json:"mask,omitempty"`               // mask图像源，其中完全透明的区域指示应该编辑的位置
+	Model             string              `json:"model,omitempty"`              // 模型名称
+	N                 int                 `json:"n,omitempty"`                  // 生成图像数量
+	OutputCompression int                 `json:"output_compression,omitempty"` // 图像压缩级别(0-100%)
+	OutputFormat      ImageOutputFormat   `json:"output_format,omitempty"`      // 返回图像格式
+	Quality           ImageQuality        `json:"quality,omitempty"`            // 图像质量
+	ResponseFormat    ImageResponseFormat `json:"response_format,omitempty"`    // 响应格式
+	Size              ImageSize           `json:"size,omitempty"`               // 图像尺寸
+	User              string              `json:"user,omitempty"`               // 用户标识符，用于监控和滥用检测
+}
+
+// MarshalJSON 序列化JSON
+func (r ImageEditRequest) MarshalJSON() (b []byte, err error) {
+	// 创建一个别名结构体
+	type Alias ImageEditRequest
+	temp := struct {
+		Provider string `json:"provider,omitempty"`
+		UserID   string `json:"user_id,omitempty"`
+		Alias
+	}{
+		Provider: "",
+		Alias:    Alias(r),
+	}
+	// 序列化JSON
+	return json.Marshal(temp)
 }

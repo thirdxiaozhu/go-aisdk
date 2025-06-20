@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:57:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 18:18:15
+ * @LastEditTime: 2025-06-20 01:26:44
  * @Description: DeepSeek服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -18,6 +18,7 @@ import (
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/loadbalancer"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/providers/common"
 	"net/http"
 )
 
@@ -64,6 +65,6 @@ func (s *deepseekProvider) InitializeProviderConfig(config *conf.ProviderConfig)
 
 // ListModels 列出模型
 func (s *deepseekProvider) ListModels(ctx context.Context, provider fmt.Stringer, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
-	err = s.executeRequest(ctx, http.MethodGet, apiModels, opts, &response)
+	err = common.ExecuteRequest(ctx, http.MethodGet, s.providerConfig.BaseURL, apiModels, opts, s.lb, nil, &response)
 	return
 }

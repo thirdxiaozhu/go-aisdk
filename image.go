@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-19 17:20:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 17:38:52
+ * @LastEditTime: 2025-06-19 21:14:47
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -32,6 +32,28 @@ func (c *SDKClient) CreateImage(ctx context.Context, request models.ImageRequest
 		ModelType: consts.ImageModel,
 		Model:     request.Model,
 	}, request.UserInfo, "CreateImage", request, handler); err != nil {
+		return
+	}
+	// 返回结果
+	response = resp.(models.ImageResponse)
+	return
+}
+
+// CreateImageEdit 编辑图像
+func (c *SDKClient) CreateImageEdit(ctx context.Context, request models.ImageEditRequest, opts ...httpclient.HTTPClientOption) (response models.ImageResponse, err error) {
+	// 定义处理函数
+	handler := func(ctx context.Context, ps core.ProviderService, req any) (resp any, err error) {
+		imageEditReq := req.(models.ImageEditRequest)
+		// 编辑图像
+		return ps.CreateImageEdit(ctx, imageEditReq, opts...)
+	}
+	// 处理请求
+	var resp any
+	if resp, err = c.handlerRequest(ctx, models.ModelInfo{
+		Provider:  request.Provider,
+		ModelType: consts.ImageModel,
+		Model:     request.Model,
+	}, request.UserInfo, "CreateImageEdit", request, handler); err != nil {
 		return
 	}
 	// 返回结果

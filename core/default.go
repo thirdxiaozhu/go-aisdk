@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-19 17:59:35
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 18:15:42
+ * @LastEditTime: 2025-06-19 21:10:41
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -43,5 +43,11 @@ func (s *DefaultProviderService) CreateChatCompletionStream(ctx context.Context,
 // CreateImage 创建图像
 func (s *DefaultProviderService) CreateImage(ctx context.Context, request models.ImageRequest, opts ...httpclient.HTTPClientOption) (response models.ImageResponse, err error) {
 	err = utils.WrapMethodNotSupported(request.Provider, consts.ImageModel, request.Model, "CreateImage")
+	return
+}
+
+// CreateImageEdit 编辑图像
+func (s *DefaultProviderService) CreateImageEdit(ctx context.Context, request models.ImageEditRequest, opts ...httpclient.HTTPClientOption) (response models.ImageResponse, err error) {
+	err = utils.WrapMethodNotSupported(request.Provider, consts.ImageModel, request.Model, "CreateImageEdit")
 	return
 }
