@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 19:59:06
+ * @LastEditTime: 2025-06-21 05:29:23
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -12,13 +12,14 @@ package main
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/internal/utils"
 	"github.com/liusuxian/go-aisdk/models"
+	imageutils "github.com/liusuxian/go-aisdk/utils"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -43,26 +44,60 @@ func createImage(ctx context.Context, client *aisdk.SDKClient) (response models.
 		UserInfo: models.UserInfo{
 			UserID: "123456",
 		},
+		Provider: consts.OpenAI,
+		Prompt:   "一间有着精致雕花窗户的花店，漂亮的深色木质门上挂着铜制把手。店内摆放着各式各样的鲜花，包括玫瑰、百合和向日葵，色彩鲜艳，生机勃勃。背景是温馨的室内场景，透过窗户可以看到街道。高清写实摄影，中景构图。",
+		Model:    consts.OpenAIGPTImage1,
+		N:        2,
+		Quality:  models.ImageQualityHigh,
+		Size:     models.ImageSize1024x1024,
+	}, httpclient.WithTimeout(time.Minute*5))
+}
+
+func createImageEdit(ctx context.Context, client *aisdk.SDKClient, filenames []string) (response models.ImageResponse, err error) {
+	imageReaders := make([]io.Reader, 0, len(filenames)*2)
+	for i, filename := range filenames {
+		var reader *imageutils.ImageReader
+		if reader, err = imageutils.FileToReader(filename); err != nil {
+			return
+		}
+		imageReaders = append(imageReaders, reader)
+		if reader, err = imageutils.URLToReader(fmt.Sprintf("https://www.gstatic.com/webp/gallery/%d.webp", i+1), fmt.Sprintf("%d", i+1), time.Second*10); err != nil {
+			return
+		}
+		imageReaders = append(imageReaders, reader)
+	}
+	return client.CreateImageEdit(ctx, models.ImageEditRequest{
+		UserInfo: models.UserInfo{
+			UserID: "123456",
+		},
 		Provider:     consts.OpenAI,
-		Prompt:       "一间有着精致雕花窗户的花店，漂亮的深色木质门上挂着铜制把手。店内摆放着各式各样的鲜花，包括玫瑰、百合和向日葵，色彩鲜艳，生机勃勃。背景是温馨的室内场景，透过窗户可以看到街道。高清写实摄影，中景构图。",
+		Image:        imageReaders,
+		Prompt:       "合并这些图片，并添加文字：这是一张美丽的图片。",
 		Model:        consts.OpenAIGPTImage1,
 		N:            2,
-		OutputFormat: models.ImageOutputFormatPNG,
+		OutputFormat: models.ImageOutputFormatJPEG,
 		Quality:      models.ImageQualityHigh,
-		Size:         models.ImageSize1536x1024,
+		Size:         models.ImageSize1024x1024,
 	}, httpclient.WithTimeout(time.Minute*5))
 }
 
 // saveBase64Image 将base64图片数据保存为文件
-func saveBase64Image(base64Data, filename string) (err error) {
+func saveBase64Image(base64Data string) (filename string, err error) {
+	// 创建images目录来保存图片
+	imagesDir := "generated_images"
+	if err = os.MkdirAll(imagesDir, 0755); err != nil {
+		return "", fmt.Errorf("create images directory error: %v", err)
+	}
 	// 解码base64数据
 	var imageData []byte
 	if imageData, err = base64.StdEncoding.DecodeString(base64Data); err != nil {
-		return fmt.Errorf("decode base64 data error: %v", err)
+		return "", fmt.Errorf("decode base64 data error: %v", err)
 	}
 	// 写入文件
+	ext := imageutils.DetectImageType(imageData)
+	filename = filepath.Join(imagesDir, fmt.Sprintf("image_%d.%s", time.Now().UnixNano(), ext))
 	if err = os.WriteFile(filename, imageData, 0644); err != nil {
-		return fmt.Errorf("write image file error: %v", err)
+		return "", fmt.Errorf("write image file error: %v", err)
 	}
 	return
 }
@@ -110,46 +145,36 @@ func main() {
 	// 创建图像
 	response1, err := createImage(ctx, client)
 	if err != nil {
-		originalErr := aisdk.Unwrap(err)
-		fmt.Println("originalErr =", originalErr)
-		fmt.Println("Cause Error =", aisdk.Cause(err))
-		switch {
-		case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
-			fmt.Println("ErrProviderNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
-			fmt.Println("ErrModelTypeNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrModelNotSupported):
-			fmt.Println("ErrModelNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
-			fmt.Println("ErrMethodNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
-			fmt.Println("ErrCompletionStreamNotSupported =", true)
-		case errors.Is(originalErr, context.Canceled):
-			fmt.Println("context.Canceled =", true)
-		case errors.Is(originalErr, context.DeadlineExceeded):
-			fmt.Println("context.DeadlineExceeded =", true)
-		}
 		log.Printf("createImage error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
-	// 创建images目录来保存图片
-	imagesDir := "generated_images"
-	if err := os.MkdirAll(imagesDir, 0755); err != nil {
-		log.Printf("create images directory error: %v", err)
-		return
-	}
 	// 保存每张生成的图片
+	filenames := make([]string, 0, len(response1.Data))
 	for i, v := range response1.Data {
 		if v.B64JSON != "" {
-			filename := filepath.Join(imagesDir, fmt.Sprintf("image_%d_%d.png", time.Now().Unix(), i+1))
-			if err := saveBase64Image(v.B64JSON, filename); err != nil {
+			if filename, err := saveBase64Image(v.B64JSON); err != nil {
 				log.Printf("save image %d error: %v", i+1, err)
 			} else {
-				log.Printf("save image %d success: %s", i+1, filename)
+				filenames = append(filenames, filename)
 			}
 		} else {
 			log.Printf("image %d base64 data is empty", i+1)
 		}
 	}
-	log.Printf("createImage response = %+v, request_id = %s", response1, response1.RequestID())
+	// 编辑图像
+	response2, err := createImageEdit(ctx, client, filenames)
+	if err != nil {
+		log.Printf("createImageEdit error = %v, request_id = %s", err, aisdk.RequestID(err))
+		return
+	}
+	// 保存每张编辑的图片
+	for i, v := range response2.Data {
+		if v.B64JSON != "" {
+			if _, err := saveBase64Image(v.B64JSON); err != nil {
+				log.Printf("save image edit %d error: %v", i+1, err)
+			}
+		} else {
+			log.Printf("image edit %d base64 data is empty", i+1)
+		}
+	}
 }
