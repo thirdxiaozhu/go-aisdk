@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 16:49:23
+ * @LastEditTime: 2025-06-23 00:13:42
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -16,7 +16,6 @@ import (
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
-	"github.com/liusuxian/go-aisdk/internal/utils"
 	"github.com/liusuxian/go-aisdk/models"
 	"log"
 	"os"
@@ -115,7 +114,7 @@ func main() {
 	}
 	defer func() {
 		metrics := client.GetMetrics()
-		log.Printf("metrics = %s\n", utils.MustString(metrics))
+		log.Printf("metrics = %+v\n", metrics)
 	}()
 
 	ctx := context.Background()
@@ -185,10 +184,10 @@ func main() {
 		}
 		log.Printf("createChatCompletionStream item = %+v", item)
 		if item.Usage != nil {
-			log.Printf("createChatCompletionStream usage = %+v", utils.MustString(item.Usage))
+			log.Printf("createChatCompletionStream usage = %+v", item.Usage)
 		}
 		if item.StreamStats != nil {
-			log.Printf("createChatCompletionStream stream_stats = %+v", utils.MustString(item.StreamStats))
+			log.Printf("createChatCompletionStream stream_stats = %+v", item.StreamStats)
 		}
 		return nil
 	}); err != nil {
