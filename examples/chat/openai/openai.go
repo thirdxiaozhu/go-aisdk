@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-23 00:14:22
+ * @LastEditTime: 2025-06-24 12:33:37
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -96,7 +96,7 @@ func main() {
 	configData := `{
   "providers": {
     "openai": {
-      "base_url": "https://chatapi.onechats.ai/v1",
+      "base_url": "https://niubi.zeabur.app/v1",
 			"api_keys": [%v]
     }
   }

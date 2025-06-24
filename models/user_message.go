@@ -2,98 +2,271 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-04-15 18:54:27
+ * @LastEditTime: 2025-06-24 18:26:52
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
 package models
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/liusuxian/go-aisdk/consts"
+)
+
+var (
+	// 序列化用户消息函数（OpenAI）
+	marshalUserMessageByOpenAI = func(m UserMessage) (b []byte, err error) {
+		type Alias UserMessage
+		temp := struct {
+			Role    string `json:"role"`
+			Content any    `json:"content"`
+			Alias
+		}{
+			Role:  "user",
+			Alias: Alias(m),
+		}
+		// 根据内容类型设置 content 字段
+		if len(m.MultimodalContent) > 0 {
+			// 移除不支持的字段
+			tempMultimodalContent := make([]ChatUserMsgPart, 0, len(m.MultimodalContent))
+			for _, v := range m.MultimodalContent {
+				if len(v.Video) > 0 || v.VideoURL != nil {
+					continue
+				}
+				if v.ImageURL != nil {
+					v.MinPixels = 0
+					v.MaxPixels = 0
+				}
+				tempMultimodalContent = append(tempMultimodalContent, v)
+			}
+			temp.Content = tempMultimodalContent
+		} else {
+			temp.Content = m.Content
+		}
+		// 移除 multimodal_content 字段
+		temp.MultimodalContent = nil
+		// 序列化JSON
+		temp.provider = ""
+		return json.Marshal(temp)
+	}
+	// 序列化用户消息函数（DeepSeek）
+	marshalUserMessageByDeepSeek = func(m UserMessage) (b []byte, err error) {
+		type Alias UserMessage
+		temp := struct {
+			Role string `json:"role"`
+			Alias
+		}{
+			Role:  "user",
+			Alias: Alias(m),
+		}
+		// 移除不支持的字段
+		temp.MultimodalContent = nil
+		// 序列化JSON
+		temp.provider = ""
+		return json.Marshal(temp)
+	}
+	// 序列化用户消息函数（Aliyunbl）
+	marshalUserMessageByAliyunbl = func(m UserMessage) (b []byte, err error) {
+		type Alias UserMessage
+		temp := struct {
+			Role    string `json:"role"`
+			Content any    `json:"content"`
+			Alias
+		}{
+			Role:  "user",
+			Alias: Alias(m),
+		}
+		// 根据内容类型设置 content 字段
+		if len(m.MultimodalContent) > 0 {
+			// 移除不支持的字段
+			tempMultimodalContent := make([]ChatUserMsgPart, 0, len(m.MultimodalContent))
+			for _, v := range m.MultimodalContent {
+				if v.File != nil {
+					continue
+				}
+				if v.ImageURL != nil {
+					v.ImageURL.Detail = ""
+				}
+				tempMultimodalContent = append(tempMultimodalContent, v)
+			}
+			temp.Content = tempMultimodalContent
+		} else {
+			temp.Content = m.Content
+		}
+		// 移除 multimodal_content 字段
+		temp.MultimodalContent = nil
+		// 移除不支持的字段
+		temp.Name = ""
+		// 序列化JSON
+		temp.provider = ""
+		return json.Marshal(temp)
+	}
+	// 策略映射
+	userMessageStrategies = map[consts.Provider]func(m UserMessage) (b []byte, err error){
+		consts.OpenAI:   marshalUserMessageByOpenAI,
+		consts.DeepSeek: marshalUserMessageByDeepSeek,
+		consts.Aliyunbl: marshalUserMessageByAliyunbl,
+	}
+)
+
+// ChatUserMsgPartType 多模态内容类型
+//
+//	提供商支持: OpenAI | Aliyunbl
+type ChatUserMsgPartType string
+
+const (
+	//	提供商支持: OpenAI | Aliyunbl
+	ChatUserMsgPartTypeText ChatUserMsgPartType = "text"
+	//	提供商支持: OpenAI | Aliyunbl
+	ChatUserMsgPartTypeImageURL ChatUserMsgPartType = "image_url"
+	//	提供商支持: OpenAI | Aliyunbl
+	ChatUserMsgPartTypeInputAudio ChatUserMsgPartType = "input_audio"
+	//	提供商支持: OpenAI
+	ChatUserMsgPartTypeFile ChatUserMsgPartType = "file"
+	//	提供商支持: Aliyunbl
+	ChatUserMsgPartTypeVideo ChatUserMsgPartType = "video"
+	//	提供商支持: Aliyunbl
+	ChatUserMsgPartTypeVideoURL ChatUserMsgPartType = "video_url"
+)
+
+// ChatUserMsgImageURLDetail 图像质量
+//
+//	提供商支持: OpenAI
+type ChatUserMsgImageURLDetail string
+
+const (
+	// 提供商支持: OpenAI
+	ChatUserMsgImageURLDetailHigh ChatUserMsgImageURLDetail = "high"
+	// 提供商支持: OpenAI
+	ChatUserMsgImageURLDetailLow ChatUserMsgImageURLDetail = "low"
+	// 提供商支持: OpenAI
+	ChatUserMsgImageURLDetailAuto ChatUserMsgImageURLDetail = "auto"
+)
+
+// ChatUserMsgImageURL 图像URL
+//
+//	提供商支持: OpenAI | Aliyunbl
+type ChatUserMsgImageURL struct {
+	// 图像URL，支持url和base64编码
+	// 提供商支持: OpenAI | Aliyunbl
+	URL string `json:"url,omitempty"`
+	// 图像质量
+	// 提供商支持: OpenAI
+	Detail ChatUserMsgImageURLDetail `json:"detail,omitempty"`
+}
+
+// ChatUserMsgInputAudioFormat 音频格式
+//
+//	提供商支持: OpenAI | Aliyunbl
+type ChatUserMsgInputAudioFormat string
+
+const (
+	//	提供商支持: OpenAI | Aliyunbl
+	ChatUserMsgInputAudioFormatMP3 ChatUserMsgInputAudioFormat = "mp3"
+	//	提供商支持: OpenAI | Aliyunbl
+	ChatUserMsgInputAudioFormatWAV ChatUserMsgInputAudioFormat = "wav"
+)
+
+// ChatUserMsgInputAudio 输入音频
+//
+//	提供商支持: OpenAI | Aliyunbl
+type ChatUserMsgInputAudio struct {
+	// 音频数据，支持url和base64编码
+	// 提供商支持: OpenAI | Aliyunbl
+	Data string `json:"data,omitempty"`
+	// 音频格式
+	// 提供商支持: OpenAI | Aliyunbl
+	Format ChatUserMsgInputAudioFormat `json:"format,omitempty"`
+}
+
+// ChatUserMsgFile 文件
+//
+//	提供商支持: OpenAI
+type ChatUserMsgFile struct {
+	// 文件数据，支持base64编码
+	// 提供商支持: OpenAI
+	FileData string `json:"file_data,omitempty"`
+	// 文件ID
+	// 提供商支持: OpenAI
+	FileID string `json:"file_id,omitempty"`
+	// 文件名
+	// 提供商支持: OpenAI
+	FileName string `json:"filename,omitempty"`
+}
+
+// ChatUserMsgVideoURL 视频URL
+//
+//	提供商支持: Aliyunbl
+type ChatUserMsgVideoURL struct {
+	// 视频URL，支持url和base64编码
+	// 提供商支持: Aliyunbl
+	URL string `json:"url,omitempty"`
+}
+
+// ChatUserMsgPart 多模态内容
+//
+//	提供商支持: OpenAI | Aliyunbl
+type ChatUserMsgPart struct {
+	// 内容类型
+	// 提供商支持: OpenAI | Aliyunbl
+	Type ChatUserMsgPartType `json:"type,omitempty"`
+	// 文本内容
+	// 提供商支持: OpenAI | Aliyunbl
+	Text string `json:"text,omitempty"`
+	// 图像URL
+	// 提供商支持: OpenAI | Aliyunbl
+	ImageURL *ChatUserMsgImageURL `json:"image_url,omitempty"`
+	// 输入音频
+	// 提供商支持: OpenAI | Aliyunbl
+	InputAudio *ChatUserMsgInputAudio `json:"input_audio,omitempty"`
+	// 文件
+	// 提供商支持: OpenAI
+	File *ChatUserMsgFile `json:"file,omitempty"`
+	// 视频列表
+	// 提供商支持: Aliyunbl
+	Video []string `json:"video,omitempty"`
+	// 视频URL
+	// 提供商支持: Aliyunbl
+	VideoURL *ChatUserMsgVideoURL `json:"video_url,omitempty"`
+	// 模型限制输入图像的最小像素
+	// 提供商支持: Aliyunbl
+	MinPixels int `json:"min_pixels,omitempty"`
+	// 模型限制输入图像的最大像素
+	// 提供商支持: Aliyunbl
+	MaxPixels int `json:"max_pixels,omitempty"`
+}
 
 // UserMessage 用户消息，支持多模态内容
+//
+//	提供商支持: OpenAI | DeepSeek | Aliyunbl
 type UserMessage struct {
-	Content           string            `json:"content,omitempty"`            // 文本内容
-	MultimodalContent []ChatUserMsgPart `json:"multimodal_content,omitempty"` // 多模态内容
-	Name              string            `json:"name,omitempty"`               // 参与者名称
+	provider consts.Provider `json:"-"` // 用于序列化参数时，处理差异化参数
+	// 文本内容
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Content string `json:"content,omitempty"`
+	// 多模态内容
+	// 提供商支持: OpenAI | Aliyunbl
+	MultimodalContent []ChatUserMsgPart `json:"-"`
+	// 参与者名称
+	// 提供商支持: OpenAI | DeepSeek
+	Name string `json:"name,omitempty"`
 }
 
 // GetRole 获取消息角色
 func (m UserMessage) GetRole() (role string) { return "user" }
 
+// SetProvider 设置提供商
+func (m *UserMessage) SetProvider(provider consts.Provider) {
+	m.provider = provider
+}
+
 // MarshalJSON 序列化JSON
 func (m UserMessage) MarshalJSON() (b []byte, err error) {
-	type Alias UserMessage
-	temp := struct {
-		Role    string `json:"role"`
-		Content any    `json:"content"`
-		Alias
-	}{
-		Role:  "user",
-		Alias: Alias(m),
+	strategy, ok := userMessageStrategies[m.provider]
+	if !ok {
+		return nil, fmt.Errorf("unsupported provider: %s", m.provider)
 	}
-	// 根据内容类型设置 content 字段
-	if len(m.MultimodalContent) > 0 {
-		temp.Content = m.MultimodalContent
-	} else {
-		temp.Content = m.Content
-	}
-	// 移除 multimodal_content 字段
-	temp.MultimodalContent = nil
-	return json.Marshal(temp)
-}
-
-// ChatUserMsgPartType 多模态内容类型
-type ChatUserMsgPartType string
-
-const (
-	ChatUserMsgPartTypeText       ChatUserMsgPartType = "text"
-	ChatUserMsgPartTypeImageURL   ChatUserMsgPartType = "image_url"
-	ChatUserMsgPartTypeInputAudio ChatUserMsgPartType = "input_audio"
-	ChatUserMsgPartTypeFile       ChatUserMsgPartType = "file"
-)
-
-// ChatUserMsgImageURLDetail 图像质量
-type ChatUserMsgImageURLDetail string
-
-const (
-	ChatUserMsgImageURLDetailHigh ChatUserMsgImageURLDetail = "high"
-	ChatUserMsgImageURLDetailLow  ChatUserMsgImageURLDetail = "low"
-	ChatUserMsgImageURLDetailAuto ChatUserMsgImageURLDetail = "auto"
-)
-
-// ChatUserMsgImageURL 图像URL
-type ChatUserMsgImageURL struct {
-	URL    string                    `json:"url"`              // 图像URL，支持url和base64编码
-	Detail ChatUserMsgImageURLDetail `json:"detail,omitempty"` // 图像质量
-}
-
-// ChatUserMsgInputAudioFormat 音频格式
-type ChatUserMsgInputAudioFormat string
-
-const (
-	ChatUserMsgInputAudioFormatMP3 ChatUserMsgInputAudioFormat = "mp3"
-	ChatUserMsgInputAudioFormatWAV ChatUserMsgInputAudioFormat = "wav"
-)
-
-// ChatUserMsgInputAudio 输入音频
-type ChatUserMsgInputAudio struct {
-	Data   string                      `json:"data"`   // 音频数据，支持base64编码
-	Format ChatUserMsgInputAudioFormat `json:"format"` // 音频格式
-}
-
-// ChatUserMsgFile 文件
-type ChatUserMsgFile struct {
-	FileData string `json:"file_data,omitempty"` // 文件数据，支持base64编码
-	FileID   string `json:"file_id,omitempty"`   // 文件ID
-	FileName string `json:"filename,omitempty"`  // 文件名
-}
-
-// ChatUserMsgPart 多模态内容
-type ChatUserMsgPart struct {
-	Type       ChatUserMsgPartType    `json:"type"`                  // 内容类型
-	Text       string                 `json:"text,omitempty"`        // 文本内容
-	ImageURL   *ChatUserMsgImageURL   `json:"image_url,omitempty"`   // 图像URL
-	InputAudio *ChatUserMsgInputAudio `json:"input_audio,omitempty"` // 输入音频
-	File       *ChatUserMsgFile       `json:"file,omitempty"`        // 文件
+	return strategy(m)
 }

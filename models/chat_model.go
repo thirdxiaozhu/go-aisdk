@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 19:13:01
+ * @LastEditTime: 2025-06-24 21:52:26
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -12,128 +12,389 @@ package models
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 )
 
+var (
+	// 序列化聊天请求函数（OpenAI）
+	marshalChatRequestByOpenAI = func(r ChatRequest) (b []byte, err error) {
+		// 设置提供商
+		for _, message := range r.Messages {
+			message.SetProvider(r.Provider)
+		}
+		// 创建一个别名结构体
+		type Alias ChatRequest
+		temp := struct {
+			UserID string `json:"user_id,omitempty"`
+			User   string `json:"user,omitempty"` // 代表你的终端用户的唯一标识符
+			Alias
+		}{
+			User:  r.UserInfo.UserID,
+			Alias: Alias(r),
+		}
+		// 处理公共字段
+		if r.WebSearchOptions != nil {
+			temp.WebSearchOptions.ForcedSearch = false
+			temp.WebSearchOptions.SearchStrategy = ""
+		}
+		// 移除不支持的字段
+		temp.TopK = 0
+		temp.EnableThinking = false
+		temp.ThinkingBudget = 0
+		temp.TranslationOptions = nil
+		temp.XDashScopeDataInspection = ""
+		// 序列化JSON
+		temp.Provider = ""
+		return json.Marshal(temp)
+	}
+	// 序列化聊天请求函数（DeepSeek）
+	marshalChatRequestByDeepSeek = func(r ChatRequest) (b []byte, err error) {
+		// 设置提供商
+		for _, message := range r.Messages {
+			message.SetProvider(r.Provider)
+		}
+		// 创建一个别名结构体
+		type Alias ChatRequest
+		temp := struct {
+			UserID    string `json:"user_id,omitempty"`
+			MaxTokens int    `json:"max_tokens,omitempty"`
+			Alias
+		}{
+			MaxTokens: r.MaxCompletionTokens,
+			Alias:     Alias(r),
+		}
+		// 处理公共字段
+		if r.ResponseFormat != nil && r.ResponseFormat.JSONSchema != nil {
+			temp.ResponseFormat = nil
+		}
+		if len(r.Tools) > 0 {
+			tempTools := make([]ChatTool, 0, len(r.Tools))
+			for _, v := range r.Tools {
+				if v.Function != nil {
+					v.Function.Strict = false
+				}
+				tempTools = append(tempTools, v)
+			}
+			temp.Tools = tempTools
+		}
+		// 移除不支持的字段
+		temp.Audio = nil
+		temp.LogitBias = nil
+		temp.MaxCompletionTokens = 0
+		temp.Metadata = nil
+		temp.Modalities = nil
+		temp.N = 0
+		temp.ParallelToolCalls = false
+		temp.Prediction = nil
+		temp.ReasoningEffort = ""
+		temp.Seed = 0
+		temp.ServiceTier = ""
+		temp.Store = false
+		temp.WebSearchOptions = nil
+		temp.TopK = 0
+		temp.EnableThinking = false
+		temp.ThinkingBudget = 0
+		temp.TranslationOptions = nil
+		temp.XDashScopeDataInspection = ""
+		// 序列化JSON
+		temp.Provider = ""
+		return json.Marshal(temp)
+	}
+	// 序列化聊天请求函数（Aliyunbl）
+	marshalChatRequestByAliyunbl = func(r ChatRequest) (b []byte, err error) {
+		// 设置提供商
+		for _, message := range r.Messages {
+			message.SetProvider(r.Provider)
+		}
+		// 创建一个别名结构体
+		type Alias ChatRequest
+		temp := struct {
+			UserID        string                `json:"user_id,omitempty"`
+			MaxTokens     int                   `json:"max_tokens,omitempty"`
+			EnableSearch  bool                  `json:"enable_search,omitempty"`
+			SearchOptions *ChatWebSearchOptions `json:"search_options,omitempty"`
+			Alias
+		}{
+			MaxTokens:    r.MaxCompletionTokens,
+			EnableSearch: r.WebSearchOptions != nil,
+			Alias:        Alias(r),
+		}
+		// 处理公共字段
+		if r.ResponseFormat != nil && r.ResponseFormat.JSONSchema != nil {
+			temp.ResponseFormat = nil
+		}
+		if len(r.Tools) > 0 {
+			tempTools := make([]ChatTool, 0, len(r.Tools))
+			for _, v := range r.Tools {
+				if v.Function != nil {
+					v.Function.Strict = false
+				}
+				tempTools = append(tempTools, v)
+			}
+			temp.Tools = tempTools
+		}
+		if r.WebSearchOptions != nil {
+			temp.SearchOptions = &ChatWebSearchOptions{
+				ForcedSearch:   r.WebSearchOptions.ForcedSearch,
+				SearchStrategy: r.WebSearchOptions.SearchStrategy,
+			}
+			temp.WebSearchOptions = nil
+		}
+		// 移除不支持的字段
+		temp.FrequencyPenalty = 0
+		temp.LogitBias = nil
+		temp.MaxCompletionTokens = 0
+		temp.Metadata = nil
+		temp.Prediction = nil
+		temp.ReasoningEffort = ""
+		temp.ServiceTier = ""
+		temp.Store = false
+		temp.XDashScopeDataInspection = ""
+		// 序列化JSON
+		temp.Provider = ""
+		return json.Marshal(temp)
+	}
+	// 策略映射
+	chatRequestStrategies = map[consts.Provider]func(m ChatRequest) (b []byte, err error){
+		consts.OpenAI:   marshalChatRequestByOpenAI,
+		consts.DeepSeek: marshalChatRequestByDeepSeek,
+		consts.Aliyunbl: marshalChatRequestByAliyunbl,
+	}
+)
+
 // ChatMessage 聊天消息的通用接口
 type ChatMessage interface {
-	GetRole() (role string)             // 获取消息角色
-	MarshalJSON() (b []byte, err error) // 序列化JSON
+	GetRole() (role string)               // 获取消息角色
+	SetProvider(provider consts.Provider) // 设置提供商（序列化参数时，处理差异化参数）
+	MarshalJSON() (b []byte, err error)   // 序列化JSON
 }
 
-// ChatAudioFormatType 音频输出格式
+// ChatAudioFormatType 输出音频的格式
+//
+//	提供商支持: OpenAI | Aliyunbl
 type ChatAudioFormatType string
 
 const (
-	ChatAudioFormatTypeWAV   ChatAudioFormatType = "wav"
-	ChatAudioFormatTypeMP3   ChatAudioFormatType = "mp3"
-	ChatAudioFormatTypeFLAC  ChatAudioFormatType = "flac"
-	ChatAudioFormatTypeOPUS  ChatAudioFormatType = "opus"
+	// 提供商支持: OpenAI | Aliyunbl
+	ChatAudioFormatTypeWAV ChatAudioFormatType = "wav"
+	// 提供商支持: OpenAI
+	ChatAudioFormatTypeMP3 ChatAudioFormatType = "mp3"
+	// 提供商支持: OpenAI
+	ChatAudioFormatTypeFLAC ChatAudioFormatType = "flac"
+	// 提供商支持: OpenAI
+	ChatAudioFormatTypeOPUS ChatAudioFormatType = "opus"
+	// 提供商支持: OpenAI
 	ChatAudioFormatTypePCM16 ChatAudioFormatType = "pcm16"
 )
 
-// ChatAudioVoiceType 模型回应时使用的声音
+// ChatAudioVoiceType 输出音频的音色
+//
+//	提供商支持: OpenAI | Aliyunbl
 type ChatAudioVoiceType string
 
 const (
-	ChatAudioVoiceTypeAlloy   ChatAudioVoiceType = "alloy"
-	ChatAudioVoiceTypeAsh     ChatAudioVoiceType = "ash"
-	ChatAudioVoiceTypeBallad  ChatAudioVoiceType = "ballad"
-	ChatAudioVoiceTypeCoral   ChatAudioVoiceType = "coral"
-	ChatAudioVoiceTypeEcho    ChatAudioVoiceType = "echo"
-	ChatAudioVoiceTypeSage    ChatAudioVoiceType = "sage"
+	// 提供商支持: OpenAI
+	ChatAudioVoiceTypeAlloy ChatAudioVoiceType = "alloy"
+	// 提供商支持: OpenAI
+	ChatAudioVoiceTypeAsh ChatAudioVoiceType = "ash"
+	// 提供商支持: OpenAI
+	ChatAudioVoiceTypeBallad ChatAudioVoiceType = "ballad"
+	// 提供商支持: OpenAI
+	ChatAudioVoiceTypeCoral ChatAudioVoiceType = "coral"
+	// 提供商支持: OpenAI
+	ChatAudioVoiceTypeEcho ChatAudioVoiceType = "echo"
+	// 提供商支持: OpenAI
+	ChatAudioVoiceTypeFable ChatAudioVoiceType = "fable"
+	// 提供商支持: OpenAI
+	ChatAudioVoiceTypeNova ChatAudioVoiceType = "nova"
+	// 提供商支持: OpenAI
+	ChatAudioVoiceTypeOnyx ChatAudioVoiceType = "onyx"
+	// 提供商支持: OpenAI
+	ChatAudioVoiceTypeSage ChatAudioVoiceType = "sage"
+	// 提供商支持: OpenAI
 	ChatAudioVoiceTypeShimmer ChatAudioVoiceType = "shimmer"
+	// 提供商支持: Aliyunbl
+	ChatAudioVoiceTypeCherry ChatAudioVoiceType = "Cherry"
+	// 提供商支持: Aliyunbl
+	ChatAudioVoiceTypeSerena ChatAudioVoiceType = "Serena"
+	// 提供商支持: Aliyunbl
+	ChatAudioVoiceTypeEthan ChatAudioVoiceType = "Ethan"
+	// 提供商支持: Aliyunbl
+	ChatAudioVoiceTypeChelsie ChatAudioVoiceType = "Chelsie"
 )
 
 // ChatAudioOutputArgs 音频输出参数
+//
+//	提供商支持: OpenAI | Aliyunbl
 type ChatAudioOutputArgs struct {
-	Format ChatAudioFormatType `json:"format"` // 输出音频格式
-	Voice  ChatAudioVoiceType  `json:"voice"`  // 模型回应时使用的声音
+	// 输出音频的格式
+	// 提供商支持: OpenAI | Aliyunbl
+	Format ChatAudioFormatType `json:"format,omitempty"`
+	// 输出音频的音色
+	// 提供商支持: OpenAI | Aliyunbl
+	Voice ChatAudioVoiceType `json:"voice,omitempty"`
 }
 
+// ChatModalitiesType 输出数据的模态
+//
+//	提供商支持: OpenAI | Aliyunbl
+type ChatModalitiesType string
+
+const (
+	// 提供商支持: OpenAI | Aliyunbl
+	ChatModalitiesTypeText ChatModalitiesType = "text"
+	// 提供商支持: OpenAI | Aliyunbl
+	ChatModalitiesTypeAudio ChatModalitiesType = "audio"
+)
+
 // ChatPredictionType 预测内容的类型
+//
+//	提供商支持: OpenAI
 type ChatPredictionType string
 
 const (
+	// 提供商支持: OpenAI
 	ChatPredictionTypeContent ChatPredictionType = "content"
 )
 
 // ChatPredictionContentPart 预测内容
+//
+//	提供商支持: OpenAI
 type ChatPredictionContentPart struct {
-	Type string `json:"type"` // 内容的类型
-	Text string `json:"text"` // 文本内容
+	Type string `json:"type,omitempty"` // 内容的类型
+	Text string `json:"text,omitempty"` // 文本内容
 }
 
 // ChatPrediction 预测输出配置
+//
+//	提供商支持: OpenAI
 type ChatPrediction struct {
-	Type    ChatPredictionType          `json:"type"`    // 预测内容的类型
-	Content []ChatPredictionContentPart `json:"content"` // 预测内容
+	// 预测内容的类型
+	// 提供商支持: OpenAI
+	Type ChatPredictionType `json:"type,omitempty"`
+	// 预测内容
+	// 提供商支持: OpenAI
+	Content []ChatPredictionContentPart `json:"content,omitempty"`
 }
 
 // ChatReasoningEffortType 推理努力程度
+//
+//	提供商支持: OpenAI
 type ChatReasoningEffortType string
 
 const (
-	ChatReasoningEffortTypeLow    ChatReasoningEffortType = "low"
+	// 提供商支持: OpenAI
+	ChatReasoningEffortTypeLow ChatReasoningEffortType = "low"
+	// 提供商支持: OpenAI
 	ChatReasoningEffortTypeMedium ChatReasoningEffortType = "medium"
-	ChatReasoningEffortTypeHigh   ChatReasoningEffortType = "high"
+	// 提供商支持: OpenAI
+	ChatReasoningEffortTypeHigh ChatReasoningEffortType = "high"
 )
 
 // ChatResponseFormatType 响应格式的类型
+//
+//	提供商支持: OpenAI | DeepSeek | Aliyunbl
 type ChatResponseFormatType string
 
 const (
-	ChatResponseFormatTypeText       ChatResponseFormatType = "text"
-	ChatResponseFormatTypeJSONSchema ChatResponseFormatType = "json_schema"
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	ChatResponseFormatTypeText ChatResponseFormatType = "text"
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
 	ChatResponseFormatTypeJSONObject ChatResponseFormatType = "json_object"
+	// 提供商支持: OpenAI
+	ChatResponseFormatTypeJSONSchema ChatResponseFormatType = "json_schema"
 )
 
 // ChatResponseFormatJSONSchema JSON Schema 配置
+//
+//	提供商支持: OpenAI
 type ChatResponseFormatJSONSchema struct {
-	Name        string         `json:"name"`                  // 响应格式名称，必须是 a-z、A-Z、0-9 或包含下划线和破折号，最大长度为 64
-	Description string         `json:"description,omitempty"` // 响应格式的描述，用于指导模型如何响应
-	Schema      json.Marshaler `json:"schema,omitempty"`      // 响应格式的 JSON Schema
-	Strict      bool           `json:"strict,omitempty"`      // 是否启用严格模式，默认为 false
+	// 响应格式名称，必须是 a-z、A-Z、0-9 或包含下划线和破折号，最大长度为 64
+	// 提供商支持: OpenAI
+	Name string `json:"name,omitempty"`
+	// 响应格式的描述，用于指导模型如何响应
+	// 提供商支持: OpenAI
+	Description string `json:"description,omitempty"`
+	// 响应格式的 JSON Schema
+	// 提供商支持: OpenAI
+	Schema json.Marshaler `json:"schema,omitempty"`
+	// 是否启用严格模式，默认为 false
+	// 提供商支持: OpenAI
+	Strict bool `json:"strict,omitempty"`
 }
 
 // ChatResponseFormat 响应格式
+//
+//	提供商支持: OpenAI | DeepSeek | Aliyunbl
 type ChatResponseFormat struct {
-	Type       ChatResponseFormatType        `json:"type"`                  // 响应格式的类型
-	JSONSchema *ChatResponseFormatJSONSchema `json:"json_schema,omitempty"` // JSON Schema 配置，仅当 Type 为 "json_schema" 时使用
+	// 响应格式的类型
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Type ChatResponseFormatType `json:"type,omitempty"`
+	// JSON Schema 配置，仅当 Type 为 "json_schema" 时使用
+	// 提供商支持: OpenAI
+	JSONSchema *ChatResponseFormatJSONSchema `json:"json_schema,omitempty"`
 }
 
 // ChatStreamOptions 流式传输选项
+//
+//	提供商支持: OpenAI | DeepSeek | Aliyunbl
 type ChatStreamOptions struct {
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
 	IncludeUsage bool `json:"include_usage,omitempty"` // 是否包含令牌使用统计信息
 }
 
 // ChatToolChoiceType 工具调用类型
+//
+//	提供商支持: OpenAI | DeepSeek | Aliyunbl
 type ChatToolChoiceType string
 
 const (
-	ChatToolChoiceTypeNone     ChatToolChoiceType = "none"     // 模型不会调用任何工具，而是生成消息
-	ChatToolChoiceTypeAuto     ChatToolChoiceType = "auto"     // 模型可以在生成消息或调用一个或多个工具之间选择
-	ChatToolChoiceTypeRequired ChatToolChoiceType = "required" // 模型必须调用一个或多个工具
+	// 模型不会调用任何 tool，而是生成一条消息
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	ChatToolChoiceTypeNone ChatToolChoiceType = "none"
+	// 模型可以选择生成一条消息或调用一个或多个 tool
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	ChatToolChoiceTypeAuto ChatToolChoiceType = "auto"
+	// 模型必须调用一个或多个 tool
+	// 提供商支持: OpenAI | DeepSeek
+	ChatToolChoiceTypeRequired ChatToolChoiceType = "required"
 )
 
 // ChatToolChoiceFunction 工具调用函数
+//
+//	提供商支持: OpenAI | DeepSeek | Aliyunbl
 type ChatToolChoiceFunction struct {
-	Name string `json:"name"` // 工具调用函数名称
+	// 工具调用函数名称
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Name string `json:"name,omitempty"`
 }
 
 // ToolType 工具类型
+//
+//	提供商支持: OpenAI | DeepSeek | Aliyunbl
 type ToolType string
 
 const (
-	ToolTypeFunction ToolType = "function" // 函数
+	// 函数
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	ToolTypeFunction ToolType = "function"
 )
 
-// ChatToolChoice 模型是否调用工具
+// ChatToolChoice 指定工具调用的策略
+//
+//	提供商支持: OpenAI | DeepSeek | Aliyunbl
 type ChatToolChoice struct {
-	ToolChoiceType ChatToolChoiceType      // 工具调用类型
-	Function       *ChatToolChoiceFunction // 工具调用函数
-	Type           ToolType                // 工具类型
+	// 工具调用类型
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	ToolChoiceType ChatToolChoiceType
+	// 工具调用函数
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Function *ChatToolChoiceFunction
+	// 工具类型
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Type ToolType
 }
 
 // MarshalJSON 序列化JSON
@@ -142,8 +403,8 @@ func (c ChatToolChoice) MarshalJSON() (b []byte, err error) {
 		return json.Marshal(c.ToolChoiceType)
 	}
 	return json.Marshal(struct {
-		Function *ChatToolChoiceFunction `json:"function"`
-		Type     ToolType                `json:"type"`
+		Function *ChatToolChoiceFunction `json:"function,omitempty"`
+		Type     ToolType                `json:"type,omitempty"`
 	}{
 		Function: c.Function,
 		Type:     c.Type,
@@ -151,112 +412,391 @@ func (c ChatToolChoice) MarshalJSON() (b []byte, err error) {
 }
 
 // ChatToolFunction 工具函数
+//
+//	提供商支持: OpenAI | DeepSeek | Aliyunbl
 type ChatToolFunction struct {
-	Name        string         `json:"name"`                  // 函数名称，必须是 a-z, A-Z, 0-9 或者包含下划线和破折号，最大长度为 64
-	Description string         `json:"description,omitempty"` // 函数描述，用于帮助模型决定何时以及如何调用函数
-	Parameters  map[string]any `json:"parameters,omitempty"`  // 函数接受的参数，描述为一个 JSON Schema 对象
-	Strict      bool           `json:"strict,omitempty"`      // 是否启用严格模式，默认为 false
+	// 函数名称，必须是 a-z, A-Z, 0-9 或者包含下划线和破折号，最大长度为 64
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Name string `json:"name,omitempty"`
+	// 函数描述，用于帮助模型决定何时以及如何调用函数
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Description string `json:"description,omitempty"`
+	// 函数接受的参数，描述为一个 JSON Schema 对象
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Parameters map[string]any `json:"parameters,omitempty"`
+	// 是否启用严格模式，默认为 false
+	// 提供商支持: OpenAI
+	Strict bool `json:"strict,omitempty"`
 }
 
 // ChatTool 工具
+//
+//	提供商支持: OpenAI | DeepSeek | Aliyunbl
 type ChatTool struct {
-	Function *ChatToolFunction `json:"function"` // 工具函数
-	Type     ToolType          `json:"type"`     // 工具类型
+	// 工具类型
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Type ToolType `json:"type,omitempty"`
+	// 工具函数
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Function *ChatToolFunction `json:"function,omitempty"`
 }
 
 // ChatSearchContextSize 搜索上下文大小
+//
+//	提供商支持: OpenAI
 type ChatSearchContextSize string
 
 const (
-	ChatSearchContextSizeLow    ChatSearchContextSize = "low"
+	// 提供商支持: OpenAI
+	ChatSearchContextSizeLow ChatSearchContextSize = "low"
+	// 提供商支持: OpenAI
 	ChatSearchContextSizeMedium ChatSearchContextSize = "medium"
-	ChatSearchContextSizeHigh   ChatSearchContextSize = "high"
+	// 提供商支持: OpenAI
+	ChatSearchContextSizeHigh ChatSearchContextSize = "high"
 )
 
 // ChatApproximateLocation 用户的大致位置参数
+//
+//	提供商支持: OpenAI
 type ChatApproximateLocation struct {
-	City     string `json:"city,omitempty"`     // 用户所在城市
-	Country  string `json:"country,omitempty"`  // 用户所在国家的两字母 ISO 代码
-	Region   string `json:"region,omitempty"`   // 用户所在地区
-	Timezone string `json:"timezone,omitempty"` // 用户的 IANA 时区
+	// 用户所在城市
+	// 提供商支持: OpenAI
+	City string `json:"city,omitempty"`
+	// 用户所在国家的两字母 ISO 代码
+	// 提供商支持: OpenAI
+	Country string `json:"country,omitempty"`
+	// 用户所在地区
+	// 提供商支持: OpenAI
+	Region string `json:"region,omitempty"`
+	// 用户的 IANA 时区
+	// 提供商支持: OpenAI
+	Timezone string `json:"timezone,omitempty"`
 }
 
 // ChatApproximateLocationType 位置近似类型
+//
+//	提供商支持: OpenAI
 type ChatApproximateLocationType string
 
 const (
+	// 提供商支持: OpenAI
 	ChatApproximateLocationTypeApproximate ChatApproximateLocationType = "approximate"
 )
 
 // ChatUserLocation 用户位置信息
+//
+//	提供商支持: OpenAI
 type ChatUserLocation struct {
-	Approximate *ChatApproximateLocation    `json:"approximate"` // 大致位置信息
-	Type        ChatApproximateLocationType `json:"type"`        // 位置近似类型
+	// 大致位置信息
+	// 提供商支持: OpenAI
+	Approximate *ChatApproximateLocation `json:"approximate,omitempty"`
+	// 位置近似类型
+	// 提供商支持: OpenAI
+	Type ChatApproximateLocationType `json:"type,omitempty"`
 }
 
+// ChatSearchStrategyType 搜索互联网信息的数量
+//
+//	提供商支持: Aliyunbl
+type ChatSearchStrategy string
+
+const (
+	// 在请求时搜索5条互联网信息
+	// 提供商支持: Aliyunbl
+	ChatSearchStrategyTypeStandard ChatSearchStrategy = "standard"
+	// 在请求时搜索10条互联网信息
+	// 提供商支持: Aliyunbl
+	ChatSearchStrategyTypeDeep ChatSearchStrategy = "pro"
+)
+
 // ChatWebSearchOptions 网络搜索选项
+//
+//	提供商支持: OpenAI | Aliyunbl
 type ChatWebSearchOptions struct {
-	SearchContextSize ChatSearchContextSize `json:"search_context_size,omitempty"` // 搜索上下文大小
-	UserLocation      *ChatUserLocation     `json:"user_location,omitempty"`       // 用户位置信息
+	// 搜索上下文大小
+	// 提供商支持: OpenAI
+	SearchContextSize ChatSearchContextSize `json:"search_context_size,omitempty"`
+	// 用户位置信息
+	// 提供商支持: OpenAI
+	UserLocation *ChatUserLocation `json:"user_location,omitempty"`
+	// 是否强制开启搜索
+	// 提供商支持: Aliyunbl
+	ForcedSearch bool `json:"forced_search,omitempty"`
+	// 搜索互联网信息的数量
+	// 提供商支持: Aliyunbl
+	SearchStrategy ChatSearchStrategy `json:"search_strategy,omitempty"`
+}
+
+// ChatTranslationLanguageType 翻译支持的语言类型
+//
+//	提供商支持: Aliyunbl
+type ChatTranslationLanguageType string
+
+const (
+	// 自动检测语言
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeAuto ChatTranslationLanguageType = "auto"
+	// 中文
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeChinese ChatTranslationLanguageType = "Chinese"
+	// 英语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeEnglish ChatTranslationLanguageType = "English"
+	// 日语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeJapanese ChatTranslationLanguageType = "Japanese"
+	// 韩语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeKorean ChatTranslationLanguageType = "Korean"
+	// 泰语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeThai ChatTranslationLanguageType = "Thai"
+	// 法语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeFrench ChatTranslationLanguageType = "French"
+	// 德语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeGerman ChatTranslationLanguageType = "German"
+	// 西班牙语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeSpanish ChatTranslationLanguageType = "Spanish"
+	// 阿拉伯语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeArabic ChatTranslationLanguageType = "Arabic"
+	// 印尼语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeIndonesian ChatTranslationLanguageType = "Indonesian"
+	// 越南语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeVietnamese ChatTranslationLanguageType = "Vietnamese"
+	// 巴西葡萄牙语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypePortuguese ChatTranslationLanguageType = "Portuguese"
+	// 意大利语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeItalian ChatTranslationLanguageType = "Italian"
+	// 荷兰语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeDutch ChatTranslationLanguageType = "Dutch"
+	// 俄语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeRussian ChatTranslationLanguageType = "Russian"
+	// 高棉语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeKhmer ChatTranslationLanguageType = "Khmer"
+	// 宿务语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeCebuano ChatTranslationLanguageType = "Cebuano"
+	// 菲律宾语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeFilipino ChatTranslationLanguageType = "Filipino"
+	// 捷克语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeCzech ChatTranslationLanguageType = "Czech"
+	// 波兰语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypePolish ChatTranslationLanguageType = "Polish"
+	// 波斯语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypePersian ChatTranslationLanguageType = "Persian"
+	// 希伯来语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeHebrew ChatTranslationLanguageType = "Hebrew"
+	// 土耳其语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeTurkish ChatTranslationLanguageType = "Turkish"
+	// 印地语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeHindi ChatTranslationLanguageType = "Hindi"
+	// 孟加拉语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeBengali ChatTranslationLanguageType = "Bengali"
+	// 乌尔都语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeUrdu ChatTranslationLanguageType = "Urdu"
+	// 马来语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeMalay ChatTranslationLanguageType = "Malay"
+	// 匈牙利语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeHungarian ChatTranslationLanguageType = "Hungarian"
+	// 瑞典语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeSwedish ChatTranslationLanguageType = "Swedish"
+	// 芬兰语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeFinnish ChatTranslationLanguageType = "Finnish"
+	// 缅甸语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeBurmese ChatTranslationLanguageType = "Burmese"
+	// 老挝语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeLao ChatTranslationLanguageType = "Lao"
+	// 粤语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeCantonese ChatTranslationLanguageType = "Cantonese"
+	// 罗马尼亚语
+	// 提供商支持: Aliyunbl
+	ChatTranslationLanguageTypeRomanian ChatTranslationLanguageType = "Romanian"
+)
+
+// ChatTranslationTerm 翻译术语
+//
+//	提供商支持: Aliyunbl
+type ChatTranslationTerm struct {
+	// 源语言的术语
+	// 提供商支持: Aliyunbl
+	Source string `json:"source,omitempty"`
+	// 目标语言的术语
+	// 提供商支持: Aliyunbl
+	Target string `json:"target,omitempty"`
+}
+
+// ChatTranslationMemory 翻译记忆
+//
+//	提供商支持: Aliyunbl
+type ChatTranslationMemory struct {
+	// 源语言的语句
+	// 提供商支持: Aliyunbl
+	Source string `json:"source,omitempty"`
+	// 目标语言的语句
+	// 提供商支持: Aliyunbl
+	Target string `json:"target,omitempty"`
+}
+
+// ChatTranslationOptions 翻译选项
+//
+//	提供商支持: Aliyunbl
+type ChatTranslationOptions struct {
+	// 源语言的英文全称，可以将source_lang设置为"auto"，模型会自动判断输入文本属于哪种语言
+	// 提供商支持: Aliyunbl
+	SourceLang ChatTranslationLanguageType `json:"source_lang,omitempty"`
+	// 目标语言的英文全称
+	// 提供商支持: Aliyunbl
+	TargetLang ChatTranslationLanguageType `json:"target_lang,omitempty"`
+	// 在使用术语干预翻译功能时需要设置的术语数组
+	// 提供商支持: Aliyunbl
+	Terms []ChatTranslationTerm `json:"terms,omitempty"`
+	// 在使用翻译记忆功能时需要设置的翻译记忆数组
+	// 提供商支持: Aliyunbl
+	TmList []ChatTranslationMemory `json:"tm_list,omitempty"`
+	// 在使用领域提示功能时需要设置的领域提示语句
+	// 提供商支持: Aliyunbl
+	Domains string `json:"domains,omitempty"`
 }
 
 // ChatRequest 聊天请求
+//
+//	提供商支持: OpenAI | DeepSeek | Aliyunbl
 type ChatRequest struct {
 	UserInfo
-	Provider            consts.Provider         `json:"provider"`                        // 提供商
-	Messages            []ChatMessage           `json:"messages"`                        // 消息数组
-	Model               string                  `json:"model"`                           // 模型名称
-	Audio               *ChatAudioOutputArgs    `json:"audio,omitempty"`                 // 音频输出的参数
-	FrequencyPenalty    float32                 `json:"frequency_penalty,omitempty"`     // 介于 -2.0 和 2.0 之间的数值。正值会根据文本中已有内容的出现频率对新 token 进行惩罚，从而降低模型逐字重复相同内容的可能性
-	LogitBias           map[string]int          `json:"logit_bias,omitempty"`            // 修改指定标记在补全中出现的可能性
-	LogProbs            bool                    `json:"logprobs,omitempty"`              // 是否返回所输出 token 的对数概率
-	MaxCompletionTokens int                     `json:"max_completion_tokens,omitempty"` // 生成补全内容的最大令牌数上限，包括可见的输出令牌和推理令牌
-	Metadata            map[string]string       `json:"metadata,omitempty"`              // 元数据
-	Modalities          []string                `json:"modalities,omitempty"`            // 希望模型生成的输出类型
-	N                   int                     `json:"n,omitempty"`                     // 为每个输入消息生成的聊天完成选项数量
-	ParallelToolCalls   bool                    `json:"parallel_tool_calls,omitempty"`   // 是否在使用工具时启用并行函数调用
-	Prediction          *ChatPrediction         `json:"prediction,omitempty"`            // 预测输出配置
-	PresencePenalty     float32                 `json:"presence_penalty,omitempty"`      // 介于 -2.0 和 2.0 之间的数值。正值会根据新标记是否已在文本中出现过对其进行惩罚，从而增加模型讨论新话题的可能性
-	ReasoningEffort     ChatReasoningEffortType `json:"reasoning_effort,omitempty"`      // 仅适用于 o 系列模型，约束推理模型的推理努力程度
-	ResponseFormat      *ChatResponseFormat     `json:"response_format,omitempty"`       // 响应格式
-	Seed                int                     `json:"seed,omitempty"`                  // 随机种子
-	ServiceTier         string                  `json:"service_tier,omitempty"`          // 指定用于处理请求的延迟层级。此参数与订阅了规模层级服务的客户相关
-	Stop                []string                `json:"stop,omitempty"`                  // 最多4个序列，当API遇到这些序列时将停止生成更多标记。返回的文本不会包含停止序列
-	Store               bool                    `json:"store,omitempty"`                 // 是否存储此聊天完成请求的输出，用于我们的模型蒸馏或评估产品
-	Stream              bool                    `json:"stream,omitempty"`                // 是否流式传输响应
-	StreamOptions       *ChatStreamOptions      `json:"stream_options,omitempty"`        // 流式传输选项
-	Temperature         float32                 `json:"temperature,omitempty"`           // 采样温度值，范围在0到2之间
-	ToolChoice          *ChatToolChoice         `json:"tool_choice,omitempty"`           // 模型是否调用工具
-	Tools               []ChatTool              `json:"tools,omitempty"`                 // 工具列表
-	TopLogProbs         int                     `json:"top_logprobs,omitempty"`          // 一个介于0和20之间的整数，指定在每个标记位置返回的最可能标记的数量，每个标记都有相关的对数概率。如果使用此参数，必须将logprobs设置为true
-	TopP                float32                 `json:"top_p,omitempty"`                 // 一种替代温度采样的方法，我们通常建议调整此参数或温度（temperature），但不要同时调整两者
-	User                string                  `json:"user,omitempty"`                  // 代表你的终端用户的唯一标识符
-	WebSearchOptions    *ChatWebSearchOptions   `json:"web_search_options,omitempty"`    // 网络搜索选项
+	Provider consts.Provider `json:"provider,omitempty"` // 提供商
+	// 消息数组
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Messages []ChatMessage `json:"messages,omitempty"`
+	// 模型名称
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Model string `json:"model,omitempty"`
+	// 输出音频的音色与格式
+	// 提供商支持: OpenAI | Aliyunbl
+	Audio *ChatAudioOutputArgs `json:"audio,omitempty"`
+	// 介于 -2.0 和 2.0 之间的数字。如果该值为正，那么新 token 会根据其在已有文本中的出现频率受到相应的惩罚，降低模型重复相同内容的可能性
+	// 提供商支持: OpenAI | DeepSeek
+	FrequencyPenalty float32 `json:"frequency_penalty,omitempty"`
+	// 修改指定标记在补全中出现的可能性
+	// 提供商支持: OpenAI
+	LogitBias map[string]int `json:"logit_bias,omitempty"`
+	// 是否返回输出 Token 的对数概率
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	LogProbs bool `json:"logprobs,omitempty"`
+	// 生成补全内容的最大令牌数上限
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	MaxCompletionTokens int `json:"max_completion_tokens,omitempty"`
+	// 元数据
+	// 提供商支持: OpenAI
+	Metadata map[string]string `json:"metadata,omitempty"`
+	// 输出数据的模态
+	// 提供商支持: OpenAI | Aliyunbl
+	Modalities []ChatModalitiesType `json:"modalities,omitempty"`
+	// 生成响应的个数
+	// 提供商支持: OpenAI | Aliyunbl
+	N int `json:"n,omitempty"`
+	// 是否开启并行工具调用
+	// 提供商支持: OpenAI | Aliyunbl
+	ParallelToolCalls bool `json:"parallel_tool_calls,omitempty"`
+	// 预测输出配置
+	// 提供商支持: OpenAI
+	Prediction *ChatPrediction `json:"prediction,omitempty"`
+	// 介于 -2.0 和 2.0 之间的数字。如果该值为正，那么新 token 会根据其是否已在已有文本中出现受到相应的惩罚，从而增加模型谈论新主题的可能性
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	PresencePenalty float32 `json:"presence_penalty,omitempty"`
+	// 仅适用于 o 系列模型，约束推理模型的推理努力程度
+	// 提供商支持: OpenAI
+	ReasoningEffort ChatReasoningEffortType `json:"reasoning_effort,omitempty"`
+	// 响应格式
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	ResponseFormat *ChatResponseFormat `json:"response_format,omitempty"`
+	// 随机种子
+	// 提供商支持: OpenAI | Aliyunbl
+	Seed int `json:"seed,omitempty"`
+	// 指定用于处理请求的延迟层级。此参数与订阅了规模层级服务的客户相关
+	// 提供商支持: OpenAI
+	ServiceTier string `json:"service_tier,omitempty"`
+	// 当API遇到这些序列时将停止生成更多标记。返回的文本不会包含停止序列
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Stop []string `json:"stop,omitempty"`
+	// 是否存储此聊天完成请求的输出，用于我们的模型蒸馏或评估产品
+	// 提供商支持: OpenAI
+	Store bool `json:"store,omitempty"`
+	// 是否流式传输响应
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Stream bool `json:"stream,omitempty"`
+	// 流式传输选项
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	StreamOptions *ChatStreamOptions `json:"stream_options,omitempty"`
+	// 采样温度值，范围在0到2之间
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Temperature float32 `json:"temperature,omitempty"`
+	// 指定工具调用的策略
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	ToolChoice *ChatToolChoice `json:"tool_choice,omitempty"`
+	// 可供模型调用的工具数组
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	Tools []ChatTool `json:"tools,omitempty"`
+	// 一个介于0和20之间的整数，指定在每个标记位置返回的最可能标记的数量，每个标记都有相关的对数概率。如果使用此参数，必须将logprobs设置为true
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	TopLogProbs int `json:"top_logprobs,omitempty"`
+	// 一种替代温度采样的方法，我们通常建议调整此参数或温度（temperature），但不要同时调整两者
+	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	TopP float32 `json:"top_p,omitempty"`
+	// 网络搜索选项
+	// 提供商支持: OpenAI | Aliyunbl
+	WebSearchOptions *ChatWebSearchOptions `json:"web_search_options,omitempty"`
+	// 生成过程中采样候选集的大小
+	// 提供商支持: Aliyunbl
+	TopK int `json:"top_k,omitempty"`
+	// 是否开启思考模式
+	// 提供商支持: Aliyunbl
+	EnableThinking bool `json:"enable_thinking,omitempty"`
+	// 思考过程的最大长度，在enable_thinking为true时生效
+	// 提供商支持: Aliyunbl
+	ThinkingBudget int `json:"thinking_budget,omitempty"`
+	// 翻译选项
+	// 提供商支持: Aliyunbl
+	TranslationOptions *ChatTranslationOptions `json:"translation_options,omitempty"`
+	// 在 API 的内容安全能力基础上，是否进一步识别输入输出内容的违规信息
+	// 可选值：'{"input":"cip","output":"cip"}'，表示同时检查输入和输出
+	// 提供商支持: Aliyunbl
+	XDashScopeDataInspection string `json:"-"`
 }
 
 // MarshalJSON 序列化JSON
 func (r ChatRequest) MarshalJSON() (b []byte, err error) {
-	// 获取提供商
-	provider := r.Provider
-	// 创建一个别名结构体
-	type Alias ChatRequest
-	temp := struct {
-		Provider  string `json:"provider,omitempty"`
-		UserID    string `json:"user_id,omitempty"`
-		MaxTokens int    `json:"max_tokens,omitempty"`
-		Alias
-	}{
-		Provider: "",
-		Alias:    Alias(r),
+	strategy, ok := chatRequestStrategies[r.Provider]
+	if !ok {
+		return nil, fmt.Errorf("unsupported provider: %s", r.Provider)
 	}
-	// 根据提供商设置最大令牌数
-	switch provider {
-	case consts.DeepSeek:
-		temp.MaxTokens = r.MaxCompletionTokens
-		temp.MaxCompletionTokens = 0
-	}
-	// 序列化JSON
-	return json.Marshal(temp)
+	return strategy(r)
 }
 
 // ChatFinishReason 模型停止生成 token 的原因
