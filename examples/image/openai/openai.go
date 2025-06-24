@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-21 05:29:23
+ * @LastEditTime: 2025-06-23 03:03:26
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,14 +11,12 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
-	"github.com/liusuxian/go-aisdk/internal/utils"
 	"github.com/liusuxian/go-aisdk/models"
-	imageutils "github.com/liusuxian/go-aisdk/utils"
+	"github.com/liusuxian/go-aisdk/utils"
 	"io"
 	"log"
 	"os"
@@ -44,24 +42,25 @@ func createImage(ctx context.Context, client *aisdk.SDKClient) (response models.
 		UserInfo: models.UserInfo{
 			UserID: "123456",
 		},
-		Provider: consts.OpenAI,
-		Prompt:   "一间有着精致雕花窗户的花店，漂亮的深色木质门上挂着铜制把手。店内摆放着各式各样的鲜花，包括玫瑰、百合和向日葵，色彩鲜艳，生机勃勃。背景是温馨的室内场景，透过窗户可以看到街道。高清写实摄影，中景构图。",
-		Model:    consts.OpenAIGPTImage1,
-		N:        2,
-		Quality:  models.ImageQualityHigh,
-		Size:     models.ImageSize1024x1024,
+		Provider:     consts.OpenAI,
+		Prompt:       "一间有着精致雕花窗户的花店，漂亮的深色木质门上挂着铜制把手。店内摆放着各式各样的鲜花，包括玫瑰、百合和向日葵，色彩鲜艳，生机勃勃。背景是温馨的室内场景，透过窗户可以看到街道。高清写实摄影，中景构图。",
+		Model:        consts.OpenAIGPTImage1,
+		N:            2,
+		OutputFormat: models.ImageOutputFormatJPEG,
+		Quality:      models.ImageQualityHigh,
+		Size:         models.ImageSize1024x1024,
 	}, httpclient.WithTimeout(time.Minute*5))
 }
 
 func createImageEdit(ctx context.Context, client *aisdk.SDKClient, filenames []string) (response models.ImageResponse, err error) {
 	imageReaders := make([]io.Reader, 0, len(filenames)*2)
 	for i, filename := range filenames {
-		var reader *imageutils.ImageReader
-		if reader, err = imageutils.FileToReader(filename); err != nil {
+		var reader *utils.ImageReader
+		if reader, err = utils.FileToReader(filename); err != nil {
 			return
 		}
 		imageReaders = append(imageReaders, reader)
-		if reader, err = imageutils.URLToReader(fmt.Sprintf("https://www.gstatic.com/webp/gallery/%d.webp", i+1), fmt.Sprintf("%d", i+1), time.Second*10); err != nil {
+		if reader, err = utils.URLToReader(fmt.Sprintf("https://www.gstatic.com/webp/gallery/%d.webp", i+1), fmt.Sprintf("%d", i+1), time.Second*10); err != nil {
 			return
 		}
 		imageReaders = append(imageReaders, reader)
@@ -79,27 +78,6 @@ func createImageEdit(ctx context.Context, client *aisdk.SDKClient, filenames []s
 		Quality:      models.ImageQualityHigh,
 		Size:         models.ImageSize1024x1024,
 	}, httpclient.WithTimeout(time.Minute*5))
-}
-
-// saveBase64Image 将base64图片数据保存为文件
-func saveBase64Image(base64Data string) (filename string, err error) {
-	// 创建images目录来保存图片
-	imagesDir := "generated_images"
-	if err = os.MkdirAll(imagesDir, 0755); err != nil {
-		return "", fmt.Errorf("create images directory error: %v", err)
-	}
-	// 解码base64数据
-	var imageData []byte
-	if imageData, err = base64.StdEncoding.DecodeString(base64Data); err != nil {
-		return "", fmt.Errorf("decode base64 data error: %v", err)
-	}
-	// 写入文件
-	ext := imageutils.DetectImageType(imageData)
-	filename = filepath.Join(imagesDir, fmt.Sprintf("image_%d.%s", time.Now().UnixNano(), ext))
-	if err = os.WriteFile(filename, imageData, 0644); err != nil {
-		return "", fmt.Errorf("write image file error: %v", err)
-	}
-	return
 }
 
 func main() {
@@ -138,7 +116,7 @@ func main() {
 	}
 	defer func() {
 		metrics := client.GetMetrics()
-		log.Printf("metrics = %s\n", utils.MustString(metrics))
+		log.Printf("metrics = %+v\n", metrics)
 	}()
 
 	ctx := context.Background()
@@ -152,7 +130,7 @@ func main() {
 	filenames := make([]string, 0, len(response1.Data))
 	for i, v := range response1.Data {
 		if v.B64JSON != "" {
-			if filename, err := saveBase64Image(v.B64JSON); err != nil {
+			if filename, err := utils.SaveBase64Image(v.B64JSON, "generated_images", fmt.Sprintf("image_%d", i+1)); err != nil {
 				log.Printf("save image %d error: %v", i+1, err)
 			} else {
 				filenames = append(filenames, filename)
@@ -170,7 +148,7 @@ func main() {
 	// 保存每张编辑的图片
 	for i, v := range response2.Data {
 		if v.B64JSON != "" {
-			if _, err := saveBase64Image(v.B64JSON); err != nil {
+			if _, err := utils.SaveBase64Image(v.B64JSON, "generated_images", fmt.Sprintf("image_edit_%d", i+1)); err != nil {
 				log.Printf("save image edit %d error: %v", i+1, err)
 			}
 		} else {
