@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-19 17:11:50
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-21 05:24:42
+ * @LastEditTime: 2025-06-24 10:44:57
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -92,14 +92,13 @@ type ImageRequest struct {
 	Background        ImageBackground     `json:"background,omitempty"`         // 设置生成图像的背景透明度
 	Model             string              `json:"model,omitempty"`              // 模型名称
 	Moderation        ImageModeration     `json:"moderation,omitempty"`         // 内容审核级别
-	N                 int                 `json:"n,omitempty"`                  // 生成图像数量
+	N                 int                 `json:"n,omitempty"`                  // 生成的图像数量。必须在1到10之间
 	OutputCompression int                 `json:"output_compression,omitempty"` // 图像压缩级别(0-100%)
 	OutputFormat      ImageOutputFormat   `json:"output_format,omitempty"`      // 返回图像格式
 	Quality           ImageQuality        `json:"quality,omitempty"`            // 图像质量
 	ResponseFormat    ImageResponseFormat `json:"response_format,omitempty"`    // 响应格式
 	Size              ImageSize           `json:"size,omitempty"`               // 图像尺寸
 	Style             ImageStyle          `json:"style,omitempty"`              // 图像风格
-	User              string              `json:"user,omitempty"`               // 用户标识符，用于监控和滥用检测
 }
 
 // MarshalJSON 序列化JSON
@@ -109,9 +108,75 @@ func (r ImageRequest) MarshalJSON() (b []byte, err error) {
 	temp := struct {
 		Provider string `json:"provider,omitempty"`
 		UserID   string `json:"user_id,omitempty"`
+		User     string `json:"user,omitempty"` // 用户标识符，用于监控和滥用检测
 		Alias
 	}{
 		Provider: "",
+		User:     r.UserInfo.UserID,
+		Alias:    Alias(r),
+	}
+	// 序列化JSON
+	return json.Marshal(temp)
+}
+
+// ImageEditRequest 编辑图像请求
+type ImageEditRequest struct {
+	UserInfo
+	Provider          consts.Provider     `json:"provider"`                     // 提供商
+	Image             []io.Reader         `json:"image,omitempty"`              // 要编辑的图像源数组
+	Prompt            string              `json:"prompt"`                       // 提示词
+	Background        ImageBackground     `json:"background,omitempty"`         // 设置生成图像的背景透明度
+	Mask              io.Reader           `json:"mask,omitempty"`               // mask图像源，其中完全透明的区域指示应该编辑的位置
+	Model             string              `json:"model,omitempty"`              // 模型名称
+	N                 int                 `json:"n,omitempty"`                  // 生成的图像数量。必须在1到10之间
+	OutputCompression int                 `json:"output_compression,omitempty"` // 图像压缩级别(0-100%)
+	OutputFormat      ImageOutputFormat   `json:"output_format,omitempty"`      // 返回图像格式
+	Quality           ImageQuality        `json:"quality,omitempty"`            // 图像质量
+	ResponseFormat    ImageResponseFormat `json:"response_format,omitempty"`    // 响应格式
+	Size              ImageSize           `json:"size,omitempty"`               // 图像尺寸
+}
+
+// MarshalJSON 序列化JSON
+func (r ImageEditRequest) MarshalJSON() (b []byte, err error) {
+	// 创建一个别名结构体
+	type Alias ImageEditRequest
+	temp := struct {
+		Provider string `json:"provider,omitempty"`
+		UserID   string `json:"user_id,omitempty"`
+		User     string `json:"user,omitempty"` // 用户标识符，用于监控和滥用检测
+		Alias
+	}{
+		Provider: "",
+		User:     r.UserInfo.UserID,
+		Alias:    Alias(r),
+	}
+	// 序列化JSON
+	return json.Marshal(temp)
+}
+
+// ImageVariationRequest 变换图像请求
+type ImageVariationRequest struct {
+	UserInfo
+	Provider       consts.Provider     `json:"provider"`                  // 提供商
+	Image          io.Reader           `json:"image"`                     // 用作变换的基础图像。必须是有效的PNG文件，小于4MB，且为正方形
+	Model          string              `json:"model,omitempty"`           // 模型名称
+	N              int                 `json:"n,omitempty"`               // 生成的图像数量。必须在1到10之间
+	ResponseFormat ImageResponseFormat `json:"response_format,omitempty"` // 响应格式
+	Size           ImageSize           `json:"size,omitempty"`            // 图像尺寸
+}
+
+// MarshalJSON 序列化JSON
+func (r ImageVariationRequest) MarshalJSON() (b []byte, err error) {
+	// 创建一个别名结构体
+	type Alias ImageVariationRequest
+	temp := struct {
+		Provider string `json:"provider,omitempty"`
+		UserID   string `json:"user_id,omitempty"`
+		User     string `json:"user,omitempty"` // 用户标识符，用于监控和滥用检测
+		Alias
+	}{
+		Provider: "",
+		User:     r.UserInfo.UserID,
 		Alias:    Alias(r),
 	}
 	// 序列化JSON
@@ -145,38 +210,4 @@ type ImageResponse struct {
 	Data    []ImageResponseData `json:"data"`            // 生成图像的列表
 	Usage   *ImageUsage         `json:"usage,omitempty"` // 图像生成的token使用信息
 	httpclient.HttpHeader
-}
-
-// ImageEditRequest 编辑图像请求
-type ImageEditRequest struct {
-	UserInfo
-	Provider          consts.Provider     `json:"provider"`                     // 提供商
-	Image             []io.Reader         `json:"image,omitempty"`              // 要编辑的图像源数组
-	Prompt            string              `json:"prompt"`                       // 提示词
-	Background        ImageBackground     `json:"background,omitempty"`         // 设置生成图像的背景透明度
-	Mask              io.Reader           `json:"mask,omitempty"`               // mask图像源，其中完全透明的区域指示应该编辑的位置
-	Model             string              `json:"model,omitempty"`              // 模型名称
-	N                 int                 `json:"n,omitempty"`                  // 生成图像数量
-	OutputCompression int                 `json:"output_compression,omitempty"` // 图像压缩级别(0-100%)
-	OutputFormat      ImageOutputFormat   `json:"output_format,omitempty"`      // 返回图像格式
-	Quality           ImageQuality        `json:"quality,omitempty"`            // 图像质量
-	ResponseFormat    ImageResponseFormat `json:"response_format,omitempty"`    // 响应格式
-	Size              ImageSize           `json:"size,omitempty"`               // 图像尺寸
-	User              string              `json:"user,omitempty"`               // 用户标识符，用于监控和滥用检测
-}
-
-// MarshalJSON 序列化JSON
-func (r ImageEditRequest) MarshalJSON() (b []byte, err error) {
-	// 创建一个别名结构体
-	type Alias ImageEditRequest
-	temp := struct {
-		Provider string `json:"provider,omitempty"`
-		UserID   string `json:"user_id,omitempty"`
-		Alias
-	}{
-		Provider: "",
-		Alias:    Alias(r),
-	}
-	// 序列化JSON
-	return json.Marshal(temp)
 }

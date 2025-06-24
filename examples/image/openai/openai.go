@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-23 03:03:26
+ * @LastEditTime: 2025-06-24 12:40:10
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -80,6 +80,24 @@ func createImageEdit(ctx context.Context, client *aisdk.SDKClient, filenames []s
 	}, httpclient.WithTimeout(time.Minute*5))
 }
 
+func createImageVariation(ctx context.Context, client *aisdk.SDKClient, filename string) (response models.ImageResponse, err error) {
+	var imageReader *utils.ImageReader
+	if imageReader, err = utils.FileToReader(filename); err != nil {
+		return
+	}
+	return client.CreateImageVariation(ctx, models.ImageVariationRequest{
+		UserInfo: models.UserInfo{
+			UserID: "123456",
+		},
+		Provider:       consts.OpenAI,
+		Image:          imageReader,
+		Model:          consts.OpenAIDallE2,
+		N:              2,
+		ResponseFormat: models.ImageResponseFormatURL,
+		Size:           models.ImageSize1024x1024,
+	}, httpclient.WithTimeout(time.Minute*5))
+}
+
 func main() {
 	tempDir, err := os.MkdirTemp("", "config-test")
 	if err != nil {
@@ -97,7 +115,7 @@ func main() {
 	configData := `{
   "providers": {
     "openai": {
-      "base_url": "https://chatapi.onechats.ai/v1",
+      "base_url": "https://niubi.zeabur.app/v1",
 			"api_keys": [%v]
     }
   }
@@ -153,6 +171,22 @@ func main() {
 			}
 		} else {
 			log.Printf("image edit %d base64 data is empty", i+1)
+		}
+	}
+	// 变换图像
+	response3, err := createImageVariation(ctx, client, filenames[0])
+	if err != nil {
+		log.Printf("createImageVariation error = %v, request_id = %s", err, aisdk.RequestID(err))
+		return
+	}
+	// 保存每张变换的图片
+	for i, v := range response3.Data {
+		if v.URL != "" {
+			if _, err := utils.SaveURLImage(v.URL, "generated_images", fmt.Sprintf("image_variation_%d", i+1), time.Second*10); err != nil {
+				log.Printf("save image variation %d error: %v", i+1, err)
+			}
+		} else {
+			log.Printf("image variation %d base64 data is empty", i+1)
 		}
 	}
 }

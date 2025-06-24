@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-19 17:37:53
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-20 22:52:42
+ * @LastEditTime: 2025-06-24 10:47:18
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -21,6 +21,7 @@ import (
 const (
 	apiImagesGenerations = "/images/generations"
 	apiImagesEdits       = "/images/edits"
+	apiImagesVariations  = "/images/variations"
 )
 
 // CreateImage 创建图像
@@ -97,8 +98,8 @@ func (s *openAIProvider) CreateImageEdit(ctx context.Context, request models.Ima
 			}
 		}
 		// 用户
-		if request.User != "" {
-			if e = builder.WriteField("user", request.User); e != nil {
+		if request.UserInfo.UserID != "" {
+			if e = builder.WriteField("user", request.UserInfo.UserID); e != nil {
 				return
 			}
 		}
@@ -106,5 +107,51 @@ func (s *openAIProvider) CreateImageEdit(ctx context.Context, request models.Ima
 		return builder.Close()
 	}
 	err = common.ExecuteRequest(ctx, http.MethodPost, s.providerConfig.BaseURL, apiImagesEdits, opts, s.lb, formHandler, &response)
+	return
+}
+
+// CreateImageVariation 变换图像
+func (s *openAIProvider) CreateImageVariation(ctx context.Context, request models.ImageVariationRequest, opts ...httpclient.HTTPClientOption) (response models.ImageResponse, err error) {
+	formHandler := func(builder httpclient.FormBuilder) (e error) {
+		// 用作变换的基础图像。必须是有效的PNG文件，小于4MB，且为正方形
+		if request.Image != nil {
+			if e = builder.CreateFormFileReader("image", request.Image, ""); e != nil {
+				return
+			}
+		}
+		// 模型名称
+		if request.Model != "" {
+			if e = builder.WriteField("model", request.Model); e != nil {
+				return
+			}
+		}
+		// 生成图像数量
+		if request.N > 0 {
+			if e = builder.WriteField("n", strconv.Itoa(request.N)); e != nil {
+				return
+			}
+		}
+		// 响应格式
+		if request.ResponseFormat != "" {
+			if e = builder.WriteField("response_format", string(request.ResponseFormat)); e != nil {
+				return
+			}
+		}
+		// 图像尺寸
+		if request.Size != "" {
+			if e = builder.WriteField("size", string(request.Size)); e != nil {
+				return
+			}
+		}
+		// 用户
+		if request.UserInfo.UserID != "" {
+			if e = builder.WriteField("user", request.UserInfo.UserID); e != nil {
+				return
+			}
+		}
+		// 关闭构建器
+		return builder.Close()
+	}
+	err = common.ExecuteRequest(ctx, http.MethodPost, s.providerConfig.BaseURL, apiImagesVariations, opts, s.lb, formHandler, &response)
 	return
 }

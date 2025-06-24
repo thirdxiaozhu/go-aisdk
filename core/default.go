@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-19 17:59:35
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 21:10:41
+ * @LastEditTime: 2025-06-24 10:42:21
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -49,5 +49,11 @@ func (s *DefaultProviderService) CreateImage(ctx context.Context, request models
 // CreateImageEdit 编辑图像
 func (s *DefaultProviderService) CreateImageEdit(ctx context.Context, request models.ImageEditRequest, opts ...httpclient.HTTPClientOption) (response models.ImageResponse, err error) {
 	err = utils.WrapMethodNotSupported(request.Provider, consts.ImageModel, request.Model, "CreateImageEdit")
+	return
+}
+
+// CreateImageVariation 变换图像
+func (s *DefaultProviderService) CreateImageVariation(ctx context.Context, request models.ImageVariationRequest, opts ...httpclient.HTTPClientOption) (response models.ImageResponse, err error) {
+	err = utils.WrapMethodNotSupported(request.Provider, consts.ImageModel, request.Model, "CreateImageVariation")
 	return
 }
