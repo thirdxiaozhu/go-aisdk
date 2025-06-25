@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 13:01:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 13:22:02
+ * @LastEditTime: 2025-06-25 14:10:39
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -18,6 +18,7 @@ import (
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -170,14 +171,23 @@ func main() {
 			return nil
 		}
 		log.Printf("createChatCompletionStream item = %+v", item)
-		if item.Usage != nil {
+		if item.Usage != nil && item.StreamStats != nil {
 			log.Printf("createChatCompletionStream usage = %+v", item.Usage)
-		}
-		if item.StreamStats != nil {
 			log.Printf("createChatCompletionStream stream_stats = %+v", item.StreamStats)
 		}
 		return nil
 	}); err != nil {
+		switch {
+		case errors.Is(err, aisdk.ErrTooManyEmptyStreamMessages):
+			fmt.Println("ErrTooManyEmptyStreamMessages =", true)
+		case errors.Is(err, aisdk.ErrStreamReturnIntervalTimeout):
+			fmt.Println("ErrStreamReturnIntervalTimeout =", true)
+		default:
+			var netErr net.Error
+			if errors.As(err, &netErr) {
+				fmt.Println("net.Error =", true)
+			}
+		}
 		log.Printf("createChatCompletionStream item error = %v", err)
 		return
 	}
