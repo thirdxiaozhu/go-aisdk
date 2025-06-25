@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 12:31:10
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 12:58:05
+ * @LastEditTime: 2025-06-25 17:07:39
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -174,6 +174,46 @@ func init() {
 				consts.AliBLQwen2Dot5Coder3bInstruct:      true,
 				consts.AliBLQwen2Dot5Coder15bInstruct:     true,
 				consts.AliBLQwen2Dot5Coder05bInstruct:     true,
+				consts.AliBLDeepSeekR1:                    true,
+				consts.AliBLDeepSeekR1_0528:               true,
+				consts.AliBLDeepSeekV3:                    true,
+				consts.AliBLDeepSeekR1DistillQwen15b:      true,
+				consts.AliBLDeepSeekR1DistillQwen7b:       true,
+				consts.AliBLDeepSeekR1DistillQwen14b:      true,
+				consts.AliBLDeepSeekR1DistillQwen32b:      true,
+				consts.AliBLDeepSeekR1DistillLlama8b:      true,
+				consts.AliBLDeepSeekR1DistillLlama70b:     true,
+				consts.AliBLLlama3Dot3_70bInstruct:        true,
+				consts.AliBLLlama3Dot2_3bInstruct:         true,
+				consts.AliBLLlama3Dot2_1bInstruct:         true,
+				consts.AliBLLlama3Dot1_405bInstruct:       true,
+				consts.AliBLLlama3Dot1_70bInstruct:        true,
+				consts.AliBLLlama3Dot1_8bInstruct:         true,
+				consts.AliBLLlama3_70bInstruct:            true,
+				consts.AliBLLlama3_8bInstruct:             true,
+				consts.AliBLLlama2_13bChatV2:              true,
+				consts.AliBLLlama2_7bChatV2:               true,
+				consts.AliBLLlama4Scout17b16eInstruct:     true,
+				consts.AliBLLlama4Maverick17b128eInstruct: true,
+				consts.AliBLLlama3Dot2_90bVisionInstruct:  true,
+				consts.AliBLLlama3Dot2_11bVision:          true,
+				consts.AliBLBaichuan2Turbo:                true,
+				consts.AliBLBaichuan2_13bChatV1:           true,
+				consts.AliBLBaichuan2_7bChatV1:            true,
+				consts.AliBLBaichuan7bV1:                  true,
+				consts.AliBLChatglm3_6b:                   true,
+				consts.AliBLChatglm6bV2:                   true,
+				consts.AliBLYiLarge:                       true,
+				consts.AliBLYiMedium:                      true,
+				consts.AliBLYiLargeRag:                    true,
+				consts.AliBLYiLargeTurbo:                  true,
+				consts.AliBLAbab6Dot5gChat:                true,
+				consts.AliBLAbab6Dot5tChat:                true,
+				consts.AliBLAbab6Dot5sChat:                true,
+				consts.AliBLZiyaLlama13bV1:                true,
+				consts.AliBLBelleLlama13b2mV1:             true,
+				consts.AliBLChatyuanLargeV2:               true,
+				consts.AliBLBilla7bSftV1:                  true,
 			},
 		},
 	}

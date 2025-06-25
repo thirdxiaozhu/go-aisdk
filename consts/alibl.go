@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 10:36:12
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 12:29:05
+ * @LastEditTime: 2025-06-25 17:06:49
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -181,4 +181,44 @@ const (
 	AliBLQwen2Dot5Coder3bInstruct      = "qwen2.5-coder-3b-instruct"           // chat
 	AliBLQwen2Dot5Coder15bInstruct     = "qwen2.5-coder-1.5b-instruct"         // chat
 	AliBLQwen2Dot5Coder05bInstruct     = "qwen2.5-coder-0.5b-instruct"         // chat
+	AliBLDeepSeekR1                    = "deepseek-r1"                         // chat
+	AliBLDeepSeekR1_0528               = "deepseek-r1-0528"                    // chat
+	AliBLDeepSeekV3                    = "deepseek-v3"                         // chat
+	AliBLDeepSeekR1DistillQwen15b      = "deepseek-r1-distill-qwen-1.5b"       // chat
+	AliBLDeepSeekR1DistillQwen7b       = "deepseek-r1-distill-qwen-7b"         // chat
+	AliBLDeepSeekR1DistillQwen14b      = "deepseek-r1-distill-qwen-14b"        // chat
+	AliBLDeepSeekR1DistillQwen32b      = "deepseek-r1-distill-qwen-32b"        // chat
+	AliBLDeepSeekR1DistillLlama8b      = "deepseek-r1-distill-llama-8b"        // chat
+	AliBLDeepSeekR1DistillLlama70b     = "deepseek-r1-distill-llama-70b"       // chat
+	AliBLLlama3Dot3_70bInstruct        = "llama3.3-70b-instruct"               // chat
+	AliBLLlama3Dot2_3bInstruct         = "llama3.2-3b-instruct"                // chat
+	AliBLLlama3Dot2_1bInstruct         = "llama3.2-1b-instruct"                // chat
+	AliBLLlama3Dot1_405bInstruct       = "llama3.1-405b-instruct"              // chat
+	AliBLLlama3Dot1_70bInstruct        = "llama3.1-70b-instruct"               // chat
+	AliBLLlama3Dot1_8bInstruct         = "llama3.1-8b-instruct"                // chat
+	AliBLLlama3_70bInstruct            = "llama3-70b-instruct"                 // chat
+	AliBLLlama3_8bInstruct             = "llama3-8b-instruct"                  // chat
+	AliBLLlama2_13bChatV2              = "llama2-13b-chat-v2"                  // chat
+	AliBLLlama2_7bChatV2               = "llama2-7b-chat-v2"                   // chat
+	AliBLLlama4Scout17b16eInstruct     = "llama-4-scout-17b-16e-instruct"      // chat
+	AliBLLlama4Maverick17b128eInstruct = "llama-4-maverick-17b-128e-instruct"  // chat
+	AliBLLlama3Dot2_90bVisionInstruct  = "llama3.2-90b-vision-instruct"        // chat
+	AliBLLlama3Dot2_11bVision          = "llama3.2-11b-vision"                 // chat
+	AliBLBaichuan2Turbo                = "baichuan2-turbo"                     // chat
+	AliBLBaichuan2_13bChatV1           = "baichuan2-13b-chat-v1"               // chat
+	AliBLBaichuan2_7bChatV1            = "baichuan2-7b-chat-v1"                // chat
+	AliBLBaichuan7bV1                  = "baichuan-7b-v1"                      // chat
+	AliBLChatglm3_6b                   = "chatglm3-6b"                         // chat
+	AliBLChatglm6bV2                   = "chatglm-6b-v2"                       // chat
+	AliBLYiLarge                       = "yi-large"                            // chat
+	AliBLYiMedium                      = "yi-medium"                           // chat
+	AliBLYiLargeRag                    = "yi-large-rag"                        // chat
+	AliBLYiLargeTurbo                  = "yi-large-turbo"                      // chat
+	AliBLAbab6Dot5gChat                = "abab6.5g-chat"                       // chat
+	AliBLAbab6Dot5tChat                = "abab6.5t-chat"                       // chat
+	AliBLAbab6Dot5sChat                = "abab6.5s-chat"                       // chat
+	AliBLZiyaLlama13bV1                = "ziya-llama-13b-v1"                   // chat
+	AliBLBelleLlama13b2mV1             = "belle-llama-13b-2m-v1"               // chat
+	AliBLChatyuanLargeV2               = "chatyuan-large-v2"                   // chat
+	AliBLBilla7bSftV1                  = "billa-7b-sft-v1"                     // chat
 )
