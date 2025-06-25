@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-16 13:48:18
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-13 17:52:18
+ * @LastEditTime: 2025-06-25 12:16:03
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -17,20 +17,20 @@ const (
 	OpenAIO1Preview                      = "o1-preview"                            // chat
 	OpenAIO1Preview20240912              = "o1-preview-2024-09-12"                 // chat
 	OpenAIO1                             = "o1"                                    // chat
-	OpenAIO120241217                     = "o1-2024-12-17"                         // chat
+	OpenAIO1_20241217                    = "o1-2024-12-17"                         // chat
 	OpenAIO1Pro                          = "o1-pro"                                // chat
 	OpenAIO1Pro20250319                  = "o1-pro-2025-03-19"                     // chat
 	OpenAIO3                             = "o3"                                    // chat
-	OpenAIO320250416                     = "o3-2025-04-16"                         // chat
+	OpenAIO3_20250416                    = "o3-2025-04-16"                         // chat
 	OpenAIO3Mini                         = "o3-mini"                               // chat
 	OpenAIO3Mini20250131                 = "o3-mini-2025-01-31"                    // chat
 	OpenAIO4Mini                         = "o4-mini"                               // chat
 	OpenAIO4Mini20250416                 = "o4-mini-2025-04-16"                    // chat
-	OpenAIGPT432K0613                    = "gpt-4-32k-0613"                        // chat
-	OpenAIGPT432K0314                    = "gpt-4-32k-0314"                        // chat
-	OpenAIGPT432K                        = "gpt-4-32k"                             // chat
-	OpenAIGPT40613                       = "gpt-4-0613"                            // chat
-	OpenAIGPT40314                       = "gpt-4-0314"                            // chat
+	OpenAIGPT4_32K0613                   = "gpt-4-32k-0613"                        // chat
+	OpenAIGPT4_32K0314                   = "gpt-4-32k-0314"                        // chat
+	OpenAIGPT4_32K                       = "gpt-4-32k"                             // chat
+	OpenAIGPT4_0613                      = "gpt-4-0613"                            // chat
+	OpenAIGPT4_0314                      = "gpt-4-0314"                            // chat
 	OpenAIGPT4o                          = "gpt-4o"                                // chat
 	OpenAIGPT4o20240513                  = "gpt-4o-2024-05-13"                     // chat
 	OpenAIGPT4o20240806                  = "gpt-4o-2024-08-06"                     // chat
@@ -45,27 +45,27 @@ const (
 	OpenAIGPT4Turbo                      = "gpt-4-turbo"                           // chat
 	OpenAIGPT4TurboPreview               = "gpt-4-turbo-preview"                   // chat
 	OpenAIGPT4Turbo20240409              = "gpt-4-turbo-2024-04-09"                // chat
-	OpenAIGPT40125Preview                = "gpt-4-0125-preview"                    // chat
-	OpenAIGPT41106Preview                = "gpt-4-1106-preview"                    // chat
+	OpenAIGPT4_0125Preview               = "gpt-4-0125-preview"                    // chat
+	OpenAIGPT4_1106Preview               = "gpt-4-1106-preview"                    // chat
 	OpenAIGPT4VisionPreview              = "gpt-4-vision-preview"                  // chat
 	OpenAIGPT4                           = "gpt-4"                                 // chat
-	OpenAIGPT41                          = "gpt-4.1"                               // chat
-	OpenAIGPT4120250414                  = "gpt-4.1-2025-04-14"                    // chat
-	OpenAIGPT41Mini                      = "gpt-4.1-mini"                          // chat
-	OpenAIGPT41Mini20250414              = "gpt-4.1-mini-2025-04-14"               // chat
-	OpenAIGPT41Nano                      = "gpt-4.1-nano"                          // chat
-	OpenAIGPT41Nano20250414              = "gpt-4.1-nano-2025-04-14"               // chat
-	OpenAIGPT45Preview                   = "gpt-4.5-preview"                       // chat
-	OpenAIGPT45Preview20250227           = "gpt-4.5-preview-2025-02-27"            // chat
-	OpenAIGPT35Turbo0125                 = "gpt-3.5-turbo-0125"                    // chat
-	OpenAIGPT35Turbo1106                 = "gpt-3.5-turbo-1106"                    // chat
+	OpenAIGPT4Dot1                       = "gpt-4.1"                               // chat
+	OpenAIGPT4Dot1_20250414              = "gpt-4.1-2025-04-14"                    // chat
+	OpenAIGPT4Dot1Mini                   = "gpt-4.1-mini"                          // chat
+	OpenAIGPT4Dot1Mini20250414           = "gpt-4.1-mini-2025-04-14"               // chat
+	OpenAIGPT4Dot1Nano                   = "gpt-4.1-nano"                          // chat
+	OpenAIGPT4Dot1Nano20250414           = "gpt-4.1-nano-2025-04-14"               // chat
+	OpenAIGPT4Dot5Preview                = "gpt-4.5-preview"                       // chat
+	OpenAIGPT4Dot5Preview20250227        = "gpt-4.5-preview-2025-02-27"            // chat
+	OpenAIGPT3Dot5Turbo0125              = "gpt-3.5-turbo-0125"                    // chat
+	OpenAIGPT3Dot5Turbo1106              = "gpt-3.5-turbo-1106"                    // chat
 	OpenAIGPT3Dot5Turbo0613              = "gpt-3.5-turbo-0613"                    // chat
 	OpenAIGPT3Dot5Turbo0301              = "gpt-3.5-turbo-0301"                    // chat
-	OpenAIGPT35Turbo16k                  = "gpt-3.5-turbo-16k"                     // chat
+	OpenAIGPT3Dot5Turbo16k               = "gpt-3.5-turbo-16k"                     // chat
 	OpenAIGPT3Dot5Turbo16K0613           = "gpt-3.5-turbo-16k-0613"                // chat
-	OpenAIGPT35Turbo                     = "gpt-3.5-turbo"                         // chat
-	OpenAIGPT35TurboInstruct             = "gpt-3.5-turbo-instruct"                // chat
-	OpenAIGPT35TurboInstruct0914         = "gpt-3.5-turbo-instruct-0914"           // chat
+	OpenAIGPT3Dot5Turbo                  = "gpt-3.5-turbo"                         // chat
+	OpenAIGPT3Dot5TurboInstruct          = "gpt-3.5-turbo-instruct"                // chat
+	OpenAIGPT3Dot5TurboInstruct0914      = "gpt-3.5-turbo-instruct-0914"           // chat
 	OpenAIDavinci002                     = "davinci-002"                           // chat
 	OpenAIBabbage002                     = "babbage-002"                           // chat
 	// 对话 + 音频处理模型
@@ -87,7 +87,7 @@ const (
 	OpenAIGPTImage1 = "gpt-image-1" // image
 	// 音频处理模型
 	OpenAITTS1                = "tts-1"                  // audio
-	OpenAITTS11106            = "tts-1-1106"             // audio
+	OpenAITTS1_1106           = "tts-1-1106"             // audio
 	OpenAITTS1HD              = "tts-1-hd"               // audio
 	OpenAITTS1HD1106          = "tts-1-hd-1106"          // audio
 	OpenAIWhisper1            = "whisper-1"              // audio

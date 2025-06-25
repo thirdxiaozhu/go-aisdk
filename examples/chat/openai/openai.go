@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-24 12:33:37
+ * @LastEditTime: 2025-06-25 14:05:10
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -76,6 +76,9 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		Model:               consts.OpenAIGPT4o,
 		MaxCompletionTokens: 4096,
 		Stream:              true,
+		StreamOptions: &models.ChatStreamOptions{
+			IncludeUsage: true,
+		},
 	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*10))
 }
 
@@ -184,10 +187,8 @@ func main() {
 			return nil
 		}
 		log.Printf("createChatCompletionStream item = %+v", item)
-		if item.Usage != nil {
+		if item.Usage != nil && item.StreamStats != nil {
 			log.Printf("createChatCompletionStream usage = %+v", item.Usage)
-		}
-		if item.StreamStats != nil {
 			log.Printf("createChatCompletionStream stream_stats = %+v", item.StreamStats)
 		}
 		return nil

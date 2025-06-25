@@ -1,8 +1,8 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-05-28 17:15:27
+ * @Date: 2025-06-25 13:01:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 14:04:23
+ * @LastEditTime: 2025-06-25 14:10:39
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -37,27 +37,18 @@ func getApiKeys(envKey string) (apiKeys string) {
 	return
 }
 
-func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
-	return client.ListModels(ctx, models.ListModelsRequest{
-		UserInfo: models.UserInfo{
-			UserID: "123456",
-		},
-		Provider: consts.DeepSeek,
-	}, httpclient.WithTimeout(time.Minute*2))
-}
-
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
 	return client.CreateChatCompletion(ctx, models.ChatRequest{
 		UserInfo: models.UserInfo{
 			UserID: "123456",
 		},
-		Provider: consts.DeepSeek,
+		Provider: consts.AliBL,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
 				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
 			},
 		},
-		Model:               consts.DeepSeekChat,
+		Model:               consts.AliBLQwenMax,
 		MaxCompletionTokens: 4096,
 	}, httpclient.WithTimeout(time.Minute*2))
 }
@@ -67,13 +58,13 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		UserInfo: models.UserInfo{
 			UserID: "123456",
 		},
-		Provider: consts.DeepSeek,
+		Provider: consts.AliBL,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好",
+				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
 			},
 		},
-		Model:               consts.DeepSeekReasoner,
+		Model:               consts.AliBLQwqPlus,
 		MaxCompletionTokens: 4096,
 		Stream:              true,
 		StreamOptions: &models.ChatStreamOptions{
@@ -98,13 +89,13 @@ func main() {
 	}
 	configData := `{
   "providers": {
-    "deepseek": {
-			"base_url": "https://api.deepseek.com",
+    "alibl": {
+			"base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
       "api_keys": [%v]
     }
   }
 }`
-	configData = fmt.Sprintf(configData, getApiKeys("DEEPSEEK_API_KEYS"))
+	configData = fmt.Sprintf(configData, getApiKeys("ALIBL_API_KEYS"))
 	log.Printf("configData: %s", configData)
 	if err := os.WriteFile(configPath, []byte(configData), 0644); err != nil {
 		log.Printf("Failed to create empty config file: %v", err)
@@ -122,41 +113,34 @@ func main() {
 	}()
 
 	ctx := context.Background()
-	// 列出模型
-	response1, err := listModels(ctx, client)
+	// 创建聊天
+	response1, err := createChatCompletion(ctx, client)
 	if err != nil {
-		log.Printf("listModels error = %v, request_id = %s", err, aisdk.RequestID(err))
+		originalErr := aisdk.Unwrap(err)
+		fmt.Println("originalErr =", originalErr)
+		fmt.Println("Cause Error =", aisdk.Cause(err))
+		switch {
+		case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
+			fmt.Println("ErrProviderNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
+			fmt.Println("ErrModelTypeNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrModelNotSupported):
+			fmt.Println("ErrModelNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
+			fmt.Println("ErrMethodNotSupported =", true)
+		case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
+			fmt.Println("ErrCompletionStreamNotSupported =", true)
+		case errors.Is(originalErr, context.Canceled):
+			fmt.Println("context.Canceled =", true)
+		case errors.Is(originalErr, context.DeadlineExceeded):
+			fmt.Println("context.DeadlineExceeded =", true)
+		}
+		log.Printf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
-	log.Printf("listModels response = %+v, request_id = %s", response1, response1.RequestID())
-	// 创建聊天
-	//response2, err := createChatCompletion(ctx, client)
-	//if err != nil {
-	//	originalErr := aisdk.Unwrap(err)
-	//	fmt.Println("originalErr =", originalErr)
-	//	fmt.Println("Cause Error =", aisdk.Cause(err))
-	//	switch {
-	//	case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
-	//		fmt.Println("ErrProviderNotSupported =", true)
-	//	case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
-	//		fmt.Println("ErrModelTypeNotSupported =", true)
-	//	case errors.Is(originalErr, aisdk.ErrModelNotSupported):
-	//		fmt.Println("ErrModelNotSupported =", true)
-	//	case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
-	//		fmt.Println("ErrMethodNotSupported =", true)
-	//	case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
-	//		fmt.Println("ErrCompletionStreamNotSupported =", true)
-	//	case errors.Is(originalErr, context.Canceled):
-	//		fmt.Println("context.Canceled =", true)
-	//	case errors.Is(originalErr, context.DeadlineExceeded):
-	//		fmt.Println("context.DeadlineExceeded =", true)
-	//	}
-	//	log.Printf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
-	//	return
-	//}
-	//log.Printf("createChatCompletion response = %+v, request_id = %s", response2, response2.RequestID())
+	log.Printf("createChatCompletion response = %+v, request_id = %s", response1, response1.RequestID())
 	// 创建流式聊天
-	response3, err := createChatCompletionStream(ctx, client)
+	response2, err := createChatCompletionStream(ctx, client)
 	if err != nil {
 		originalErr := aisdk.Unwrap(err)
 		fmt.Println("originalErr =", originalErr)
@@ -181,8 +165,8 @@ func main() {
 		return
 	}
 	// 读取流式聊天
-	log.Printf("createChatCompletionStream request_id = %s", response3.RequestID())
-	if err = response3.ForEach(func(item models.ChatBaseResponse, isFinished bool) (err error) {
+	log.Printf("createChatCompletionStream request_id = %s", response2.RequestID())
+	if err = response2.ForEach(func(item models.ChatBaseResponse, isFinished bool) (err error) {
 		if isFinished {
 			return nil
 		}

@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 19:11:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-16 15:44:46
+ * @LastEditTime: 2025-06-25 10:55:15
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -148,9 +148,9 @@ func TestSDKConfigManager(t *testing.T) {
 	if err == nil {
 		t.Error("NewSDKConfigManager should return an error for invalid JSON config")
 	}
-	// 11. Test GetProviderConfig for Aliyunbl provider
-	providerConfig := manager2.GetProviderConfig(consts.Aliyunbl)
+	// 11. Test GetProviderConfig for AliBL provider
+	providerConfig := manager2.GetProviderConfig(consts.AliBL)
 	if providerConfig.BaseURL != "" {
-		t.Error("GetProviderConfig should return an empty config for Aliyunbl provider")
+		t.Error("GetProviderConfig should return an empty config for AliBL provider")
 	}
 }

@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-24 18:26:52
+ * @LastEditTime: 2025-06-25 10:57:42
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -67,8 +67,8 @@ var (
 		temp.provider = ""
 		return json.Marshal(temp)
 	}
-	// 序列化用户消息函数（Aliyunbl）
-	marshalUserMessageByAliyunbl = func(m UserMessage) (b []byte, err error) {
+	// 序列化用户消息函数（AliBL）
+	marshalUserMessageByAliBL = func(m UserMessage) (b []byte, err error) {
 		type Alias UserMessage
 		temp := struct {
 			Role    string `json:"role"`
@@ -107,27 +107,27 @@ var (
 	userMessageStrategies = map[consts.Provider]func(m UserMessage) (b []byte, err error){
 		consts.OpenAI:   marshalUserMessageByOpenAI,
 		consts.DeepSeek: marshalUserMessageByDeepSeek,
-		consts.Aliyunbl: marshalUserMessageByAliyunbl,
+		consts.AliBL: marshalUserMessageByAliBL,
 	}
 )
 
 // ChatUserMsgPartType 多模态内容类型
 //
-//	提供商支持: OpenAI | Aliyunbl
+//	提供商支持: OpenAI | AliBL
 type ChatUserMsgPartType string
 
 const (
-	//	提供商支持: OpenAI | Aliyunbl
+	//	提供商支持: OpenAI | AliBL
 	ChatUserMsgPartTypeText ChatUserMsgPartType = "text"
-	//	提供商支持: OpenAI | Aliyunbl
+	//	提供商支持: OpenAI | AliBL
 	ChatUserMsgPartTypeImageURL ChatUserMsgPartType = "image_url"
-	//	提供商支持: OpenAI | Aliyunbl
+	//	提供商支持: OpenAI | AliBL
 	ChatUserMsgPartTypeInputAudio ChatUserMsgPartType = "input_audio"
 	//	提供商支持: OpenAI
 	ChatUserMsgPartTypeFile ChatUserMsgPartType = "file"
-	//	提供商支持: Aliyunbl
+	//	提供商支持: AliBL
 	ChatUserMsgPartTypeVideo ChatUserMsgPartType = "video"
-	//	提供商支持: Aliyunbl
+	//	提供商支持: AliBL
 	ChatUserMsgPartTypeVideoURL ChatUserMsgPartType = "video_url"
 )
 
@@ -147,10 +147,10 @@ const (
 
 // ChatUserMsgImageURL 图像URL
 //
-//	提供商支持: OpenAI | Aliyunbl
+//	提供商支持: OpenAI | AliBL
 type ChatUserMsgImageURL struct {
 	// 图像URL，支持url和base64编码
-	// 提供商支持: OpenAI | Aliyunbl
+	// 提供商支持: OpenAI | AliBL
 	URL string `json:"url,omitempty"`
 	// 图像质量
 	// 提供商支持: OpenAI
@@ -159,25 +159,25 @@ type ChatUserMsgImageURL struct {
 
 // ChatUserMsgInputAudioFormat 音频格式
 //
-//	提供商支持: OpenAI | Aliyunbl
+//	提供商支持: OpenAI | AliBL
 type ChatUserMsgInputAudioFormat string
 
 const (
-	//	提供商支持: OpenAI | Aliyunbl
+	//	提供商支持: OpenAI | AliBL
 	ChatUserMsgInputAudioFormatMP3 ChatUserMsgInputAudioFormat = "mp3"
-	//	提供商支持: OpenAI | Aliyunbl
+	//	提供商支持: OpenAI | AliBL
 	ChatUserMsgInputAudioFormatWAV ChatUserMsgInputAudioFormat = "wav"
 )
 
 // ChatUserMsgInputAudio 输入音频
 //
-//	提供商支持: OpenAI | Aliyunbl
+//	提供商支持: OpenAI | AliBL
 type ChatUserMsgInputAudio struct {
 	// 音频数据，支持url和base64编码
-	// 提供商支持: OpenAI | Aliyunbl
+	// 提供商支持: OpenAI | AliBL
 	Data string `json:"data,omitempty"`
 	// 音频格式
-	// 提供商支持: OpenAI | Aliyunbl
+	// 提供商支持: OpenAI | AliBL
 	Format ChatUserMsgInputAudioFormat `json:"format,omitempty"`
 }
 
@@ -198,56 +198,56 @@ type ChatUserMsgFile struct {
 
 // ChatUserMsgVideoURL 视频URL
 //
-//	提供商支持: Aliyunbl
+//	提供商支持: AliBL
 type ChatUserMsgVideoURL struct {
 	// 视频URL，支持url和base64编码
-	// 提供商支持: Aliyunbl
+	// 提供商支持: AliBL
 	URL string `json:"url,omitempty"`
 }
 
 // ChatUserMsgPart 多模态内容
 //
-//	提供商支持: OpenAI | Aliyunbl
+//	提供商支持: OpenAI | AliBL
 type ChatUserMsgPart struct {
 	// 内容类型
-	// 提供商支持: OpenAI | Aliyunbl
+	// 提供商支持: OpenAI | AliBL
 	Type ChatUserMsgPartType `json:"type,omitempty"`
 	// 文本内容
-	// 提供商支持: OpenAI | Aliyunbl
+	// 提供商支持: OpenAI | AliBL
 	Text string `json:"text,omitempty"`
 	// 图像URL
-	// 提供商支持: OpenAI | Aliyunbl
+	// 提供商支持: OpenAI | AliBL
 	ImageURL *ChatUserMsgImageURL `json:"image_url,omitempty"`
 	// 输入音频
-	// 提供商支持: OpenAI | Aliyunbl
+	// 提供商支持: OpenAI | AliBL
 	InputAudio *ChatUserMsgInputAudio `json:"input_audio,omitempty"`
 	// 文件
 	// 提供商支持: OpenAI
 	File *ChatUserMsgFile `json:"file,omitempty"`
 	// 视频列表
-	// 提供商支持: Aliyunbl
+	// 提供商支持: AliBL
 	Video []string `json:"video,omitempty"`
 	// 视频URL
-	// 提供商支持: Aliyunbl
+	// 提供商支持: AliBL
 	VideoURL *ChatUserMsgVideoURL `json:"video_url,omitempty"`
 	// 模型限制输入图像的最小像素
-	// 提供商支持: Aliyunbl
+	// 提供商支持: AliBL
 	MinPixels int `json:"min_pixels,omitempty"`
 	// 模型限制输入图像的最大像素
-	// 提供商支持: Aliyunbl
+	// 提供商支持: AliBL
 	MaxPixels int `json:"max_pixels,omitempty"`
 }
 
 // UserMessage 用户消息，支持多模态内容
 //
-//	提供商支持: OpenAI | DeepSeek | Aliyunbl
+//	提供商支持: OpenAI | DeepSeek | AliBL
 type UserMessage struct {
 	provider consts.Provider `json:"-"` // 用于序列化参数时，处理差异化参数
 	// 文本内容
-	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	// 提供商支持: OpenAI | DeepSeek | AliBL
 	Content string `json:"content,omitempty"`
 	// 多模态内容
-	// 提供商支持: OpenAI | Aliyunbl
+	// 提供商支持: OpenAI | AliBL
 	MultimodalContent []ChatUserMsgPart `json:"-"`
 	// 参与者名称
 	// 提供商支持: OpenAI | DeepSeek

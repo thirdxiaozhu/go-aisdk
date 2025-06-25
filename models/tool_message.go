@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-24 18:26:35
+ * @LastEditTime: 2025-06-25 10:57:24
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -34,20 +34,20 @@ var (
 	toolMessageStrategies = map[consts.Provider]func(m ToolMessage) (b []byte, err error){
 		consts.OpenAI:   marshalToolMessageByOpenAI,
 		consts.DeepSeek: marshalToolMessageByOpenAI,
-		consts.Aliyunbl: marshalToolMessageByOpenAI,
+		consts.AliBL: marshalToolMessageByOpenAI,
 	}
 )
 
 // ToolMessage 工具消息
 //
-//	提供商支持: OpenAI | DeepSeek | Aliyunbl
+//	提供商支持: OpenAI | DeepSeek | AliBL
 type ToolMessage struct {
 	provider consts.Provider `json:"-"` // 用于序列化参数时，处理差异化参数
 	// 文本内容
-	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	// 提供商支持: OpenAI | DeepSeek | AliBL
 	Content string `json:"content,omitempty"`
 	// 工具调用ID
-	// 提供商支持: OpenAI | DeepSeek | Aliyunbl
+	// 提供商支持: OpenAI | DeepSeek | AliBL
 	ToolCallID string `json:"tool_call_id,omitempty"`
 }
 
