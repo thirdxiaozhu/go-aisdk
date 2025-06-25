@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 13:01:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 13:17:52
+ * @LastEditTime: 2025-06-25 13:22:02
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -66,6 +66,9 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		Model:               consts.AliBLQwqPlus,
 		MaxCompletionTokens: 4096,
 		Stream:              true,
+		StreamOptions: &models.ChatStreamOptions{
+			IncludeUsage: true,
+		},
 	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*5))
 }
 
@@ -166,7 +169,7 @@ func main() {
 		if isFinished {
 			return nil
 		}
-		log.Printf("createChatCompletionStream item = %+v, content = %s", item, item.Choices[0].Delta.Content)
+		log.Printf("createChatCompletionStream item = %+v", item)
 		if item.Usage != nil {
 			log.Printf("createChatCompletionStream usage = %+v", item.Usage)
 		}

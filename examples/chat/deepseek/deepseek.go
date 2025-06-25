@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-23 00:13:42
+ * @LastEditTime: 2025-06-25 13:23:01
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -75,6 +75,9 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		Model:               consts.DeepSeekReasoner,
 		MaxCompletionTokens: 4096,
 		Stream:              true,
+		StreamOptions: &models.ChatStreamOptions{
+			IncludeUsage: true,
+		},
 	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*5))
 }
 
