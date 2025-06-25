@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:57:28
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-11 19:06:24
+ * @LastEditTime: 2025-06-25 10:53:42
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -22,7 +22,7 @@ const (
 	DeepSeek   Provider = "deepseek"   // DeepSeek
 	Claude     Provider = "claude"     // Anthropic Claude
 	Gemini     Provider = "gemini"     // Google Gemini
-	Aliyunbl   Provider = "aliyunbl"   // 阿里云百炼
+	AliBL      Provider = "alibl"      // 阿里百炼
 	Midjourney Provider = "midjourney" // Midjourney
 	Vidu       Provider = "vidu"       // 生数科技
 	Keling     Provider = "keling"     // 可灵AI

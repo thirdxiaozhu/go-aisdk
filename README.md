@@ -32,7 +32,7 @@ go get github.com/liusuxian/go-aisdk
 - DeepSeek
 - Claude (Anthropic)
 - Gemini (Google)
-- Aliyunbl (阿里云百炼)
+- AliBL (阿里百炼)
 - Midjourney
 - Vidu (生数科技)
 - Keling (可灵 AI)
