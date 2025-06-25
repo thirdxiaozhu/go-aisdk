@@ -45,7 +45,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 		Provider: consts.AliBL,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+				Content: "请简要介绍自己",
 			},
 		},
 		Model:               consts.AliBLQwenMax,
@@ -61,7 +61,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		Provider: consts.AliBL,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+				Content: "请简要介绍自己",
 			},
 		},
 		Model:               consts.AliBLQwqPlus,
