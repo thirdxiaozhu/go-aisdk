@@ -54,7 +54,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 		Provider: consts.OpenAI,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+				Content: "介绍一下你自己",
 			},
 		},
 		Model:               consts.OpenAIGPT4o,
@@ -70,7 +70,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		Provider: consts.OpenAI,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+				Content: "介绍一下你自己",
 			},
 		},
 		Model:               consts.OpenAIGPT4o,
