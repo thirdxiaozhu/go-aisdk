@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8df846c7-bb5a-4e5d-ba5b-dc77b78744ed" name="Changes" comment="6.20">
+      <change afterPath="$PROJECT_DIR$/providers/ark/ark.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/providers/ark/chat.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/chat/openai/openai.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/chat/openai/openai.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consts/consts.go" beforeDir="false" afterPath="$PROJECT_DIR$/consts/consts.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,6 +47,10 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/../../../../sdk/go1.24.3/src/encoding/json/encode.go" root0="SKIP_INSPECTION" />
   </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -55,6 +61,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl.executor": "Run",
     "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek.executor": "Run",
     "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
@@ -66,21 +73,46 @@
     "git-widget-placeholder": "dev",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "C:/Users/邹嘉旭",
+    "last_opened_file_path": "//wsl.localhost/Ubuntu-20.04/home/jiaxv/ego/server/utils/go-aisdk/providers/ark",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "run.configurations.included.in.services": "true",
     "settings.editor.selected.configurable": "preferences.lookFeel",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai">
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="\\wsl.localhost\Ubuntu-20.04\home\jiaxv\ego\server\utils\go-aisdk\providers\ark" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="GoApplicationRunConfiguration" />
+      </set>
+    </option>
+  </component>
+  <component name="RunManager" selected="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="go-aisdk" />
       <working_directory value="$PROJECT_DIR$" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build github.com/liusuxian/go-aisdk/examples/chat/alibl" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="go-aisdk" />
+      <working_directory value="$PROJECT_DIR$" />
+      <envs>
+        <env name="ALIBL_API_KEYS" value="sk-6bb8bcfb06154c82b069f32b3b225a31" />
+      </envs>
+      <kind value="PACKAGE" />
+      <package value="github.com/liusuxian/go-aisdk/examples/chat/alibl" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/examples/chat/alibl/alibl.go" />
       <method v="2" />
     </configuration>
     <configuration name="go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
@@ -117,14 +149,15 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
+        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
         <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai" />
-        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
-        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
         <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
         <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
       </list>
