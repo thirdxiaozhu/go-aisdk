@@ -11,6 +11,7 @@ package providers
 
 import (
 	_ "github.com/liusuxian/go-aisdk/providers/alibl"
+	_ "github.com/liusuxian/go-aisdk/providers/ark"
 	_ "github.com/liusuxian/go-aisdk/providers/deepseek"
 	_ "github.com/liusuxian/go-aisdk/providers/openai"
 )

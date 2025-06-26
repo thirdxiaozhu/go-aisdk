@@ -5,12 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8df846c7-bb5a-4e5d-ba5b-dc77b78744ed" name="Changes" comment="6.20">
+      <change afterPath="$PROJECT_DIR$/consts/ark.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/chat/ark/ark.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/chat_model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/chat_model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/system_message.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/system_message.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/tool_message.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/tool_message.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/providers/alibl/alibl.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/alibl/alibl.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/providers/ark/ark.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/ark/ark.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/providers/ark/chat.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/ark/chat.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/providers/providers.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/providers.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
   </component>
   <component name="GOROOT" url="file://$PROJECT_DIR$/../../../../sdk/go1.24.3" />
   <component name="Git.Settings">
@@ -58,7 +74,9 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
     "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl.executor": "Run",
+    "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark.executor": "Run",
     "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek.executor": "Run",
     "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
@@ -75,7 +93,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "run.configurations.included.in.services": "true",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "settings.editor.selected.configurable": "fileTemplates",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -91,7 +109,7 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek">
+  <component name="RunManager" selected="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="go-aisdk" />
       <working_directory value="$PROJECT_DIR$" />
@@ -112,7 +130,19 @@
       <filePath value="$PROJECT_DIR$/examples/chat/alibl/alibl.go" />
       <method v="2" />
     </configuration>
-    <configuration name="go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+    <configuration name="go build github.com/liusuxian/go-aisdk/examples/chat/ark" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="go-aisdk" />
+      <working_directory value="$PROJECT_DIR$" />
+      <envs>
+        <env name="ARK_API_KEYS" value="7659003f-2e53-4e93-b479-7ce819e3b1ba" />
+      </envs>
+      <kind value="PACKAGE" />
+      <package value="github.com/liusuxian/go-aisdk/examples/chat/ark" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/examples/chat/deepseek/deepseek.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
       <module name="go-aisdk" />
       <working_directory value="$PROJECT_DIR$" />
       <envs>
@@ -146,13 +176,13 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
+      <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark" />
+      <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
         <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
         <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai" />
         <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
@@ -217,7 +247,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/models/chat_model.go</url>
-          <line>170</line>
+          <line>213</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

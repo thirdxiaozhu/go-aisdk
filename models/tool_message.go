@@ -34,7 +34,8 @@ var (
 	toolMessageStrategies = map[consts.Provider]func(m ToolMessage) (b []byte, err error){
 		consts.OpenAI:   marshalToolMessageByOpenAI,
 		consts.DeepSeek: marshalToolMessageByOpenAI,
-		consts.AliBL: marshalToolMessageByOpenAI,
+		consts.AliBL:    marshalToolMessageByOpenAI,
+		consts.Ark:      marshalToolMessageByOpenAI,
 	}
 )
 

@@ -35,6 +35,7 @@ func init() {
 		supportedModels: map[fmt.Stringer]map[string]bool{
 			consts.ChatModel: {
 				// chat
+				consts.Doubaoseed1_6: true,
 			},
 		},
 	}
