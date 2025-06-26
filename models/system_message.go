@@ -60,14 +60,8 @@ var (
 		// 根据内容类型设置 content 字段
 		if len(m.MultimodalContent) > 0 {
 			// 移除不支持的字段
-			tempMultimodalContent := make([]ChatUserMsgPart, 0, len(m.MultimodalContent))
+			tempMultimodalContent := make([]ChatSystemMsgPart, 0, len(m.MultimodalContent))
 			for _, v := range m.MultimodalContent {
-				if v.File != nil {
-					continue
-				}
-				if v.ImageURL != nil {
-					v.ImageURL.Detail = ""
-				}
 				tempMultimodalContent = append(tempMultimodalContent, v)
 			}
 			temp.Content = tempMultimodalContent
@@ -85,6 +79,7 @@ var (
 		consts.OpenAI:   marshalSystemMessageByOpenAI,
 		consts.DeepSeek: marshalSystemMessageByOpenAI,
 		consts.AliBL:    marshalSystemMessageByAliBL,
+		consts.Ark:      marshalSystemMessageByArk,
 	}
 )
 
@@ -146,11 +141,11 @@ type ChatSystemMsgPart struct {
 type SystemMessage struct {
 	provider consts.Provider `json:"-"` // 用于序列化参数时，处理差异化参数
 	// 文本内容
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Content string `json:"content,omitempty"`
 	// 多模态内容
 	// 提供商支持: Ark
-	MultimodalContent []ChatUserMsgPart `json:"-"`
+	MultimodalContent []ChatSystemMsgPart `json:"-"`
 	// 参与者名称
 	// 提供商支持: OpenAI | DeepSeek
 	Name string `json:"name,omitempty"`

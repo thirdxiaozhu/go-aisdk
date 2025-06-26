@@ -4,17 +4,11 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8df846c7-bb5a-4e5d-ba5b-dc77b78744ed" name="Changes" comment="6.20">
-      <change afterPath="$PROJECT_DIR$/consts/ark.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/chat/ark/ark.go" afterDir="false" />
+    <list default="true" id="8df846c7-bb5a-4e5d-ba5b-dc77b78744ed" name="Changes" comment="6.27">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/chat_model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/chat_model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/assistant_message.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/assistant_message.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/system_message.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/system_message.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/tool_message.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/tool_message.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/providers/alibl/alibl.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/alibl/alibl.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/providers/ark/ark.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/ark/ark.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/providers/ark/chat.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/ark/chat.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/providers/providers.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/providers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/user_message.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/user_message.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -237,7 +231,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="1" />
     <MESSAGE value="6.19" />
-    <option name="LAST_COMMIT_MESSAGE" value="6.19" />
+    <MESSAGE value="6.27" />
+    <option name="LAST_COMMIT_MESSAGE" value="6.27" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>

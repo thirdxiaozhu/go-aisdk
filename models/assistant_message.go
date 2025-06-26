@@ -85,11 +85,32 @@ var (
 		temp.provider = ""
 		return json.Marshal(temp)
 	}
+	marshalAssistantMessageByArk = func(m AssistantMessage) (b []byte, err error) {
+		type Alias AssistantMessage
+		temp := struct {
+			Role string `json:"role"`
+			Alias
+		}{
+			Role:  "assistant",
+			Alias: Alias(m),
+		}
+		// 移除不支持的字段
+		temp.Audio = nil
+		temp.MultimodalContent = nil
+		temp.Name = ""
+		temp.Refusal = ""
+		temp.Prefix = false
+		temp.ReasoningContent = ""
+		// 序列化JSON
+		temp.provider = ""
+		return json.Marshal(temp)
+	}
 	// 策略映射
 	assistantMessageStrategies = map[consts.Provider]func(m AssistantMessage) (b []byte, err error){
 		consts.OpenAI:   marshalAssistantMessageByOpenAI,
 		consts.DeepSeek: marshalAssistantMessageByDeepSeek,
 		consts.AliBL:    marshalAssistantMessageByAliBL,
+		consts.Ark:      marshalAssistantMessageByArk,
 	}
 )
 
@@ -138,7 +159,7 @@ type AssistantMessage struct {
 	// 提供商支持: OpenAI
 	Audio *ChatAssistantMsgAudio `json:"audio,omitempty"`
 	// 文本内容
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Content string `json:"content,omitempty"`
 	// 多模态内容
 	// 提供商支持: OpenAI
@@ -150,7 +171,7 @@ type AssistantMessage struct {
 	// 提供商支持: OpenAI
 	Refusal string `json:"refusal,omitempty"`
 	// 工具调用
-	// 提供商支持: OpenAI | AliBL
+	// 提供商支持: OpenAI | AliBL | Ark
 	ToolCalls []ToolCalls `json:"tool_calls,omitempty"`
 	// 设置此参数为 true，来强制模型在其回答中以此 assistant 消息中提供的前缀内容开始
 	// 提供商支持: DeepSeek | AliBL

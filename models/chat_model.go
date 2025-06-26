@@ -165,12 +165,9 @@ var (
 		// 创建一个别名结构体
 		type Alias ChatRequest
 		temp := struct {
-			UserID    string `json:"user_id,omitempty"`
-			MaxTokens int    `json:"max_tokens,omitempty"`
+			UserID string `json:"user_id,omitempty"`
 			Alias
 		}{
-			MaxTokens: r.MaxCompletionTokens,
-
 			Alias: Alias(r),
 		}
 		// 处理公共字段
