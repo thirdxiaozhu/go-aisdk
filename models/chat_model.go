@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 10:57:09
+ * @LastEditTime: 2025-06-25 22:47:43
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -21,7 +21,7 @@ var (
 	marshalChatRequestByOpenAI = func(r ChatRequest) (b []byte, err error) {
 		// 设置提供商
 		for _, message := range r.Messages {
-			message.SetProvider(r.Provider)
+			message.SetProvider(r.Provider.String())
 		}
 		// 创建一个别名结构体
 		type Alias ChatRequest
@@ -52,7 +52,7 @@ var (
 	marshalChatRequestByDeepSeek = func(r ChatRequest) (b []byte, err error) {
 		// 设置提供商
 		for _, message := range r.Messages {
-			message.SetProvider(r.Provider)
+			message.SetProvider(r.Provider.String())
 		}
 		// 创建一个别名结构体
 		type Alias ChatRequest
@@ -105,7 +105,7 @@ var (
 	marshalChatRequestByAliBL = func(r ChatRequest) (b []byte, err error) {
 		// 设置提供商
 		for _, message := range r.Messages {
-			message.SetProvider(r.Provider)
+			message.SetProvider(r.Provider.String())
 		}
 		// 创建一个别名结构体
 		type Alias ChatRequest
@@ -159,15 +159,14 @@ var (
 	chatRequestStrategies = map[consts.Provider]func(m ChatRequest) (b []byte, err error){
 		consts.OpenAI:   marshalChatRequestByOpenAI,
 		consts.DeepSeek: marshalChatRequestByDeepSeek,
-		consts.AliBL: marshalChatRequestByAliBL,
+		consts.AliBL:    marshalChatRequestByAliBL,
 	}
 )
 
 // ChatMessage 聊天消息的通用接口
 type ChatMessage interface {
-	GetRole() (role string)               // 获取消息角色
-	SetProvider(provider consts.Provider) // 设置提供商（序列化参数时，处理差异化参数）
-	MarshalJSON() (b []byte, err error)   // 序列化JSON
+	SetProvider(provider string)        // 设置提供商（序列化参数时，处理差异化参数）
+	MarshalJSON() (b []byte, err error) // 序列化JSON
 }
 
 // ChatAudioFormatType 输出音频的格式
