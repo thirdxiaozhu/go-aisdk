@@ -191,7 +191,6 @@ var (
 		temp.Store = false
 		temp.XDashScopeDataInspection = ""
 		// 序列化JSON
-		temp.Provider = ""
 		temp.EnableThinking = false
 		return json.Marshal(temp)
 	}

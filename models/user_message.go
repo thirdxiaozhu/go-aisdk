@@ -319,6 +319,7 @@ func (m UserMessage) GetRole() (role string) { return "user" }
 
 // SetProvider 设置提供商
 func (m *UserMessage) SetProvider(provider consts.Provider) {
+	fmt.Println(m)
 	m.provider = provider
 }
 
