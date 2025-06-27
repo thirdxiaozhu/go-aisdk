@@ -33,9 +33,30 @@ var (
 		temp.Provider = ""
 		return json.Marshal(temp)
 	}
+
+	// 序列化创建图像请求函数（Ark）
+	marshalImageRequestByArk = func(r ImageRequest) (b []byte, err error) {
+		type Alias ImageRequest
+		temp := struct {
+			UserID string `json:"user_id,omitempty"`
+			User   string `json:"user,omitempty"` // 用户标识符，用于监控和滥用检测
+			Alias
+		}{
+			User:  r.UserInfo.UserID,
+			Alias: Alias(r),
+		}
+		temp.Provider = ""
+		temp.Background = ""
+		temp.Moderation = ""
+		temp.N = 0
+
+		// 序列化JSON
+		return json.Marshal(temp)
+	}
 	// 策略映射（创建图像请求）
 	imageRequestStrategies = map[consts.Provider]func(r ImageRequest) (b []byte, err error){
 		consts.OpenAI: marshalImageRequestByOpenAI,
+		consts.Ark:    marshalImageRequestByArk,
 	}
 	// 序列化编辑图像请求函数（OpenAI）
 	marshalImageEditRequestByOpenAI = func(r ImageEditRequest) (b []byte, err error) {
@@ -181,7 +202,7 @@ const (
 	// 提供商支持: OpenAI
 	ImageSize512x512 ImageSize = "512x512"
 	// 1024x1024
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Ark
 	ImageSize1024x1024 ImageSize = "1024x1024"
 	// 1792x1024
 	// 提供商支持: OpenAI
@@ -195,6 +216,27 @@ const (
 	// 1024x1536
 	// 提供商支持: OpenAI
 	ImageSize1024x1536 ImageSize = "1024x1536"
+	// 864x1152
+	// 提供商支持: Ark
+	ImageSize864x1152 ImageSize = "864x1152"
+	// 1152x864
+	// 提供商支持: Ark
+	ImageSize1152x864 ImageSize = "1152x864"
+	// 1280x720
+	// 提供商支持: Ark
+	ImageSize1280x720 ImageSize = "1280x720"
+	// 720x1280
+	// 提供商支持: Ark
+	ImageSize720x1280 ImageSize = "720x1280"
+	// 832x1248
+	// 提供商支持: Ark
+	ImageSize832x1248 ImageSize = "832x1248"
+	// 1248x832
+	// 提供商支持: Ark
+	ImageSize1248x832 ImageSize = "1248x832"
+	// 1512x648
+	// 提供商支持: Ark
+	ImageSize1512x648 ImageSize = "1512x648"
 )
 
 // ImageStyle 图像风格
@@ -218,13 +260,13 @@ type ImageRequest struct {
 	UserInfo
 	Provider consts.Provider `json:"provider,omitempty"` // 提供商
 	// 提示词
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Ark
 	Prompt string `json:"prompt,omitempty"`
 	// 设置生成图像的背景透明度
 	// 提供商支持: OpenAI
 	Background ImageBackground `json:"background,omitempty"`
 	// 模型名称
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Ark
 	Model string `json:"model,omitempty"`
 	// 内容审核级别
 	// 提供商支持: OpenAI
@@ -242,14 +284,23 @@ type ImageRequest struct {
 	// 提供商支持: OpenAI
 	Quality ImageQuality `json:"quality,omitempty"`
 	// 响应格式
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Ark
 	ResponseFormat ImageResponseFormat `json:"response_format,omitempty"`
 	// 图像尺寸
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Ark
 	Size ImageSize `json:"size,omitempty"`
 	// 图像风格
 	// 提供商支持: OpenAI
 	Style ImageStyle `json:"style,omitempty"`
+	// 随机数种子 用于控制模型生成内容的随机性
+	// 提供商支持: Ark
+	Seed int `json:"seed,omitempty"`
+	// 模型输出结果与prompt的一致程度
+	// 提供商支持: Ark
+	GuidanceScale float64 `json:"guidance_scale,omitempty"`
+	// 是否添加水印
+	// 提供商支持: Ark
+	Watermark bool `json:"watermark,omitempty"`
 }
 
 // MarshalJSON 序列化JSON
