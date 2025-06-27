@@ -14,14 +14,14 @@ type ToolMessage struct {
 	// 用于序列化参数时，处理差异化参数
 	provider string
 	// 文本内容
-	// 提供商支持: OpenAI | DeepSeek | AliBL
-	Content string `json:"content,omitempty" providers:"openai,deepseek,alibl"`
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
+	Content string `json:"content,omitempty" providers:"openai,deepseek,alibl,ark"`
 	// 消息角色
-	// 提供商支持: OpenAI | DeepSeek | AliBL
-	Role string `json:"role,omitempty" providers:"openai,deepseek,alibl" default:"tool"`
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
+	Role string `json:"role,omitempty" providers:"openai,deepseek,alibl,ark" default:"tool"`
 	// 工具调用ID
-	// 提供商支持: OpenAI | DeepSeek | AliBL
-	ToolCallID string `json:"tool_call_id,omitempty" providers:"openai,deepseek,alibl"`
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
+	ToolCallID string `json:"tool_call_id,omitempty" providers:"openai,deepseek,alibl,ark"`
 }
 
 // SetProvider 设置提供商

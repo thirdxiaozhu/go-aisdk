@@ -47,14 +47,14 @@ type AssistantMessage struct {
 	// 提供商支持: OpenAI
 	Audio *ChatAssistantMsgAudio `json:"audio,omitempty" providers:"openai"`
 	// 文本内容
-	// 提供商支持: OpenAI | DeepSeek | AliBL
-	Content string `json:"content,omitempty" providers:"openai,deepseek,alibl"`
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
+	Content string `json:"content,omitempty" providers:"openai,deepseek,alibl,ark"`
 	// 多模态内容
 	// 提供商支持: OpenAI
 	MultimodalContent []ChatAssistantMsgPart `json:"multimodal_content,omitempty" providers:"openai" copyto:"Content"`
 	// 消息角色
-	// 提供商支持: OpenAI | DeepSeek | AliBL
-	Role string `json:"role,omitempty" providers:"openai,deepseek,alibl" default:"assistant"`
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
+	Role string `json:"role,omitempty" providers:"openai,deepseek,alibl,ark" default:"assistant"`
 	// 参与者名称
 	// 提供商支持: OpenAI | DeepSeek
 	Name string `json:"name,omitempty" providers:"openai,deepseek"`
@@ -62,8 +62,8 @@ type AssistantMessage struct {
 	// 提供商支持: OpenAI
 	Refusal string `json:"refusal,omitempty" providers:"openai"`
 	// 工具调用
-	// 提供商支持: OpenAI
-	ToolCalls []ToolCalls `json:"tool_calls,omitempty" providers:"openai"`
+	// 提供商支持: OpenAI | Ark
+	ToolCalls []ToolCalls `json:"tool_calls,omitempty" providers:"openai,ark"`
 	// 设置此参数为 true，来强制模型在其回答中以此 assistant 消息中提供的前缀内容开始
 	// 提供商支持: DeepSeek | AliBL
 	Prefix bool `json:"prefix,omitempty" providers:"deepseek,alibl" mapping:"alibl:partial"`

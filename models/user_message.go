@@ -13,14 +13,18 @@ package models
 type ChatUserMsgPartType string
 
 const (
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | AliBL | Ark
 	ChatUserMsgPartTypeText ChatUserMsgPartType = "text"
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | AliBL | Ark
 	ChatUserMsgPartTypeImageURL ChatUserMsgPartType = "image_url"
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | AliBL | Ark
 	ChatUserMsgPartTypeInputAudio ChatUserMsgPartType = "input_audio"
 	// 提供商支持: OpenAI
 	ChatUserMsgPartTypeFile ChatUserMsgPartType = "file"
+	// 提供商支持: AliBL
+	ChatUserMsgPartTypeVideo ChatUserMsgPartType = "video"
+	// 提供商支持: AliBL | Ark
+	ChatUserMsgPartTypeVideoURL ChatUserMsgPartType = "video_url"
 )
 
 // ChatUserMsgImageURLDetail 图像质量
@@ -35,14 +39,25 @@ const (
 	ChatUserMsgImageURLDetailAuto ChatUserMsgImageURLDetail = "auto"
 )
 
+// ChatUserMsgImagePixelLimit 像素限制
+type ChatUserMsgImagePixelLimit struct {
+	// 允许设置图片的像素大小限制
+	// 提供商支持: Ark
+	MaxPixels int `json:"max_pixels,omitempty" providers:"ark"`
+	// 允许设置图片的像素大小限制
+	// 提供商支持: Ark
+	MinPixels int `json:"min_pixels,omitempty" providers:"ark"`
+}
+
 // ChatUserMsgImageURL 图像URL
 type ChatUserMsgImageURL struct {
 	// 图像URL，支持url和base64编码
-	// 提供商支持: OpenAI | AliBL
-	URL string `json:"url,omitempty" providers:"openai,alibl" mapping:"alibl:image"`
+	// 提供商支持: OpenAI | AliBL | Ark
+	//URL string `json:"url,omitempty" providers:"openai,alibl,ark" mapping:"alibl:image"`
+	URL string `json:"url,omitempty" providers:"openai,alibl,ark"`
 	// 图像质量
-	// 提供商支持: OpenAI
-	Detail ChatUserMsgImageURLDetail `json:"detail,omitempty" providers:"openai"`
+	// 提供商支持: OpenAI | Ark
+	Detail ChatUserMsgImageURLDetail `json:"detail,omitempty" providers:"openai,ark"`
 	// 使用OCR模型进行文字提取前对图像进行自动转正
 	// 提供商支持: AliBL
 	EnableRotate bool `json:"enable_rotate,omitempty" providers:"alibl"`
@@ -52,6 +67,9 @@ type ChatUserMsgImageURL struct {
 	// 使用OCR模型限制输入图像的最大像素，默认值：6422528，最大值：23520000
 	// 提供商支持: AliBL
 	MaxPixels int `json:"max_pixels,omitempty" providers:"alibl"`
+	// 图片像素限制
+	// 提供商支持: Ark
+	ImagePixelLimit *ChatUserMsgImagePixelLimit `json:"image_pixel_limit,omitempty" providers:"ark"`
 }
 
 // ChatUserMsgInputAudioFormat 音频格式
@@ -100,17 +118,27 @@ type ChatUserMsgInputVideo struct {
 	FPS float64 `json:"fps,omitempty" providers:"alibl"`
 }
 
+// ChatUserMsgVideoURL 输入视频
+type ChatUserMsgVideoURL struct {
+	// 视频文件，支持url
+	// 提供商支持: Ark
+	URL string `json:"url,omitempty" providers:"ark"`
+	// 用于控制抽帧的频率，表示对视频文件每间隔 1/fps 秒抽取一帧，取值范围为 (0.2, 5)，默认值为1.0
+	// 提供商支持: Ark
+	FPS float64 `json:"fps,omitempty" providers:"ark"`
+}
+
 // ChatUserMsgPart 多模态内容
 type ChatUserMsgPart struct {
 	// 内容类型
-	// 提供商支持: OpenAI
-	Type ChatUserMsgPartType `json:"type,omitempty" providers:"openai"`
+	// 提供商支持: OpenAI | AliBL | Ark
+	Type ChatUserMsgPartType `json:"type,omitempty" providers:"openai,alibl,ark"`
 	// 文本内容
-	// 提供商支持: OpenAI | AliBL
-	Text string `json:"text,omitempty" providers:"openai,alibl"`
+	// 提供商支持: OpenAI | AliBL | Ark
+	Text string `json:"text,omitempty" providers:"openai,alibl,ark"`
 	// 图像URL
-	// 提供商支持: OpenAI | AliBL
-	ImageURL *ChatUserMsgImageURL `json:"image_url,omitempty" providers:"openai,alibl" flatten:"alibl"`
+	// 提供商支持: OpenAI | AliBL | Ark
+	ImageURL *ChatUserMsgImageURL `json:"image_url,omitempty" providers:"openai,alibl,ark" `
 	// 输入音频
 	// 提供商支持: OpenAI | AliBL
 	InputAudio *ChatUserMsgInputAudio `json:"input_audio,omitempty" providers:"openai,alibl" flatten:"alibl"`
@@ -120,6 +148,9 @@ type ChatUserMsgPart struct {
 	// 输入视频
 	// 提供商支持: AliBL
 	InputVideo *ChatUserMsgInputVideo `json:"input_video,omitempty" providers:"alibl" flatten:"alibl"`
+	// 输入视频
+	// 提供商支持: Ark
+	VideoURL *ChatUserMsgVideoURL `json:"video_url,omitempty" providers:"ark"`
 }
 
 // UserMessage 用户消息，支持多模态内容
@@ -127,14 +158,14 @@ type UserMessage struct {
 	// 用于序列化参数时，处理差异化参数
 	provider string
 	// 文本内容
-	// 提供商支持: OpenAI | DeepSeek | AliBL
-	Content string `json:"content,omitempty" providers:"openai,deepseek,alibl"`
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
+	Content string `json:"content,omitempty" providers:"openai,deepseek,alibl,ark"`
 	// 多模态内容
-	// 提供商支持: OpenAI | AliBL
-	MultimodalContent []ChatUserMsgPart `json:"multimodal_content,omitempty" providers:"openai,alibl" copyto:"Content"`
+	// 提供商支持: OpenAI | AliBL | Ark
+	MultimodalContent []ChatUserMsgPart `json:"multimodal_content,omitempty" providers:"openai,alibl,ark" copyto:"Content"`
 	// 消息角色
-	// 提供商支持: OpenAI | DeepSeek | AliBL
-	Role string `json:"role,omitempty" providers:"openai,deepseek,alibl" default:"user"`
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
+	Role string `json:"role,omitempty" providers:"openai,deepseek,alibl,ark" default:"user"`
 	// 参与者名称
 	// 提供商支持: OpenAI | DeepSeek
 	Name string `json:"name,omitempty" providers:"openai,deepseek"`

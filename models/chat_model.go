@@ -310,16 +310,16 @@ const (
 //	提供商支持: OpenAI
 type ChatResponseFormatJSONSchema struct {
 	// 响应格式名称，必须是 a-z、A-Z、0-9 或包含下划线和破折号，最大长度为 64
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Ark
 	Name string `json:"name,omitempty"`
 	// 响应格式的描述，用于指导模型如何响应
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Ark
 	Description string `json:"description,omitempty"`
 	// 响应格式的 JSON Schema
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Ark
 	Schema json.Marshaler `json:"schema,omitempty"`
 	// 是否启用严格模式，默认为 false
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Arkf
 	Strict bool `json:"strict,omitempty"`
 }
 
@@ -328,10 +328,10 @@ type ChatResponseFormatJSONSchema struct {
 //	提供商支持: OpenAI | DeepSeek | AliBL
 type ChatResponseFormat struct {
 	// 响应格式的类型
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Type ChatResponseFormatType `json:"type,omitempty"`
 	// JSON Schema 配置，仅当 Type 为 "json_schema" 时使用
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Ark
 	JSONSchema *ChatResponseFormatJSONSchema `json:"json_schema,omitempty"`
 }
 
@@ -414,13 +414,13 @@ func (c ChatToolChoice) MarshalJSON() (b []byte, err error) {
 //	提供商支持: OpenAI | DeepSeek | AliBL
 type ChatToolFunction struct {
 	// 函数名称，必须是 a-z, A-Z, 0-9 或者包含下划线和破折号，最大长度为 64
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Name string `json:"name,omitempty"`
 	// 函数描述，用于帮助模型决定何时以及如何调用函数
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Description string `json:"description,omitempty"`
 	// 函数接受的参数，描述为一个 JSON Schema 对象
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Parameters map[string]any `json:"parameters,omitempty"`
 	// 是否启用严格模式，默认为 false
 	// 提供商支持: OpenAI
@@ -432,10 +432,10 @@ type ChatToolFunction struct {
 //	提供商支持: OpenAI | DeepSeek | AliBL
 type ChatTool struct {
 	// 工具类型
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Type ToolType `json:"type,omitempty"`
 	// 工具函数
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Function *ChatToolFunction `json:"function,omitempty"`
 }
 
@@ -683,6 +683,10 @@ type ChatTranslationOptions struct {
 	Domains string `json:"domains,omitempty"`
 }
 
+type ChatThinkingOptions struct {
+	Type string `json:"type,omitempty"`
+}
+
 // ChatRequest 聊天请求
 //
 //	提供商支持: OpenAI | DeepSeek | AliBL
@@ -693,19 +697,19 @@ type ChatRequest struct {
 	// 提供商支持: OpenAI | DeepSeek | AliBL
 	Messages []ChatMessage `json:"messages,omitempty"`
 	// 模型名称
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Model string `json:"model,omitempty"`
 	// 输出音频的音色与格式
 	// 提供商支持: OpenAI | AliBL
 	Audio *ChatAudioOutputArgs `json:"audio,omitempty"`
 	// 介于 -2.0 和 2.0 之间的数字。如果该值为正，那么新 token 会根据其在已有文本中的出现频率受到相应的惩罚，降低模型重复相同内容的可能性
-	// 提供商支持: OpenAI | DeepSeek
+	// 提供商支持: OpenAI | DeepSeek | Ark
 	FrequencyPenalty float32 `json:"frequency_penalty,omitempty"`
 	// 修改指定标记在补全中出现的可能性
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Ark
 	LogitBias map[string]int `json:"logit_bias,omitempty"`
 	// 是否返回输出 Token 的对数概率
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	LogProbs bool `json:"logprobs,omitempty"`
 	// 生成补全内容的最大令牌数上限
 	// 提供商支持: OpenAI | DeepSeek | AliBL
@@ -726,46 +730,46 @@ type ChatRequest struct {
 	// 提供商支持: OpenAI
 	Prediction *ChatPrediction `json:"prediction,omitempty"`
 	// 介于 -2.0 和 2.0 之间的数字。如果该值为正，那么新 token 会根据其是否已在已有文本中出现受到相应的惩罚，从而增加模型谈论新主题的可能性
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	PresencePenalty float32 `json:"presence_penalty,omitempty"`
 	// 仅适用于 o 系列模型，约束推理模型的推理努力程度
 	// 提供商支持: OpenAI
 	ReasoningEffort ChatReasoningEffortType `json:"reasoning_effort,omitempty"`
 	// 响应格式
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	ResponseFormat *ChatResponseFormat `json:"response_format,omitempty"`
 	// 随机种子
 	// 提供商支持: OpenAI | AliBL
 	Seed int `json:"seed,omitempty"`
 	// 指定用于处理请求的延迟层级。此参数与订阅了规模层级服务的客户相关
-	// 提供商支持: OpenAI
+	// 提供商支持: OpenAI | Ark
 	ServiceTier string `json:"service_tier,omitempty"`
 	// 当API遇到这些序列时将停止生成更多标记。返回的文本不会包含停止序列
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Stop []string `json:"stop,omitempty"`
 	// 是否存储此聊天完成请求的输出，用于我们的模型蒸馏或评估产品
 	// 提供商支持: OpenAI
 	Store bool `json:"store,omitempty"`
 	// 是否流式传输响应
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Stream bool `json:"stream,omitempty"`
 	// 流式传输选项
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	StreamOptions *ChatStreamOptions `json:"stream_options,omitempty"`
 	// 采样温度值，范围在0到2之间
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Temperature float32 `json:"temperature,omitempty"`
 	// 指定工具调用的策略
 	// 提供商支持: OpenAI | DeepSeek | AliBL
 	ToolChoice *ChatToolChoice `json:"tool_choice,omitempty"`
 	// 可供模型调用的工具数组
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Tools []ChatTool `json:"tools,omitempty"`
 	// 一个介于0和20之间的整数，指定在每个标记位置返回的最可能标记的数量，每个标记都有相关的对数概率。如果使用此参数，必须将logprobs设置为true
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	TopLogProbs int `json:"top_logprobs,omitempty"`
 	// 一种替代温度采样的方法，我们通常建议调整此参数或温度（temperature），但不要同时调整两者
-	// 提供商支持: OpenAI | DeepSeek | AliBL
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	TopP float32 `json:"top_p,omitempty"`
 	// 网络搜索选项
 	// 提供商支持: OpenAI | AliBL
@@ -786,6 +790,9 @@ type ChatRequest struct {
 	// 可选值：'{"input":"cip","output":"cip"}'，表示同时检查输入和输出
 	// 提供商支持: AliBL
 	XDashScopeDataInspection string `json:"-"`
+	// 是否开启思考模式
+	// 提供商支持: Ark
+	Thinking *ChatThinkingOptions `json:"thinking,omitempty"`
 }
 
 // MarshalJSON 序列化JSON
