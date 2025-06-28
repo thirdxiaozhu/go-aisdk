@@ -41,13 +41,10 @@ func createImage(ctx context.Context, client *aisdk.SDKClient) (response models.
 		UserInfo: models.UserInfo{
 			UserID: "123456",
 		},
-		Provider:     consts.Ark,
-		Prompt:       "一间有着精致雕花窗户的花店，漂亮的深色木质门上挂着铜制把手。店内摆放着各式各样的鲜花，包括玫瑰、百合和向日葵，色彩鲜艳，生机勃勃。背景是温馨的室内场景，透过窗户可以看到街道。高清写实摄影，中景构图。",
-		Model:        consts.Doubaoseed1_6,
-		N:            2,
-		OutputFormat: models.ImageOutputFormatJPEG,
-		Quality:      models.ImageQualityHigh,
-		Size:         models.ImageSize1024x1024,
+		Provider: consts.Ark,
+		Prompt:   "一间有着精致雕花窗户的花店，漂亮的深色木质门上挂着铜制把手。店内摆放着各式各样的鲜花，包括玫瑰、百合和向日葵，色彩鲜艳，生机勃勃。背景是温馨的室内场景，透过窗户可以看到街道。高清写实摄影，中景构图。",
+		Model:    consts.Doubaoseedream3,
+		Size:     models.ImageSize1024x1024,
 	}, httpclient.WithTimeout(time.Minute*5))
 }
 func main() {
@@ -66,9 +63,9 @@ func main() {
 	}
 	configData := `{
   "providers": {
-    "openai": {
-      "base_url": "https://ark.cn-beijing.volces.com/api/v3",
-			"api_keys": [%v]
+    "ark": {
+			"base_url": "https://ark.cn-beijing.volces.com/api/v3",
+      "api_keys": [%v]
     }
   }
 }`
@@ -96,6 +93,7 @@ func main() {
 		log.Printf("createImage error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
+
 	// 保存每张生成的图片
 	filenames := make([]string, 0, len(response1.Data))
 	for i, v := range response1.Data {
@@ -106,7 +104,8 @@ func main() {
 				filenames = append(filenames, filename)
 			}
 		} else {
-			log.Printf("image %d base64 data is empty", i+1)
+
+			log.Printf("Response = %v", v)
 		}
 	}
 }

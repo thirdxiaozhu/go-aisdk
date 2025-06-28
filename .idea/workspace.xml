@@ -6,10 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="8df846c7-bb5a-4e5d-ba5b-dc77b78744ed" name="Changes" comment="新增火山大模型对话测试、火山大模型图片生成">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consts/ark.go" beforeDir="false" afterPath="$PROJECT_DIR$/consts/ark.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/chat_model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/chat_model.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/system_message_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/system_message_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/user_message_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/user_message_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/image/ark/ark.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/image/ark/ark.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/image.go" beforeDir="false" afterPath="$PROJECT_DIR$/image.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/image_model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/image_model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/providers/ark/ark.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/ark/ark.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,6 +75,7 @@
     "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark.executor": "Run",
     "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek.executor": "Run",
     "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai.executor": "Run",
+    "Go Build.go build github.com/liusuxian/go-aisdk/examples/image/ark.executor": "Run",
     "Go Test.TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models.executor": "Run",
     "Go Test.TestUserMessage_MarshalJSON/AliBL完整多模态 in github.com/liusuxian/go-aisdk/models.executor": "Run",
     "Go Test.TestUserMessage_MarshalJSON/AliBL视频完整配置 in github.com/liusuxian/go-aisdk/models.executor": "Run",
@@ -110,7 +111,7 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models">
+  <component name="RunManager" selected="Go Build.go build github.com/liusuxian/go-aisdk/examples/image/ark">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="go-aisdk" />
       <working_directory value="$PROJECT_DIR$" />
@@ -155,16 +156,16 @@
       <filePath value="$PROJECT_DIR$/examples/chat/deepseek/deepseek.go" />
       <method v="2" />
     </configuration>
-    <configuration name="go build github.com/liusuxian/go-aisdk/examples/chat/openai" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+    <configuration name="go build github.com/liusuxian/go-aisdk/examples/image/ark" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="go-aisdk" />
       <working_directory value="$PROJECT_DIR$" />
       <envs>
-        <env name="OPENAI_API_KEYS" value="sk-UJ0wofeU8STYHobg2pagoLz9SEIOHXPMSYe7LemqxEpdnniS" />
+        <env name="ARK_API_KEYS" value="7659003f-2e53-4e93-b479-7ce819e3b1ba" />
       </envs>
       <kind value="PACKAGE" />
-      <package value="github.com/liusuxian/go-aisdk/examples/chat/openai" />
+      <package value="github.com/liusuxian/go-aisdk/examples/image/ark" />
       <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$/examples/chat/openai/openai.go" />
+      <filePath value="$PROJECT_DIR$/examples/image/ark/ark.go" />
       <method v="2" />
     </configuration>
     <configuration name="TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
@@ -227,19 +228,19 @@
     <list>
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark" />
+      <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/image/ark" />
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
-      <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai" />
       <item itemvalue="Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models" />
       <item itemvalue="Go Test.TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models" />
       <item itemvalue="Go Test.TestUserMessage_MarshalJSON/AliBL完整多模态 in github.com/liusuxian/go-aisdk/models" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/image/ark" />
         <item itemvalue="Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models" />
         <item itemvalue="Go Test.TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models" />
         <item itemvalue="Go Test.TestUserMessage_MarshalJSON/AliBL完整多模态 in github.com/liusuxian/go-aisdk/models" />
         <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
-        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai" />
       </list>
     </recent_temporary>
   </component>
