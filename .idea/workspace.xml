@@ -4,12 +4,12 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8df846c7-bb5a-4e5d-ba5b-dc77b78744ed" name="Changes" comment="6.27_2">
-      <change afterPath="$PROJECT_DIR$/examples/image/ark/ark.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/providers/ark/image.go" afterDir="false" />
+    <list default="true" id="8df846c7-bb5a-4e5d-ba5b-dc77b78744ed" name="Changes" comment="新增火山大模型对话测试、火山大模型图片生成">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/consts/ark.go" beforeDir="false" afterPath="$PROJECT_DIR$/consts/ark.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/image_model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/image_model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/chat_model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/chat_model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/system_message_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/system_message_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/user_message_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/user_message_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,6 +31,7 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -74,6 +75,10 @@
     "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark.executor": "Run",
     "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek.executor": "Run",
     "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai.executor": "Run",
+    "Go Test.TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models.executor": "Run",
+    "Go Test.TestUserMessage_MarshalJSON/AliBL完整多模态 in github.com/liusuxian/go-aisdk/models.executor": "Run",
+    "Go Test.TestUserMessage_MarshalJSON/AliBL视频完整配置 in github.com/liusuxian/go-aisdk/models.executor": "Run",
+    "Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -105,7 +110,7 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark">
+  <component name="RunManager" selected="Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="go-aisdk" />
       <working_directory value="$PROJECT_DIR$" />
@@ -162,6 +167,54 @@
       <filePath value="$PROJECT_DIR$/examples/chat/openai/openai.go" />
       <method v="2" />
     </configuration>
+    <configuration name="TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="go-aisdk" />
+      <working_directory value="$PROJECT_DIR$/models" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/liusuxian/go-aisdk/models" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestSystemMessage_MarshalJSON\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestUserMessage_MarshalJSON/AliBL完整多模态 in github.com/liusuxian/go-aisdk/models" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="go-aisdk" />
+      <working_directory value="$PROJECT_DIR$/models" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/liusuxian/go-aisdk/models" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestUserMessage_MarshalJSON\E$/^\QAliBL完整多模态\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestUserMessage_MarshalJSON/AliBL视频完整配置 in github.com/liusuxian/go-aisdk/models" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="go-aisdk" />
+      <working_directory value="$PROJECT_DIR$/models" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/liusuxian/go-aisdk/models" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestUserMessage_MarshalJSON\E$/^\QAliBL视频完整配置\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="go-aisdk" />
+      <working_directory value="$PROJECT_DIR$/models" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/liusuxian/go-aisdk/models" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestUserMessage_MarshalJSON\E$/^\QArk完整多模态\E$" />
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
       <module name="go-aisdk" />
       <working_directory value="$PROJECT_DIR$" />
@@ -176,13 +229,17 @@
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark" />
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai" />
+      <item itemvalue="Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models" />
+      <item itemvalue="Go Test.TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models" />
+      <item itemvalue="Go Test.TestUserMessage_MarshalJSON/AliBL完整多模态 in github.com/liusuxian/go-aisdk/models" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models" />
+        <item itemvalue="Go Test.TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models" />
+        <item itemvalue="Go Test.TestUserMessage_MarshalJSON/AliBL完整多模态 in github.com/liusuxian/go-aisdk/models" />
         <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
         <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai" />
-        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
-        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
       </list>
     </recent_temporary>
   </component>
@@ -218,7 +275,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="origin/dev" />
+                        <option value="dev" />
                       </list>
                     </value>
                   </entry>
@@ -235,20 +292,12 @@
     <MESSAGE value="6.19" />
     <MESSAGE value="6.27" />
     <MESSAGE value="6.27_2" />
-    <option name="LAST_COMMIT_MESSAGE" value="6.27_2" />
+    <MESSAGE value="6.27_7" />
+    <MESSAGE value="新增火山大模型对话" />
+    <MESSAGE value="新增火山大模型对话测试、火山大模型图片生成" />
+    <option name="LAST_COMMIT_MESSAGE" value="新增火山大模型对话测试、火山大模型图片生成" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/models/chat_model.go</url>
-          <line>209</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

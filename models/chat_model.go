@@ -155,11 +155,51 @@ var (
 		temp.Provider = ""
 		return json.Marshal(temp)
 	}
+	// 序列化聊天请求函数（Ark）
+	marshalChatRequestByArk = func(r ChatRequest) (b []byte, err error) {
+		// 设置提供商
+		for _, message := range r.Messages {
+			message.SetProvider(r.Provider.String())
+		}
+		// 创建一个别名结构体
+		type Alias ChatRequest
+		temp := struct {
+			UserID string `json:"user_id,omitempty"`
+			Alias
+		}{
+			Alias: Alias(r),
+		}
+		// 处理公共字段
+		if r.ResponseFormat != nil && r.ResponseFormat.JSONSchema != nil {
+			temp.ResponseFormat = nil
+		}
+		if len(r.Tools) > 0 {
+			tempTools := make([]ChatTool, 0, len(r.Tools))
+			for _, v := range r.Tools {
+				if v.Function != nil {
+					v.Function.Strict = false
+				}
+				tempTools = append(tempTools, v)
+			}
+			temp.Tools = tempTools
+		}
+		// 移除不支持的字段
+		temp.Metadata = nil
+		temp.Prediction = nil
+		temp.ReasoningEffort = ""
+		temp.Store = false
+		temp.XDashScopeDataInspection = ""
+		// 序列化JSON
+		temp.Provider = ""
+		temp.EnableThinking = false
+		return json.Marshal(temp)
+	}
 	// 策略映射
 	chatRequestStrategies = map[consts.Provider]func(m ChatRequest) (b []byte, err error){
 		consts.OpenAI:   marshalChatRequestByOpenAI,
 		consts.DeepSeek: marshalChatRequestByDeepSeek,
 		consts.AliBL:    marshalChatRequestByAliBL,
+		consts.Ark:      marshalChatRequestByArk,
 	}
 )
 

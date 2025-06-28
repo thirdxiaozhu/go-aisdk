@@ -215,6 +215,16 @@ func TestSystemMessage_MarshalJSON(t *testing.T) {
 			wantB:   []byte(`{"role":"system","content":"Test content","name":"TestBot"}`),
 			wantErr: false,
 		},
+		//{
+		//	name: "test", // deepseek providers support test
+		//	fields: fields{
+		//		provider: "ark",
+		//		Content:  "Test content",
+		//		Role:     "", // 默认值
+		//	},
+		//	wantB:   []byte(`{"role":"system","content":"Test content","name":"TestBot"}`),
+		//	wantErr: false,
+		//},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

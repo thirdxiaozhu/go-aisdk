@@ -11,6 +11,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -114,6 +115,32 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 				},
 			},
 			wantB:   []byte(`{"content":[{"text":"test"},{"image":"https://example.com/image.png","enable_rotate":true,"min_pixels":100,"max_pixels":23520000},{"audio":"https://example.com/audio.mp3"},{"video":["https://example.com/video.mp4","https://example.com/video.mp4"],"fps":2}],"role":"user"}`),
+			wantErr: false,
+		},
+		{
+			name: "Ark完整多模态", // ark
+			fields: fields{
+				provider: "ark",
+				Content:  "test",
+				MultimodalContent: []ChatUserMsgPart{
+					{
+						Type: ChatUserMsgPartTypeText,
+						Text: "test",
+					},
+					{
+						Type: ChatUserMsgPartTypeImageURL,
+						ImageURL: &ChatUserMsgImageURL{
+							URL:    "https://example.com/image.png",
+							Detail: ChatUserMsgImageURLDetailHigh,
+							ImagePixelLimit: &ChatUserMsgImagePixelLimit{
+								MaxPixels: 10000,
+								MinPixels: 9999,
+							},
+						},
+					},
+				},
+			},
+			wantB:   []byte(`{"content":[{"text":"test","type":"text"},{"image_url":{"detail":"high","image_pixel_limit":{"max_pixels":10000,"min_pixels":9999},"url":"https://example.com/image.png"},"type":"image_url"}],"role":"user"}`),
 			wantErr: false,
 		},
 		{
@@ -1022,6 +1049,8 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 				t.Errorf("Failed to unmarshal got JSON: %v", err)
 				return
 			}
+
+			fmt.Println(string(gotB))
 			if err := json.Unmarshal(tt.wantB, &want); err != nil {
 				t.Errorf("Failed to unmarshal want JSON: %v", err)
 				return
