@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 14:05:10
+ * @LastEditTime: 2025-07-01 00:17:50
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -41,7 +41,7 @@ func getApiKeys(envKey string) (apiKeys string) {
 func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
 	return client.ListModels(ctx, models.ListModelsRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.OpenAI,
 	}, httpclient.WithTimeout(time.Minute*2))
@@ -50,12 +50,24 @@ func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.L
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
 	return client.CreateChatCompletion(ctx, models.ChatRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.OpenAI,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+				MultimodalContent: []models.ChatUserMsgPart{
+					{
+						Type: models.ChatUserMsgPartTypeText,
+						Text: "请使用中文解析该图片内容，字数限制在100个字以内",
+					},
+					{
+						Type: models.ChatUserMsgPartTypeImageURL,
+						ImageURL: &models.ChatUserMsgImageURL{
+							URL:    "https://www.gstatic.com/webp/gallery/1.webp",
+							Detail: models.ChatUserMsgImageURLDetailHigh,
+						},
+					},
+				},
 			},
 		},
 		Model:               consts.OpenAIGPT4o,
@@ -66,19 +78,31 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponseStream, err error) {
 	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.OpenAI,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+				MultimodalContent: []models.ChatUserMsgPart{
+					{
+						Type: models.ChatUserMsgPartTypeText,
+						Text: "请使用中文解析该图片内容，字数限制在100个字以内",
+					},
+					{
+						Type: models.ChatUserMsgPartTypeImageURL,
+						ImageURL: &models.ChatUserMsgImageURL{
+							URL:    "https://www.gstatic.com/webp/gallery/1.webp",
+							Detail: models.ChatUserMsgImageURLDetailHigh,
+						},
+					},
+				},
 			},
 		},
 		Model:               consts.OpenAIGPT4o,
 		MaxCompletionTokens: utils.Int(4096),
-		Stream:              true,
+		Stream:              utils.Bool(true),
 		StreamOptions: &models.ChatStreamOptions{
-			IncludeUsage: true,
+			IncludeUsage: utils.Bool(true),
 		},
 	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*10))
 }

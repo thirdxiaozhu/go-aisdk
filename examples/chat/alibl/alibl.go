@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 13:01:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 14:10:39
+ * @LastEditTime: 2025-07-01 00:19:17
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -41,7 +41,7 @@ func getApiKeys(envKey string) (apiKeys string) {
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
 	return client.CreateChatCompletion(ctx, models.ChatRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.AliBL,
 		Messages: []models.ChatMessage{
@@ -57,7 +57,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponseStream, err error) {
 	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.AliBL,
 		Messages: []models.ChatMessage{
@@ -67,9 +67,9 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		},
 		Model:               consts.AliBLQwqPlus,
 		MaxCompletionTokens: utils.Int(4096),
-		Stream:              true,
+		Stream:              utils.Bool(true),
 		StreamOptions: &models.ChatStreamOptions{
-			IncludeUsage: true,
+			IncludeUsage: utils.Bool(true),
 		},
 	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*5))
 }

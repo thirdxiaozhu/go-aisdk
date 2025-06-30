@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:05
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 11:11:55
+ * @LastEditTime: 2025-07-01 00:27:50
  * @Description: 中间件接口定义
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -73,7 +73,7 @@ type RequestInfo struct {
 	IsSuccess       bool      `json:"is_success"`        // 最后一次的请求状态（重试过程中会更新，最终表示是否成功）
 	Error           error     `json:"error"`             // 最后一次的错误信息（重试过程中会更新）
 	RequestID       string    `json:"request_id"`        // 请求ID
-	UserID          string    `json:"user_id"`           // 用户ID
+	User            string    `json:"user"`              // 代表你的终端用户的唯一标识符
 	Attempt         int       `json:"attempt"`           // 第几次重试
 	MaxAttempts     int       `json:"max_attempts"`      // 最大重试次数
 }
@@ -122,7 +122,7 @@ func deepCopyRequestInfo(original *RequestInfo) (requestInfo *RequestInfo) {
 		TotalDurationMs: original.TotalDurationMs,
 		IsSuccess:       original.IsSuccess,
 		RequestID:       original.RequestID,
-		UserID:          original.UserID,
+		User:            original.User,
 		Attempt:         original.Attempt,
 		MaxAttempts:     original.MaxAttempts,
 	}

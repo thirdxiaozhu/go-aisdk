@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-19 17:37:53
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-24 10:47:18
+ * @LastEditTime: 2025-07-01 00:28:45
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -98,8 +98,8 @@ func (s *openAIProvider) CreateImageEdit(ctx context.Context, request models.Ima
 			}
 		}
 		// 用户
-		if request.UserInfo.UserID != "" {
-			if e = builder.WriteField("user", request.UserInfo.UserID); e != nil {
+		if request.UserInfo.User != "" {
+			if e = builder.WriteField("user", request.UserInfo.User); e != nil {
 				return
 			}
 		}
@@ -144,8 +144,8 @@ func (s *openAIProvider) CreateImageVariation(ctx context.Context, request model
 			}
 		}
 		// 用户
-		if request.UserInfo.UserID != "" {
-			if e = builder.WriteField("user", request.UserInfo.UserID); e != nil {
+		if request.UserInfo.User != "" {
+			if e = builder.WriteField("user", request.UserInfo.User); e != nil {
 				return
 			}
 		}

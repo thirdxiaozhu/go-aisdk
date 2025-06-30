@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:09:20
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 18:19:50
+ * @LastEditTime: 2025-07-01 00:28:24
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -129,7 +129,7 @@ func (c *SDKClient) handlerRequest(
 		Method:    method,
 		StartTime: time.Now(),
 		RequestID: requestId,
-		UserID:    userInfo.UserID,
+		User:      userInfo.User,
 	})
 	// 定义最终处理函数
 	finalHandler := func(ctx context.Context, req any) (resp any, err error) {
