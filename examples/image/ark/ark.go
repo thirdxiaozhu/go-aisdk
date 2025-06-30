@@ -39,7 +39,7 @@ func getApiKeys(envKey string) (apiKeys string) {
 func createImage(ctx context.Context, client *aisdk.SDKClient) (response models.ImageResponse, err error) {
 	return client.CreateImage(ctx, models.ImageRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.Ark,
 		Prompt:   "一间有着精致雕花窗户的花店，漂亮的深色木质门上挂着铜制把手。店内摆放着各式各样的鲜花，包括玫瑰、百合和向日葵，色彩鲜艳，生机勃勃。背景是温馨的室内场景，透过窗户可以看到街道。高清写实摄影，中景构图。",

@@ -42,7 +42,7 @@ var (
 			User   string `json:"user,omitempty"` // 用户标识符，用于监控和滥用检测
 			Alias
 		}{
-			User:  r.UserInfo.UserID,
+			User:  r.UserInfo.User,
 			Alias: Alias(r),
 		}
 		temp.Provider = ""
