@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-27 16:00:47
+ * @LastEditTime: 2025-06-30 18:54:49
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -45,13 +45,13 @@ type ChatUserMsgImageURL struct {
 	Detail ChatUserMsgImageURLDetail `json:"detail,omitempty" providers:"openai"`
 	// 使用OCR模型进行文字提取前对图像进行自动转正
 	// 提供商支持: AliBL
-	EnableRotate bool `json:"enable_rotate,omitempty" providers:"alibl"`
+	EnableRotate *bool `json:"enable_rotate,omitempty" providers:"alibl"`
 	// 使用OCR模型限制输入图像的最小像素，默认值：3136，最小值：100
 	// 提供商支持: AliBL
-	MinPixels int `json:"min_pixels,omitempty" providers:"alibl"`
+	MinPixels *int `json:"min_pixels,omitempty" providers:"alibl"`
 	// 使用OCR模型限制输入图像的最大像素，默认值：6422528，最大值：23520000
 	// 提供商支持: AliBL
-	MaxPixels int `json:"max_pixels,omitempty" providers:"alibl"`
+	MaxPixels *int `json:"max_pixels,omitempty" providers:"alibl"`
 }
 
 // ChatUserMsgInputAudioFormat 音频格式
@@ -97,7 +97,7 @@ type ChatUserMsgInputVideo struct {
 	VideoImgList []string `json:"video_img_list,omitempty" providers:"alibl" copyto:"Video"`
 	// 用于控制抽帧的频率，表示对视频文件每间隔 1/fps 秒抽取一帧，取值范围为 (0.1, 10)，默认值为2.0
 	// 提供商支持: AliBL
-	FPS float64 `json:"fps,omitempty" providers:"alibl"`
+	FPS *float64 `json:"fps,omitempty" providers:"alibl"`
 }
 
 // ChatUserMsgPart 多模态内容

@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-27 15:57:31
+ * @LastEditTime: 2025-06-30 18:03:43
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -66,7 +66,7 @@ type AssistantMessage struct {
 	ToolCalls []ToolCalls `json:"tool_calls,omitempty" providers:"openai"`
 	// 设置此参数为 true，来强制模型在其回答中以此 assistant 消息中提供的前缀内容开始
 	// 提供商支持: DeepSeek | AliBL
-	Prefix bool `json:"prefix,omitempty" providers:"deepseek,alibl" mapping:"alibl:partial"`
+	Prefix *bool `json:"prefix,omitempty" providers:"deepseek,alibl" mapping:"alibl:partial"`
 	// 用于模型在对话前缀续写功能下，作为最后一条 assistant 思维链内容的输入。使用此功能时，prefix 参数必须设置为 true
 	// 提供商支持: DeepSeek
 	ReasoningContent string `json:"reasoning_content,omitempty" providers:"deepseek"`

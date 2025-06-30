@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 17:39:21
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-27 15:49:43
+ * @LastEditTime: 2025-06-30 15:35:10
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -425,7 +425,8 @@ func (s *Serializer) flattenField(fieldValue reflect.Value, visited *map[uintptr
 // getCopyToTargetJsonFieldName 获取copyto标签字段对应的JSON字段名
 //
 //	格式1: `copyto:"targetField"` -> 将字段值复制到指定字段对应的JSON字段名
-//	格式2: `copyto:"provider1:targetField1,provider2:targetField2"` -> 将字段值复制到提供商指定字段对应的JSON字段名
+//	格式2: `copyto:"provider1:targetField1,provider2:targetField2,..."` -> 将字段值复制到提供商指定字段对应的JSON字段名
+//	格式3: `copyto:"provider1|provider2|provider3|...:targetField1,provider4|provider5|...:targetField2"` -> 将字段值复制到提供商指定字段对应的JSON字段名
 func (s *Serializer) getCopyToTargetJsonFieldName(copyToTag string, structValue reflect.Value) (targetJsonFieldName string, err error) {
 	// 获取当前提供商指定tag的值
 	var tagValue string
@@ -449,8 +450,9 @@ func (s *Serializer) getCopyToTargetJsonFieldName(copyToTag string, structValue 
 
 // getDefaultValue 获取当前提供商的默认值
 //
-//	格式1: `default:"provider1:defaultValue1,provider2:defaultValue2"` -> 使用指定提供商的默认值
-//	格式2: `default:"defaultValue"` -> 使用通用默认值
+//	格式1: `default:"provider1:defaultValue1,provider2:defaultValue2,..."` -> 使用指定提供商的默认值
+//	格式2: `default:"provider1|provider2|provider3|...:defaultValue1,provider4|provider5|...:defaultValue2"` -> 使用指定提供商的默认值
+//	格式3: `default:"defaultValue"` -> 使用通用默认值
 func (s *Serializer) getDefaultValue(defaultTag string) (result any, err error) {
 	// 获取当前提供商指定tag的值
 	var tagValue string
@@ -489,7 +491,7 @@ func (s *Serializer) shouldSkipField(field reflect.StructField, value reflect.Va
 
 // isSupported 检查提供商是否被支持
 //
-//	格式: `providers:"provider1,provider2,provider3"`
+//	格式: `tag:"provider1,provider2,provider3"`
 //	如果tag为空，则默认支持所有提供商
 func (s *Serializer) isSupported(tag string) (isSupported bool) {
 	if tag == "" {
@@ -503,7 +505,8 @@ func (s *Serializer) isSupported(tag string) (isSupported bool) {
 // getJsonFieldName 获取JSON字段名
 //
 //	格式1: `json:"jsonFieldName"` -> 使用json字段名
-//	格式2: `json:"jsonFieldName" mapping:"provider1:mappedName1,provider2:mappedName2"` -> 使用指定提供商的映射名
+//	格式2: `json:"jsonFieldName" mapping:"provider1:mappedName1,provider2:mappedName2,..."` -> 使用指定提供商的映射名
+//	格式3: `json:"jsonFieldName" mapping:"provider1|provider2|provider3|...:mappedName1,provider4|provider5|...:mappedName2"` -> 使用指定提供商的映射名
 //	如果tag为空，则使用Go字段名
 func (s *Serializer) getJsonFieldName(field reflect.StructField) (jsonFieldName string) {
 	jsonTag := field.Tag.Get("json")
@@ -522,10 +525,10 @@ func (s *Serializer) getJsonFieldName(field reflect.StructField) (jsonFieldName 
 		for mapping := range strings.SplitSeq(mappingTag, ",") {
 			if parts := strings.Split(mapping, ":"); len(parts) == 2 {
 				var (
-					provider   = strings.TrimSpace(parts[0])
-					mappedName = strings.TrimSpace(parts[1])
+					providerList = strings.Split(strings.TrimSpace(parts[0]), "|")
+					mappedName   = strings.TrimSpace(parts[1])
 				)
-				if provider == s.provider && mappedName != "" {
+				if slices.Contains(providerList, s.provider) && mappedName != "" {
 					jsonFieldName = mappedName
 					return
 				}
@@ -537,19 +540,20 @@ func (s *Serializer) getJsonFieldName(field reflect.StructField) (jsonFieldName 
 
 // getTagValue 获取当前提供商指定tag的值
 //
-//	格式1: `tag:"provider1:value1,provider2:value2"` -> 使用指定提供商的值
-//	格式2: `tag:"value"` -> 使用通用值
+//	格式1: `tag:"provider1:value1,provider2:value2,..."` -> 使用指定提供商的值
+//	格式2: `tag:"provider1|provider2|provider3|...:value1,provider4|provider5|...:value2"` -> 使用指定提供商的值
+//	格式3: `tag:"value"` -> 使用通用值
 func (s *Serializer) getTagValue(tagValue string) (value string, err error) {
 	// 检查是否包含提供商特定的值
 	if strings.Contains(tagValue, ":") {
 		for mapping := range strings.SplitSeq(tagValue, ",") {
 			if parts := strings.Split(mapping, ":"); len(parts) == 2 {
-				var provider = strings.TrimSpace(parts[0])
-				if provider == s.provider {
+				var providerList = strings.Split(strings.TrimSpace(parts[0]), "|")
+				if slices.Contains(providerList, s.provider) {
 					value = strings.TrimSpace(parts[1])
 					if value == "" {
 						// 配置了提供商，但值为空，报错
-						err = fmt.Errorf("tag value[%s] is empty for provider[%s]", tagValue, provider)
+						err = fmt.Errorf("tag value[%s] is empty for provider[%s]", tagValue, s.provider)
 						return
 					}
 					return
