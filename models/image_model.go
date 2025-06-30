@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-19 17:11:50
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 14:39:48
+ * @LastEditTime: 2025-07-01 00:20:34
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -26,7 +26,7 @@ var (
 			User   string `json:"user,omitempty"` // 用户标识符，用于监控和滥用检测
 			Alias
 		}{
-			User:  r.UserInfo.UserID,
+			User:  r.UserInfo.User,
 			Alias: Alias(r),
 		}
 		// 序列化JSON
@@ -66,7 +66,7 @@ var (
 			User   string `json:"user,omitempty"` // 用户标识符，用于监控和滥用检测
 			Alias
 		}{
-			User:  r.UserInfo.UserID,
+			User:  r.UserInfo.User,
 			Alias: Alias(r),
 		}
 		// 序列化JSON
@@ -85,7 +85,7 @@ var (
 			User   string `json:"user,omitempty"` // 用户标识符，用于监控和滥用检测
 			Alias
 		}{
-			User:  r.UserInfo.UserID,
+			User:  r.UserInfo.User,
 			Alias: Alias(r),
 		}
 		// 序列化JSON

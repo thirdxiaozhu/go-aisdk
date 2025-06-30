@@ -60,13 +60,13 @@ type ChatUserMsgImageURL struct {
 	Detail ChatUserMsgImageURLDetail `json:"detail,omitempty" providers:"openai,ark"`
 	// 使用OCR模型进行文字提取前对图像进行自动转正
 	// 提供商支持: AliBL
-	EnableRotate bool `json:"enable_rotate,omitempty" providers:"alibl"`
+	EnableRotate *bool `json:"enable_rotate,omitempty" providers:"alibl"`
 	// 使用OCR模型限制输入图像的最小像素，默认值：3136，最小值：100
 	// 提供商支持: AliBL
-	MinPixels int `json:"min_pixels,omitempty" providers:"alibl"`
+	MinPixels *int `json:"min_pixels,omitempty" providers:"alibl"`
 	// 使用OCR模型限制输入图像的最大像素，默认值：6422528，最大值：23520000
 	// 提供商支持: AliBL
-	MaxPixels int `json:"max_pixels,omitempty" providers:"alibl"`
+	MaxPixels *int `json:"max_pixels,omitempty" providers:"alibl"`
 	// 图片像素限制
 	// 提供商支持: Ark
 	ImagePixelLimit *ChatUserMsgImagePixelLimit `json:"image_pixel_limit,omitempty" providers:"ark"`
@@ -115,7 +115,7 @@ type ChatUserMsgInputVideo struct {
 	VideoImgList []string `json:"video_img_list,omitempty" providers:"alibl" copyto:"Video"`
 	// 用于控制抽帧的频率，表示对视频文件每间隔 1/fps 秒抽取一帧，取值范围为 (0.1, 10)，默认值为2.0
 	// 提供商支持: AliBL
-	FPS float64 `json:"fps,omitempty" providers:"alibl"`
+	FPS *float64 `json:"fps,omitempty" providers:"alibl"`
 }
 
 // ChatUserMsgVideoURL 输入视频

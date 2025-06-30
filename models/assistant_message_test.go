@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 22:58:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-27 10:10:36
+ * @LastEditTime: 2025-06-30 18:14:57
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,6 +11,7 @@ package models
 
 import (
 	"encoding/json"
+	"github.com/liusuxian/go-aisdk/utils"
 	"reflect"
 	"testing"
 )
@@ -25,7 +26,7 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 		Name              string
 		Refusal           string
 		ToolCalls         []ToolCalls
-		Prefix            bool
+		Prefix            *bool
 		ReasoningContent  string
 	}
 	tests := []struct {
@@ -161,7 +162,7 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 				provider: "deepseek",
 				Content:  "Prefix test",
 				Role:     "",
-				Prefix:   true,
+				Prefix:   utils.Bool(true),
 			},
 			wantB:   []byte(`{"role":"assistant","content":"Prefix test","prefix":true}`),
 			wantErr: false,
@@ -172,7 +173,7 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 				provider:         "deepseek",
 				Content:          "Final answer",
 				Role:             "",
-				Prefix:           true,
+				Prefix:           utils.Bool(true),
 				ReasoningContent: "Let me think about this step by step...",
 			},
 			wantB:   []byte(`{"role":"assistant","content":"Final answer","prefix":true,"reasoning_content":"Let me think about this step by step..."}`),
@@ -184,9 +185,9 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 				provider: "deepseek",
 				Content:  "",
 				Role:     "",
-				Prefix:   false, // false值会omitempty
+				Prefix:   utils.Bool(false),
 			},
-			wantB:   []byte(`{"role":"assistant"}`),
+			wantB:   []byte(`{"role":"assistant","prefix":false}`),
 			wantErr: false,
 		},
 		{
@@ -205,7 +206,7 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 				provider: "alibl",
 				Content:  "AliBL prefix test",
 				Role:     "",
-				Prefix:   true, // 在alibl中映射为"partial"
+				Prefix:   utils.Bool(true), // 在alibl中映射为"partial"
 			},
 			wantB:   []byte(`{"role":"assistant","content":"AliBL prefix test","partial":true}`),
 			wantErr: false,
@@ -227,9 +228,9 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 				provider: "alibl",
 				Content:  "",
 				Role:     "",
-				Prefix:   false,
+				Prefix:   utils.Bool(false),
 			},
-			wantB:   []byte(`{"role":"assistant"}`),
+			wantB:   []byte(`{"role":"assistant","partial":false}`),
 			wantErr: false,
 		},
 		{
@@ -264,7 +265,7 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 				Content:          "Complex DeepSeek case",
 				Role:             "thinking_assistant",
 				Name:             "DeepThink",
-				Prefix:           true,
+				Prefix:           utils.Bool(true),
 				ReasoningContent: "Complex reasoning process...",
 			},
 			wantB:   []byte(`{"role":"thinking_assistant","content":"Complex DeepSeek case","name":"DeepThink","prefix":true,"reasoning_content":"Complex reasoning process..."}`),
@@ -397,7 +398,7 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 						Type: "function",
 					},
 				},
-				Prefix:           true,
+				Prefix:           utils.Bool(true),
 				ReasoningContent: "DeepSeek reasoning",
 			},
 			wantB:   []byte(`{"role":"assistant","content":"DeepSeek content","name":"DeepSeek Bot","prefix":true,"reasoning_content":"DeepSeek reasoning"}`),
@@ -426,7 +427,7 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 						Type: "function",
 					},
 				},
-				Prefix:           true,                // alibl支持，但映射为partial
+				Prefix:           utils.Bool(true),    // alibl支持，但映射为partial
 				ReasoningContent: "Should be ignored", // alibl不支持reasoning_content
 			},
 			wantB:   []byte(`{"role":"assistant","content":"AliBL content","partial":true}`),
@@ -449,7 +450,7 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 				Role:             "Should be ignored",
 				Name:             "Should be ignored",
 				Refusal:          "Should be ignored",
-				Prefix:           true,
+				Prefix:           utils.Bool(true),
 				ReasoningContent: "Should be ignored",
 			},
 			wantB:   []byte{},
@@ -474,24 +475,24 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 			name: "test", // deepseek omitempty comprehensive test
 			fields: fields{
 				provider:         "deepseek",
-				Content:          "",    // 空字符串，会omitempty
-				Role:             "",    // 空字符串，使用默认值
-				Name:             "",    // 空字符串，会omitempty
-				Prefix:           false, // false值，会omitempty
-				ReasoningContent: "",    // 空字符串，会omitempty
+				Content:          "", // 空字符串，会omitempty
+				Role:             "", // 空字符串，使用默认值
+				Name:             "", // 空字符串，会omitempty
+				Prefix:           utils.Bool(false),
+				ReasoningContent: "", // 空字符串，会omitempty
 			},
-			wantB:   []byte(`{"role":"assistant"}`),
+			wantB:   []byte(`{"role":"assistant","prefix":false}`),
 			wantErr: false,
 		},
 		{
 			name: "test", // alibl omitempty comprehensive test
 			fields: fields{
 				provider: "alibl",
-				Content:  "",    // 空字符串，会omitempty
-				Role:     "",    // 空字符串，使用默认值
-				Prefix:   false, // false值，会omitempty
+				Content:  "", // 空字符串，会omitempty
+				Role:     "", // 空字符串，使用默认值
+				Prefix:   utils.Bool(false),
 			},
-			wantB:   []byte(`{"role":"assistant"}`),
+			wantB:   []byte(`{"role":"assistant","partial":false}`),
 			wantErr: false,
 		},
 		{
@@ -601,7 +602,7 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 				provider: "deepseek",
 				Content:  "Prefix true without reasoning",
 				Role:     "",
-				Prefix:   true,
+				Prefix:   utils.Bool(true),
 				// ReasoningContent 为空
 			},
 			wantB:   []byte(`{"role":"assistant","content":"Prefix true without reasoning","prefix":true}`),
@@ -613,10 +614,10 @@ func TestAssistantMessage_MarshalJSON(t *testing.T) {
 				provider:         "deepseek",
 				Content:          "Reasoning without prefix",
 				Role:             "",
-				Prefix:           false, // false会被omitempty
+				Prefix:           utils.Bool(false),
 				ReasoningContent: "Reasoning content without prefix",
 			},
-			wantB:   []byte(`{"role":"assistant","content":"Reasoning without prefix","reasoning_content":"Reasoning content without prefix"}`),
+			wantB:   []byte(`{"role":"assistant","prefix":false,"content":"Reasoning without prefix","reasoning_content":"Reasoning content without prefix"}`),
 			wantErr: false,
 		},
 		{

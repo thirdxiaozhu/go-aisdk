@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-24 12:40:10
+ * @LastEditTime: 2025-07-01 00:20:14
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -40,7 +40,7 @@ func getApiKeys(envKey string) (apiKeys string) {
 func createImage(ctx context.Context, client *aisdk.SDKClient) (response models.ImageResponse, err error) {
 	return client.CreateImage(ctx, models.ImageRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider:     consts.OpenAI,
 		Prompt:       "一间有着精致雕花窗户的花店，漂亮的深色木质门上挂着铜制把手。店内摆放着各式各样的鲜花，包括玫瑰、百合和向日葵，色彩鲜艳，生机勃勃。背景是温馨的室内场景，透过窗户可以看到街道。高清写实摄影，中景构图。",
@@ -67,7 +67,7 @@ func createImageEdit(ctx context.Context, client *aisdk.SDKClient, filenames []s
 	}
 	return client.CreateImageEdit(ctx, models.ImageEditRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider:     consts.OpenAI,
 		Image:        imageReaders,
@@ -87,7 +87,7 @@ func createImageVariation(ctx context.Context, client *aisdk.SDKClient, filename
 	}
 	return client.CreateImageVariation(ctx, models.ImageVariationRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider:       consts.OpenAI,
 		Image:          imageReader,

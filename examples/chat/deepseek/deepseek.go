@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 14:04:23
+ * @LastEditTime: 2025-07-01 00:20:01
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -17,6 +17,7 @@ import (
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/utils"
 	"log"
 	"net"
 	"os"
@@ -40,7 +41,7 @@ func getApiKeys(envKey string) (apiKeys string) {
 func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
 	return client.ListModels(ctx, models.ListModelsRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.DeepSeek,
 	}, httpclient.WithTimeout(time.Minute*2))
@@ -49,7 +50,7 @@ func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.L
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
 	return client.CreateChatCompletion(ctx, models.ChatRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.DeepSeek,
 		Messages: []models.ChatMessage{
@@ -58,14 +59,14 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 			},
 		},
 		Model:               consts.DeepSeekChat,
-		MaxCompletionTokens: 4096,
+		MaxCompletionTokens: utils.Int(4096),
 	}, httpclient.WithTimeout(time.Minute*2))
 }
 
 func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponseStream, err error) {
 	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.DeepSeek,
 		Messages: []models.ChatMessage{
@@ -74,10 +75,10 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 			},
 		},
 		Model:               consts.DeepSeekReasoner,
-		MaxCompletionTokens: 4096,
-		Stream:              true,
+		MaxCompletionTokens: utils.Int(4096),
+		Stream:              utils.Bool(true),
 		StreamOptions: &models.ChatStreamOptions{
-			IncludeUsage: true,
+			IncludeUsage: utils.Bool(true),
 		},
 	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*5))
 }

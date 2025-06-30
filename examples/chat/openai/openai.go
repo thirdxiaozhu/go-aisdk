@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 14:05:10
+ * @LastEditTime: 2025-07-01 00:17:50
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -17,6 +17,7 @@ import (
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/utils"
 	"log"
 	"net"
 	"os"
@@ -40,7 +41,7 @@ func getApiKeys(envKey string) (apiKeys string) {
 func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.ListModelsResponse, err error) {
 	return client.ListModels(ctx, models.ListModelsRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.OpenAI,
 	}, httpclient.WithTimeout(time.Minute*2))
@@ -49,35 +50,59 @@ func listModels(ctx context.Context, client *aisdk.SDKClient) (response models.L
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
 	return client.CreateChatCompletion(ctx, models.ChatRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.OpenAI,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "介绍一下你自己",
+				MultimodalContent: []models.ChatUserMsgPart{
+					{
+						Type: models.ChatUserMsgPartTypeText,
+						Text: "请使用中文解析该图片内容，字数限制在100个字以内",
+					},
+					{
+						Type: models.ChatUserMsgPartTypeImageURL,
+						ImageURL: &models.ChatUserMsgImageURL{
+							URL:    "https://www.gstatic.com/webp/gallery/1.webp",
+							Detail: models.ChatUserMsgImageURLDetailHigh,
+						},
+					},
+				},
 			},
 		},
 		Model:               consts.OpenAIGPT4o,
-		MaxCompletionTokens: 4096,
+		MaxCompletionTokens: utils.Int(4096),
 	}, httpclient.WithTimeout(time.Minute*2))
 }
 
 func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponseStream, err error) {
 	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.OpenAI,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "介绍一下你自己",
+				MultimodalContent: []models.ChatUserMsgPart{
+					{
+						Type: models.ChatUserMsgPartTypeText,
+						Text: "请使用中文解析该图片内容，字数限制在100个字以内",
+					},
+					{
+						Type: models.ChatUserMsgPartTypeImageURL,
+						ImageURL: &models.ChatUserMsgImageURL{
+							URL:    "https://www.gstatic.com/webp/gallery/1.webp",
+							Detail: models.ChatUserMsgImageURLDetailHigh,
+						},
+					},
+				},
 			},
 		},
 		Model:               consts.OpenAIGPT4o,
-		MaxCompletionTokens: 4096,
-		Stream:              true,
+		MaxCompletionTokens: utils.Int(4096),
+		Stream:              utils.Bool(true),
 		StreamOptions: &models.ChatStreamOptions{
-			IncludeUsage: true,
+			IncludeUsage: utils.Bool(true),
 		},
 	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*10))
 }

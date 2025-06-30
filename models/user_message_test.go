@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-26 22:39:53
+ * @LastEditTime: 2025-06-30 19:40:44
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,7 +11,6 @@ package models
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -45,9 +44,9 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 						Type: ChatUserMsgPartTypeImageURL,
 						ImageURL: &ChatUserMsgImageURL{
 							URL:          "https://example.com/image.png",
-							EnableRotate: true,
-							MinPixels:    100,
-							MaxPixels:    23520000,
+							EnableRotate: utils.Bool(true),
+							MinPixels:    utils.Int(100),
+							MaxPixels:    utils.Int(23520000),
 						},
 					},
 					{
@@ -83,9 +82,9 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 						Type: ChatUserMsgPartTypeImageURL,
 						ImageURL: &ChatUserMsgImageURL{
 							URL:          "https://example.com/image.png",
-							EnableRotate: true,
-							MinPixels:    100,
-							MaxPixels:    23520000,
+							EnableRotate: utils.Bool(true),
+							MinPixels:    utils.Int(100),
+							MaxPixels:    utils.Int(23520000),
 						},
 					},
 					{
@@ -109,7 +108,7 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 								"https://example.com/video.mp4",
 								"https://example.com/video.mp4",
 							},
-							FPS: 2.0,
+							FPS: utils.Float64(2.0),
 						},
 					},
 				},
@@ -297,14 +296,14 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 					{
 						ImageURL: &ChatUserMsgImageURL{
 							URL:          "https://example.com/image.png",
-							EnableRotate: false, // 零值应该被omitempty跳过
-							MinPixels:    0,     // 零值应该被omitempty跳过
-							MaxPixels:    0,     // 零值应该被omitempty跳过
+							EnableRotate: utils.Bool(false),
+							MinPixels:    utils.Int(0),
+							MaxPixels:    utils.Int(0),
 						},
 					},
 				},
 			},
-			wantB:   []byte(`{"content":[{"image":"https://example.com/image.png"}],"role":"user"}`),
+			wantB:   []byte(`{"content":[{"image":"https://example.com/image.png","enable_rotate":false,"min_pixels":0,"max_pixels":0}],"role":"user"}`),
 			wantErr: false,
 		},
 		{
@@ -417,7 +416,7 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 								"https://example.com/frame2.jpg",
 								"https://example.com/frame3.jpg",
 							},
-							FPS: 1.5,
+							FPS: utils.Float64(1.5),
 						},
 					},
 				},
@@ -505,9 +504,9 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 					{
 						ImageURL: &ChatUserMsgImageURL{
 							URL:          "https://example.com/image.png",
-							EnableRotate: true,
-							MinPixels:    100,
-							MaxPixels:    23520000,
+							EnableRotate: utils.Bool(true),
+							MinPixels:    utils.Int(100),
+							MaxPixels:    utils.Int(23520000),
 						},
 					},
 				},
@@ -523,7 +522,7 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 					{
 						InputVideo: &ChatUserMsgInputVideo{
 							VideoImgList: []string{"https://example.com/frame.jpg"},
-							FPS:          0.1, // 最小值
+							FPS:          utils.Float64(0.1), // 最小值
 						},
 					},
 				},
@@ -539,7 +538,7 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 					{
 						InputVideo: &ChatUserMsgInputVideo{
 							VideoImgList: []string{"https://example.com/frame.jpg"},
-							FPS:          10.0, // 最大值
+							FPS:          utils.Float64(10.0), // 最大值
 						},
 					},
 				},
@@ -634,7 +633,7 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 					{
 						InputVideo: &ChatUserMsgInputVideo{
 							VideoImgList: []string{}, // 空列表
-							FPS:          2.0,
+							FPS:          utils.Float64(2.0),
 						},
 					},
 				},
@@ -674,9 +673,9 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 						ImageURL: &ChatUserMsgImageURL{
 							URL:          "https://example.com/image.png",
 							Detail:       ChatUserMsgImageURLDetailHigh, // alibl不支持detail
-							EnableRotate: true,
-							MinPixels:    100,
-							MaxPixels:    23520000,
+							EnableRotate: utils.Bool(true),
+							MinPixels:    utils.Int(100),
+							MaxPixels:    utils.Int(23520000),
 						},
 						InputAudio: &ChatUserMsgInputAudio{
 							Data:   "https://example.com/audio.mp3",
@@ -696,7 +695,7 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 					{
 						ImageURL: &ChatUserMsgImageURL{
 							URL:       "https://example.com/image.png",
-							MinPixels: 100, // 最小值
+							MinPixels: utils.Int(100), // 最小值
 						},
 					},
 				},
@@ -712,7 +711,7 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 					{
 						ImageURL: &ChatUserMsgImageURL{
 							URL:       "https://example.com/image.png",
-							MaxPixels: 23520000, // 最大值
+							MaxPixels: utils.Int(23520000), // 最大值
 						},
 					},
 				},
@@ -828,9 +827,9 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 						Text: "Start text",
 						ImageURL: &ChatUserMsgImageURL{
 							URL:          "https://example.com/alibl.png",
-							EnableRotate: true,
-							MinPixels:    1000,
-							MaxPixels:    20000000,
+							EnableRotate: utils.Bool(true),
+							MinPixels:    utils.Int(1000),
+							MaxPixels:    utils.Int(20000000),
 						},
 					},
 					{
@@ -847,7 +846,7 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 								"https://example.com/frame3.jpg",
 								"https://example.com/frame4.jpg",
 							},
-							FPS: 3.5,
+							FPS: utils.Float64(3.5),
 						},
 					},
 					{
@@ -996,7 +995,7 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 							VideoImgList: []string{
 								"https://example.com/frame1.jpg",
 							}, // 只有一个帧
-							FPS: 0.1, // 最小FPS
+							FPS: utils.Float64(0.1), // 最小FPS
 						},
 					},
 					{
@@ -1013,7 +1012,7 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 								"https://example.com/frame9.jpg",
 								"https://example.com/frame10.jpg",
 							}, // 多个帧
-							FPS: 10.0, // 最大FPS
+							FPS: utils.Float64(10.0), // 最大FPS
 						},
 					},
 				},
@@ -1049,8 +1048,6 @@ func TestUserMessage_MarshalJSON(t *testing.T) {
 				t.Errorf("Failed to unmarshal got JSON: %v", err)
 				return
 			}
-
-			fmt.Println(string(gotB))
 			if err := json.Unmarshal(tt.wantB, &want); err != nil {
 				t.Errorf("Failed to unmarshal want JSON: %v", err)
 				return
