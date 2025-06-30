@@ -17,6 +17,7 @@ import (
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
+	"github.com/liusuxian/go-aisdk/utils"
 	"log"
 	"net"
 	"os"
@@ -49,7 +50,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 			},
 		},
 		Model:               consts.AliBLQwenMax,
-		MaxCompletionTokens: 4096,
+		MaxCompletionTokens: utils.Int(4096),
 	}, httpclient.WithTimeout(time.Minute*2))
 }
 
@@ -65,7 +66,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 			},
 		},
 		Model:               consts.AliBLQwqPlus,
-		MaxCompletionTokens: 4096,
+		MaxCompletionTokens: utils.Int(4096),
 		Stream:              true,
 		StreamOptions: &models.ChatStreamOptions{
 			IncludeUsage: true,
