@@ -2,12 +2,12 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-30 17:00:01
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-30 17:07:18
+ * @LastEditTime: 2025-07-01 11:39:07
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package utils
+package models
 
 import "time"
 

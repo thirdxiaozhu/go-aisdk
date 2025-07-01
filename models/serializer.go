@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 17:39:21
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-30 15:35:10
+ * @LastEditTime: 2025-07-01 18:17:20
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -165,6 +165,7 @@ func (s *Serializer) serializeStruct(v reflect.Value, visited *map[uintptr]bool,
 			s.handleAnonymousEmbeddedField, // 处理匿名嵌入字段
 			s.handleCopyToField,            // 处理copyto标签字段
 			s.handleFlattenField,           // 处理flatten标签字段
+			s.handleGroupField,             // 处理group标签字段
 			s.handleDefaultField,           // 处理default标签字段
 		} {
 			if isSkip, err = handler(&specialFieldContext{
@@ -341,6 +342,55 @@ func (s *Serializer) handleFlattenField(ctx *specialFieldContext) (isSkip bool, 
 			for key, value := range flattenedFields {
 				if _, exists := (*ctx.result)[key]; !exists {
 					(*ctx.result)[key] = value
+				}
+			}
+		}
+		isSkip = true
+		return
+	}
+	return
+}
+
+// 处理group标签字段
+func (s *Serializer) handleGroupField(ctx *specialFieldContext) (isSkip bool, err error) {
+	if groupTag := ctx.field.Tag.Get("group"); groupTag != "" {
+		// 获取当前提供商的分组名
+		var groupName string
+		if groupName, err = s.getTagValue(groupTag); err != nil {
+			return
+		}
+		if groupName == "" {
+			// group tag 没有当前提供商的配置，之后会当成普通字段进行处理
+			return
+		}
+		// 递归序列化字段值
+		var (
+			serializedValue any
+			serializedValid bool
+		)
+		if serializedValue, serializedValid, err = s.serializeValue(ctx.fieldValue, ctx.visited, ctx.depth); err != nil {
+			err = fmt.Errorf("error serializing group field %s: %w", ctx.field.Name, err)
+			return
+		}
+		if serializedValid {
+			// 直接在 result 中处理分组，检查是否已存在
+			if existingGroup, exists := (*ctx.result)[groupName]; exists {
+				// 如果分组已存在，合并字段
+				if existingGroupMap, ok := existingGroup.(map[string]any); ok {
+					// 只添加不存在的字段，避免覆盖
+					if _, fieldExists := existingGroupMap[ctx.jsonFieldName]; !fieldExists {
+						existingGroupMap[ctx.jsonFieldName] = serializedValue
+					}
+				} else {
+					// 如果已存在的不是 map 类型，创建新的分组并添加字段
+					(*ctx.result)[groupName] = map[string]any{
+						ctx.jsonFieldName: serializedValue,
+					}
+				}
+			} else {
+				// 分组不存在，创建新的分组
+				(*ctx.result)[groupName] = map[string]any{
+					ctx.jsonFieldName: serializedValue,
 				}
 			}
 		}

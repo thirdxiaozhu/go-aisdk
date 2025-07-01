@@ -14,12 +14,15 @@ type SystemMessage struct {
 	// 用于序列化参数时，处理差异化参数
 	provider string
 	// 文本内容
+	//
 	// 提供商支持: OpenAI | DeepSeek | AliBL
 	Content string `json:"content,omitempty" providers:"openai,deepseek,alibl"`
 	// 消息角色
+	//
 	// 提供商支持: OpenAI | DeepSeek | AliBL
 	Role string `json:"role,omitempty" providers:"openai,deepseek,alibl" default:"system"`
 	// 参与者名称
+	//
 	// 提供商支持: OpenAI | DeepSeek
 	Name string `json:"name,omitempty" providers:"openai,deepseek"`
 }

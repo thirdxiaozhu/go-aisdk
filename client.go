@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:09:20
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 00:28:24
+ * @LastEditTime: 2025-07-01 17:09:06
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -166,18 +166,14 @@ func (c *SDKClient) isModelSupported(s core.ProviderService, modelInfo models.Mo
 	}
 	// 获取指定模型类型支持的模型列表
 	var (
-		modelMap map[string]bool
+		modelMap map[string]uint
 		ok       bool
 	)
 	if modelMap, ok = supportedModels[modelInfo.ModelType]; !ok {
 		return wrapModelTypeNotSupported(modelInfo.Provider, modelInfo.ModelType)
 	}
 	// 判断模型是否支持
-	var modelSupported bool
-	if modelSupported, ok = modelMap[modelInfo.Model]; !ok {
-		return wrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
-	}
-	if !modelSupported {
+	if _, ok = modelMap[modelInfo.Model]; !ok {
 		return wrapModelNotSupported(modelInfo.Provider, modelInfo.Model, modelInfo.ModelType)
 	}
 	return

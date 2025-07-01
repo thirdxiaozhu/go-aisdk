@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 00:20:01
+ * @LastEditTime: 2025-07-01 11:41:30
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -17,7 +17,6 @@ import (
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
-	"github.com/liusuxian/go-aisdk/utils"
 	"log"
 	"net"
 	"os"
@@ -59,7 +58,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 			},
 		},
 		Model:               consts.DeepSeekChat,
-		MaxCompletionTokens: utils.Int(4096),
+		MaxCompletionTokens: models.Int(4096),
 	}, httpclient.WithTimeout(time.Minute*2))
 }
 
@@ -75,10 +74,10 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 			},
 		},
 		Model:               consts.DeepSeekReasoner,
-		MaxCompletionTokens: utils.Int(4096),
-		Stream:              utils.Bool(true),
+		MaxCompletionTokens: models.Int(4096),
+		Stream:              models.Bool(true),
 		StreamOptions: &models.ChatStreamOptions{
-			IncludeUsage: utils.Bool(true),
+			IncludeUsage: models.Bool(true),
 		},
 	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*5))
 }
