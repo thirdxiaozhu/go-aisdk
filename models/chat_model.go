@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 15:35:23
+ * @LastEditTime: 2025-07-01 23:57:06
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,6 +11,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 )
@@ -814,6 +815,7 @@ func (r ChatRequest) MarshalJSON() (b []byte, err error) {
 		}
 		// 序列化JSON
 		temp.Provider = ""
+		temp.Stream = nil
 		return NewSerializer(provider).Serialize(temp)
 	default:
 		// 序列化JSON
@@ -967,6 +969,85 @@ type ChatBaseResponse struct {
 // SetStreamStats 设置流式传输统计信息
 func (c *ChatBaseResponse) SetStreamStats(stats httpclient.StreamStats) {
 	c.StreamStats = &stats
+}
+
+// UnmarshalJSON 反序列化JSON
+func (c *ChatBaseResponse) UnmarshalJSON(data []byte) (err error) {
+	var rawMap map[string]json.RawMessage
+	if err = json.Unmarshal(data, &rawMap); err != nil {
+		return
+	}
+	// 阿里百炼响应
+	if _, ok := rawMap["output"]; ok {
+		var outputMap map[string]json.RawMessage
+		if err = json.Unmarshal(rawMap["output"], &outputMap); err != nil {
+			return
+		}
+		// 处理 choices 字段
+		if _, ok := outputMap["choices"]; ok {
+			var tmpChoices []struct {
+				FinishReason ChatFinishReason `json:"finish_reason,omitempty"`
+				Message      *struct {
+					Role             string          `json:"role,omitempty"`
+					Content          json.RawMessage `json:"content,omitempty"`
+					ReasoningContent string          `json:"reasoning_content,omitempty"`
+					ToolCalls        []ToolCalls     `json:"tool_calls,omitempty"`
+				} `json:"message,omitempty"`
+				LogProbs *ChatLogProbs `json:"logprobs,omitempty"`
+			}
+			if err = json.Unmarshal(outputMap["choices"], &tmpChoices); err != nil {
+				return
+			}
+
+			c.Choices = make([]ChatChoice, len(tmpChoices))
+			for i, tmpChoice := range tmpChoices {
+				c.Choices[i] = ChatChoice{
+					FinishReason: tmpChoice.FinishReason,
+					Message: &ChatCompletionMessage{
+						Role: tmpChoice.Message.Role,
+						Content: func() string {
+							// 尝试将 Content 转换为 []map[string]any 类型
+							var contentMapList []map[string]any
+							if e := json.Unmarshal(tmpChoice.Message.Content, &contentMapList); e == nil {
+								var content string
+								for _, contentMap := range contentMapList {
+									if text, ok := contentMap["text"].(string); ok {
+										if content == "" {
+											content = text
+										} else {
+											content = fmt.Sprintf("%s\n%s", content, text)
+										}
+									}
+								}
+								return content
+							}
+							// 尝试将 Content 转换为 string 类型
+							var content string
+							if e := json.Unmarshal(tmpChoice.Message.Content, &content); e == nil {
+								return content
+							}
+							// 如果转换失败，返回空字符串
+							return ""
+						}(),
+						ReasoningContent: tmpChoice.Message.ReasoningContent,
+						ToolCalls:        tmpChoice.Message.ToolCalls,
+					},
+					LogProbs: tmpChoice.LogProbs,
+				}
+			}
+		}
+		// 处理 usage 字段
+		if _, ok := rawMap["usage"]; ok {
+			if err = json.Unmarshal(rawMap["usage"], &c.Usage); err != nil {
+				return
+			}
+		}
+		return
+	}
+	// 通用响应
+	type Alias ChatBaseResponse
+	temp := (*Alias)(c)
+	return json.Unmarshal(data, temp)
 }
 
 // ChatResponse 聊天响应

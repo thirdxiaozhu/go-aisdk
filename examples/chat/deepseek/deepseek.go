@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 11:41:30
+ * @LastEditTime: 2025-07-01 22:57:48
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -128,7 +128,7 @@ func main() {
 		log.Printf("listModels error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
-	log.Printf("listModels response = %+v, request_id = %s", response1, response1.RequestID())
+	log.Printf("listModels response = %s, request_id = %s", httpclient.MustString(response1), response1.RequestID())
 	// 创建聊天
 	response2, err := createChatCompletion(ctx, client)
 	if err != nil {
@@ -154,7 +154,7 @@ func main() {
 		log.Printf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
 		return
 	}
-	log.Printf("createChatCompletion response = %+v, request_id = %s", response2, response2.RequestID())
+	log.Printf("createChatCompletion response = %s, request_id = %s", httpclient.MustString(response2), response2.RequestID())
 	// 创建流式聊天
 	response3, err := createChatCompletionStream(ctx, client)
 	if err != nil {
@@ -186,10 +186,10 @@ func main() {
 		if isFinished {
 			return nil
 		}
-		log.Printf("createChatCompletionStream item = %+v", item)
+		log.Printf("createChatCompletionStream item = %s", httpclient.MustString(item))
 		if item.Usage != nil && item.StreamStats != nil {
-			log.Printf("createChatCompletionStream usage = %+v", item.Usage)
-			log.Printf("createChatCompletionStream stream_stats = %+v", item.StreamStats)
+			log.Printf("createChatCompletionStream usage = %s", httpclient.MustString(item.Usage))
+			log.Printf("createChatCompletionStream stream_stats = %s", httpclient.MustString(item.StreamStats))
 		}
 		return nil
 	}); err != nil {
