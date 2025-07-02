@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 23:57:06
+ * @LastEditTime: 2025-07-03 01:08:04
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
+	"strings"
 )
 
 // ChatMessage 聊天消息的通用接口
@@ -652,10 +653,10 @@ type ChatRequest struct {
 	//
 	// 提供商支持: OpenAI
 	Audio *ChatAudioOutputArgs `json:"audio,omitempty" providers:"openai"`
-	// 介于 -2.0 和 2.0 之间的数字。如果该值为正，那么新 token 会根据其在已有文本中的出现频率受到相应的惩罚，降低模型重复相同内容的可能性
+	// 介于 -2.0 和 2.0 之间的数字（AliBL取值范围：只要大于0即可，1.0表示不做惩罚）。如果该值为正，那么新 token 会根据其在已有文本中的出现频率受到相应的惩罚，降低模型重复相同内容的可能性
 	//
-	// 提供商支持: OpenAI | DeepSeek
-	FrequencyPenalty *float32 `json:"frequency_penalty,omitempty" providers:"openai,deepseek"`
+	// 提供商支持: OpenAI | DeepSeek | AliBL
+	FrequencyPenalty *float32 `json:"frequency_penalty,omitempty" providers:"openai,deepseek,alibl" mapping:"alibl:repetition_penalty" group:"alibl:parameters"`
 	// 修改指定标记在补全中出现的可能性
 	//
 	// 提供商支持: OpenAI
@@ -668,9 +669,11 @@ type ChatRequest struct {
 	//
 	// 提供商支持: OpenAI | DeepSeek | AliBL
 	MaxCompletionTokens *int `json:"max_completion_tokens,omitempty" providers:"openai,deepseek,alibl" mapping:"deepseek|alibl:max_tokens" group:"alibl:parameters"`
-	// 元数据
+	// 元数据（AliBL支持该参数，但不会被序列化，会放到请求头中）
 	//
-	// 提供商支持: OpenAI
+	// AliBL：map[string]string{"X-DashScope-DataInspection": "{\"input\": \"cip\", \"output\": \"cip\"}"} -> 在 API 的内容安全能力基础上，进一步识别输入输出内容的违规信息
+	//
+	// 提供商支持: OpenAI | AliBL
 	Metadata map[string]string `json:"metadata,omitempty" providers:"openai"`
 	// 输出数据的模态
 	//
@@ -716,10 +719,10 @@ type ChatRequest struct {
 	//
 	// 提供商支持: OpenAI
 	Store *bool `json:"store,omitempty" providers:"openai"`
-	// 是否流式传输响应
+	// 是否流式传输响应（AliBL支持该参数，但不会被序列化，会放到请求头中）
 	//
 	// 提供商支持: OpenAI | DeepSeek | AliBL
-	Stream *bool `json:"stream,omitempty" providers:"openai,deepseek,alibl"`
+	Stream *bool `json:"stream,omitempty" providers:"openai,deepseek"`
 	// 流式传输选项
 	//
 	// 提供商支持: OpenAI | DeepSeek
@@ -760,10 +763,6 @@ type ChatRequest struct {
 	//
 	// 提供商支持: AliBL
 	ThinkingBudget *int `json:"thinking_budget,omitempty" providers:"alibl"`
-	// 模型生成时连续序列中的重复度。提高repetition_penalty时可以降低模型生成的重复度，1.0表示不做惩罚。没有严格的取值范围，只要大于0即可
-	//
-	// 提供商支持: AliBL
-	RepetitionPenalty *float32 `json:"repetition_penalty,omitempty" providers:"alibl" group:"alibl:parameters"`
 	// OCR模型执行内置任务时需要配置的参数
 	//
 	// 提供商支持: AliBL
@@ -772,12 +771,6 @@ type ChatRequest struct {
 	//
 	// 提供商支持: AliBL
 	TranslationOptions *ChatTranslationOptions `json:"translation_options,omitempty" providers:"alibl" group:"alibl:parameters"`
-	// 在 API 的内容安全能力基础上，是否进一步识别输入输出内容的违规信息
-	//
-	// 取值：map[string]any{"input": "cip", "output": "cip"} -> 进一步识别；不设置该参数 -> 不进一步识别
-	//
-	// 提供商支持: AliBL
-	XDashScopeDataInspection map[string]any `json:"-"`
 }
 
 // MarshalJSON 序列化JSON
@@ -803,9 +796,9 @@ func (r ChatRequest) MarshalJSON() (b []byte, err error) {
 			// 返回数据的格式
 			ResultFormat string `json:"result_format,omitempty" providers:"alibl" group:"alibl:parameters"`
 		}{
+			Alias:                  Alias(r),
 			VlHighResolutionImages: Bool(true),
 			ResultFormat:           "message",
-			Alias:                  Alias(r),
 		}
 		if r.WebSearchOptions != nil {
 			temp.EnableSearch = Bool(true)
@@ -813,8 +806,13 @@ func (r ChatRequest) MarshalJSON() (b []byte, err error) {
 		if BoolValue(r.Stream) {
 			temp.IncrementalOutput = Bool(true)
 		}
+		// TODO 特殊处理（qwen-plus系列模型在开启思考模式时，incremental_output必须为true）
+		if strings.Contains(r.Model, "qwen-plus") && BoolValue(r.EnableThinking) {
+			temp.IncrementalOutput = Bool(true)
+		}
 		// 序列化JSON
 		temp.Provider = ""
+		temp.Metadata = nil
 		temp.Stream = nil
 		return NewSerializer(provider).Serialize(temp)
 	default:
@@ -979,66 +977,106 @@ func (c *ChatBaseResponse) UnmarshalJSON(data []byte) (err error) {
 	}
 	// 阿里百炼响应
 	if _, ok := rawMap["output"]; ok {
+		// 解析 output 数据
 		var outputMap map[string]json.RawMessage
 		if err = json.Unmarshal(rawMap["output"], &outputMap); err != nil {
 			return
 		}
-		// 处理 choices 字段
+		// 处理 choices 数据
 		if _, ok := outputMap["choices"]; ok {
+			// 解析 choices 数组
 			var tmpChoices []struct {
-				FinishReason ChatFinishReason `json:"finish_reason,omitempty"`
+				FinishReason ChatFinishReason `json:"finish_reason,omitempty"` // 模型停止生成 token 的原因
 				Message      *struct {
-					Role             string          `json:"role,omitempty"`
-					Content          json.RawMessage `json:"content,omitempty"`
-					ReasoningContent string          `json:"reasoning_content,omitempty"`
-					ToolCalls        []ToolCalls     `json:"tool_calls,omitempty"`
-				} `json:"message,omitempty"`
-				LogProbs *ChatLogProbs `json:"logprobs,omitempty"`
+					Role             string          `json:"role,omitempty"`              // 输出消息的角色
+					Content          json.RawMessage `json:"content,omitempty"`           // 输出消息的内容
+					ReasoningContent string          `json:"reasoning_content,omitempty"` // 模型的深度思考内容
+					ToolCalls        []ToolCalls     `json:"tool_calls,omitempty"`        // 如果模型需要调用工具，则会生成tool_calls参数
+				} `json:"message,omitempty"` // 模型输出的消息对象
+				LogProbs *ChatLogProbs `json:"logprobs,omitempty"` // 当前 choices 对象的概率信息
 			}
 			if err = json.Unmarshal(outputMap["choices"], &tmpChoices); err != nil {
 				return
 			}
-
+			// 创建 choices 数组
 			c.Choices = make([]ChatChoice, len(tmpChoices))
 			for i, tmpChoice := range tmpChoices {
-				c.Choices[i] = ChatChoice{
-					FinishReason: tmpChoice.FinishReason,
-					Message: &ChatCompletionMessage{
-						Role: tmpChoice.Message.Role,
-						Content: func() string {
-							// 尝试将 Content 转换为 []map[string]any 类型
-							var contentMapList []map[string]any
-							if e := json.Unmarshal(tmpChoice.Message.Content, &contentMapList); e == nil {
-								var content string
-								for _, contentMap := range contentMapList {
-									if text, ok := contentMap["text"].(string); ok {
-										if content == "" {
-											content = text
-										} else {
-											content = fmt.Sprintf("%s\n%s", content, text)
-										}
+				// 创建 message 对象
+				message := &ChatCompletionMessage{
+					Role: tmpChoice.Message.Role,
+					Content: func() string {
+						// 尝试将 Content 转换为 []map[string]any 类型
+						var contentMapList []map[string]any
+						if e := json.Unmarshal(tmpChoice.Message.Content, &contentMapList); e == nil {
+							var content string
+							for _, contentMap := range contentMapList {
+								if text, ok := contentMap["text"].(string); ok {
+									if content == "" {
+										content = text
+									} else {
+										content = fmt.Sprintf("%s\n%s", content, text)
 									}
 								}
-								return content
 							}
-							// 尝试将 Content 转换为 string 类型
-							var content string
-							if e := json.Unmarshal(tmpChoice.Message.Content, &content); e == nil {
-								return content
-							}
-							// 如果转换失败，返回空字符串
-							return ""
-						}(),
-						ReasoningContent: tmpChoice.Message.ReasoningContent,
-						ToolCalls:        tmpChoice.Message.ToolCalls,
-					},
-					LogProbs: tmpChoice.LogProbs,
+							return content
+						}
+						// 尝试将 Content 转换为 string 类型
+						var content string
+						if e := json.Unmarshal(tmpChoice.Message.Content, &content); e == nil {
+							return content
+						}
+						// 如果转换失败，返回空字符串
+						return ""
+					}(),
+					ReasoningContent: tmpChoice.Message.ReasoningContent,
+					ToolCalls:        tmpChoice.Message.ToolCalls,
+				}
+				c.Choices[i] = ChatChoice{
+					FinishReason: tmpChoice.FinishReason,
+					Message:      message,
+					LogProbs:     tmpChoice.LogProbs,
+					Delta:        message,
 				}
 			}
 		}
-		// 处理 usage 字段
+		// 处理 search_info 数据
+		if _, ok := outputMap["search_info"]; ok {
+			// 解析 search_info 数据
+			var tmpSearchInfo struct {
+				SearchResults []struct {
+					SiteName string `json:"site_name,omitempty"` // 搜索结果来源的网站名称
+					Icon     string `json:"icon,omitempty"`      // 来源网站的图标URL，如果没有图标则为空字符串
+					Index    int    `json:"index,omitempty"`     // 搜索结果的序号，表示该搜索结果在search_results中的索引
+					Title    string `json:"title,omitempty"`     // 搜索结果的标题
+					URL      string `json:"url,omitempty"`       // 搜索结果的链接地址
+				} `json:"search_results,omitempty"` // 联网搜索到的结果
+			}
+			if err = json.Unmarshal(outputMap["search_info"], &tmpSearchInfo); err != nil {
+				return
+			}
+		}
+		// 处理 usage 数据
 		if _, ok := rawMap["usage"]; ok {
-			if err = json.Unmarshal(rawMap["usage"], &c.Usage); err != nil {
+			// 解析 usage 数据
+			var tmpUsage struct {
+				InputTokens        int `json:"input_tokens,omitempty"`  // 用户输入内容转换成Token后的长度
+				OutputTokens       int `json:"output_tokens,omitempty"` // 模型输出内容转换成Token后的长度
+				InputTokensDetails *struct {
+					TextTokens  int `json:"text_tokens,omitempty"`  // 输入的文本转换为Token后的长度
+					ImageTokens int `json:"image_tokens,omitempty"` // 输入的图像转换为Token后的长度
+					VideoTokens int `json:"video_tokens,omitempty"` // 输入的视频文件或图像列表转换为Token后的长度
+				} `json:"input_tokens_details,omitempty"` // 输入内容转换成Token后的长度详情
+				TotalTokens         int `json:"total_tokens,omitempty"` // 当输入为纯文本时返回该字段，为input_tokens与output_tokens之和
+				ImageTokens         int `json:"image_tokens,omitempty"` // 输入内容包含image时返回该字段。为用户输入图片内容转换成Token后的长度
+				VideoTokens         int `json:"video_tokens,omitempty"` // 输入内容包含video时返回该字段。为用户输入视频内容转换成Token后的长度
+				AudioTokens         int `json:"audio_tokens,omitempty"` // 输入内容包含audio时返回该字段。为用户输入音频内容转换成Token后的长度
+				OutputTokensDetails *struct {
+					TextTokens      int `json:"text_tokens,omitempty"`      // 输出的文本转换为Token后的长度
+					ReasoningTokens int `json:"reasoning_tokens,omitempty"` // 模型思考过程转换为Token后的长度
+				} `json:"output_tokens_details,omitempty"` // 输出内容转换成 Token后的长度详情
+				PromptTokensDetails *PromptTokensDetails `json:"prompt_tokens_details,omitempty"` // 输入 Token 的细粒度分类
+			}
+			if err = json.Unmarshal(rawMap["usage"], &tmpUsage); err != nil {
 				return
 			}
 		}

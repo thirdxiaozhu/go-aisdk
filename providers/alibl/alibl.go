@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 12:31:10
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 17:41:31
+ * @LastEditTime: 2025-07-03 01:07:30
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -65,20 +65,20 @@ func init() {
 				consts.AliBLQwenLong:                      0,
 				consts.AliBLQwenLongLatest:                0,
 				consts.AliBLQwenLong20250125:              0,
-				consts.AliBLQwenOmniTurbo:                 0,
-				consts.AliBLQwenOmniTurboLatest:           0,
-				consts.AliBLQwenOmniTurbo20250326:         0,
-				consts.AliBLQwenOmniTurbo20250119:         0,
-				consts.AliBLQwenOmniTurboRealtime:         0,
-				consts.AliBLQwenOmniTurboRealtimeLatest:   0,
-				consts.AliBLQwenOmniTurboRealtime20250508: 0,
-				consts.AliBLQvqMax:                        0,
-				consts.AliBLQvqMaxLatest:                  0,
-				consts.AliBLQvqMax20250515:                0,
-				consts.AliBLQvqMax20250325:                0,
-				consts.AliBLQvqPlus:                       0,
-				consts.AliBLQvqPlusLatest:                 0,
-				consts.AliBLQvqPlus20250515:               0,
+				consts.AliBLQwenOmniTurbo:                 1,
+				consts.AliBLQwenOmniTurboLatest:           1,
+				consts.AliBLQwenOmniTurbo20250326:         1,
+				consts.AliBLQwenOmniTurbo20250119:         1,
+				consts.AliBLQwenOmniTurboRealtime:         1,
+				consts.AliBLQwenOmniTurboRealtimeLatest:   1,
+				consts.AliBLQwenOmniTurboRealtime20250508: 1,
+				consts.AliBLQvqMax:                        1,
+				consts.AliBLQvqMaxLatest:                  1,
+				consts.AliBLQvqMax20250515:                1,
+				consts.AliBLQvqMax20250325:                1,
+				consts.AliBLQvqPlus:                       1,
+				consts.AliBLQvqPlusLatest:                 1,
+				consts.AliBLQvqPlus20250515:               1,
 				consts.AliBLQwenVlMax:                     1,
 				consts.AliBLQwenVlMaxLatest:               1,
 				consts.AliBLQwenVlMax20250408:             1,
