@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:15:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 00:20:01
+ * @LastEditTime: 2025-07-01 22:57:48
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -55,6 +55,19 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
 				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+				MultimodalContent: []models.ChatUserMsgPart{
+					{
+						Type: models.ChatUserMsgPartTypeImageURL,
+						ImageURL: &models.ChatUserMsgImageURL{
+							URL:    "https://www.gstatic.com/webp/gallery/1.webp",
+							Detail: models.ChatUserMsgImageURLDetailHigh,
+						},
+					},
+					{
+						Type: models.ChatUserMsgPartTypeText,
+						Text: "这些是什么?",
+					},
+				}, // 不会被序列化，也不会复制到Content字段，因为deepseek不支持多模态
 			},
 		},
 		Model:               consts.DeepSeekChat,
@@ -70,7 +83,20 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		Provider: consts.DeepSeek,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好",
+				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+				MultimodalContent: []models.ChatUserMsgPart{
+					{
+						Type: models.ChatUserMsgPartTypeImageURL,
+						ImageURL: &models.ChatUserMsgImageURL{
+							URL:    "https://www.gstatic.com/webp/gallery/1.webp",
+							Detail: models.ChatUserMsgImageURLDetailHigh,
+						},
+					},
+					{
+						Type: models.ChatUserMsgPartTypeText,
+						Text: "这些是什么?",
+					},
+				}, // 不会被序列化，也不会复制到Content字段，因为deepseek不支持多模态
 			},
 		},
 		Model:               consts.DeepSeekReasoner,
@@ -118,7 +144,7 @@ func main() {
 	}
 	defer func() {
 		metrics := client.GetMetrics()
-		log.Printf("metrics = %+v\n", metrics)
+		log.Printf("metrics = %s\n", httpclient.MustString(metrics))
 	}()
 
 	ctx := context.Background()

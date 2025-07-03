@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 12:47:24
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 22:21:05
+ * @LastEditTime: 2025-07-02 22:15:16
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -55,8 +55,8 @@ func withRequestOptions(request models.ChatRequest) (reqSetters []httpclient.Req
 	reqSetters = []httpclient.RequestOption{
 		httpclient.WithBody(request),
 	}
-	if request.XDashScopeDataInspection != nil {
-		reqSetters = append(reqSetters, httpclient.WithKeyValue("X-DashScope-DataInspection", httpclient.MustString(request.XDashScopeDataInspection)))
+	if data, ok := request.Metadata["X-DashScope-DataInspection"]; ok {
+		reqSetters = append(reqSetters, httpclient.WithKeyValue("X-DashScope-DataInspection", data))
 	}
 	if models.BoolValue(request.Stream) {
 		reqSetters = append(reqSetters, httpclient.WithKeyValue("X-DashScope-SSE", "enable"))

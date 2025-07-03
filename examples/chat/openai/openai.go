@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 22:57:33
+ * @LastEditTime: 2025-07-02 22:34:13
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -142,7 +142,7 @@ func main() {
 	}
 	defer func() {
 		metrics := client.GetMetrics()
-		log.Printf("metrics = %+v\n", metrics)
+		log.Printf("metrics = %s\n", httpclient.MustString(metrics))
 	}()
 
 	ctx := context.Background()

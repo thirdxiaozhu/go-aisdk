@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 13:01:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 18:33:37
+ * @LastEditTime: 2025-07-03 01:07:40
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -47,21 +47,23 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 			&models.UserMessage{
 				MultimodalContent: []models.ChatUserMsgPart{
 					{
-						Type: models.ChatUserMsgPartTypeImageURL,
+						Type: models.ChatUserMsgPartTypeImageURL, // 不会被序列化
 						ImageURL: &models.ChatUserMsgImageURL{
 							URL:    "https://www.gstatic.com/webp/gallery/1.webp",
-							Detail: models.ChatUserMsgImageURLDetailHigh,
+							Detail: models.ChatUserMsgImageURLDetailHigh, // 不会被序列化
 						},
 					},
 					{
-						Type: models.ChatUserMsgPartTypeText,
+						Type: models.ChatUserMsgPartTypeText, // 不会被序列化
 						Text: "这些是什么?",
 					},
 				},
 			},
 		},
-		Model:               consts.AliBLQwenVlPlus,
+		Model:               consts.AliBLQwenVlMax,
+		FrequencyPenalty:    models.Float32(1.0),
 		MaxCompletionTokens: models.Int(4096),
+		// Metadata:            map[string]string{"X-DashScope-DataInspection": "{\"input\": \"cip\", \"output\": \"cip\"}"},
 		WebSearchOptions: &models.ChatWebSearchOptions{
 			EnableSource:   models.Bool(true),
 			EnableCitation: models.Bool(true),
@@ -70,8 +72,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 			SearchStrategy: models.ChatSearchStrategyPro,
 		},
 		EnableThinking: models.Bool(true),
-		// XDashScopeDataInspection: map[string]any{"input": "cip", "output": "cip"},
-	}, httpclient.WithTimeout(time.Minute*2))
+	}, httpclient.WithTimeout(time.Minute*5))
 }
 
 func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponseStream, err error) {
@@ -84,21 +85,23 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 			&models.UserMessage{
 				MultimodalContent: []models.ChatUserMsgPart{
 					{
-						Type: models.ChatUserMsgPartTypeImageURL,
+						Type: models.ChatUserMsgPartTypeImageURL, // 不会被序列化
 						ImageURL: &models.ChatUserMsgImageURL{
 							URL:    "https://www.gstatic.com/webp/gallery/1.webp",
-							Detail: models.ChatUserMsgImageURLDetailHigh,
+							Detail: models.ChatUserMsgImageURLDetailHigh, // 不会被序列化
 						},
 					},
 					{
-						Type: models.ChatUserMsgPartTypeText,
+						Type: models.ChatUserMsgPartTypeText, // 不会被序列化
 						Text: "这些是什么?",
 					},
 				},
 			},
 		},
-		Model:               consts.AliBLQwenVlPlus,
+		Model:               consts.AliBLQwenVlMax,
+		FrequencyPenalty:    models.Float32(1.0),
 		MaxCompletionTokens: models.Int(4096),
+		// Metadata:            map[string]string{"X-DashScope-DataInspection": "{\"input\": \"cip\", \"output\": \"cip\"}"},
 		WebSearchOptions: &models.ChatWebSearchOptions{
 			EnableSource:   models.Bool(true),
 			EnableCitation: models.Bool(true),
@@ -107,11 +110,10 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 			SearchStrategy: models.ChatSearchStrategyPro,
 		},
 		EnableThinking: models.Bool(true),
-		// XDashScopeDataInspection: map[string]any{"input": "cip", "output": "cip"},
-		Stream: models.Bool(true),
+		Stream:         models.Bool(true), // 不会被序列化，会放到请求头中
 		StreamOptions: &models.ChatStreamOptions{
 			IncludeUsage: models.Bool(true),
-		},
+		}, // 不会被序列化
 	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*5))
 }
 
@@ -151,7 +153,7 @@ func main() {
 	}
 	defer func() {
 		metrics := client.GetMetrics()
-		log.Printf("metrics = %+v\n", metrics)
+		log.Printf("metrics = %s\n", httpclient.MustString(metrics))
 	}()
 
 	ctx := context.Background()
