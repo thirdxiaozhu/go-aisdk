@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-25 22:51:21
+ * @LastEditTime: 2025-07-03 15:16:45
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -79,5 +79,5 @@ func (m *SystemMessage) SetProvider(provider string) {
 
 // MarshalJSON 序列化JSON
 func (m SystemMessage) MarshalJSON() (b []byte, err error) {
-	return NewSerializer(m.provider).Serialize(m)
+	return utils.NewSerializer(m.provider).Serialize(m)
 }

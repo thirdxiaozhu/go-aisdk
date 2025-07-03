@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:57:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 17:13:36
+ * @LastEditTime: 2025-07-03 15:34:49
  * @Description: DeepSeek服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -65,6 +65,14 @@ func (s *deepseekProvider) InitializeProviderConfig(config *conf.ProviderConfig)
 
 // ListModels 列出模型
 func (s *deepseekProvider) ListModels(ctx context.Context, provider fmt.Stringer, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
-	err = common.ExecuteRequest(ctx, http.MethodGet, s.providerConfig.BaseURL, apiModels, opts, s.lb, nil, &response)
+	err = common.ExecuteRequest(ctx, &common.ExecuteRequestContext{
+		Provider: consts.DeepSeek,
+		Method:   http.MethodGet,
+		BaseURL:  s.providerConfig.BaseURL,
+		ApiPath:  apiModels,
+		Opts:     opts,
+		LB:       s.lb,
+		Response: &response,
+	})
 	return
 }

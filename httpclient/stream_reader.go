@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 18:00:38
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-02 01:26:49
+ * @LastEditTime: 2025-07-03 16:54:50
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -41,7 +41,7 @@ type StreamReader[T Streamable] struct {
 	streamReturnIntervalTimeout time.Duration
 	streamReturnIntervalTimer   *time.Timer
 	errAccumulator              ErrorAccumulator
-	unmarshaler                 Unmarshaler
+	responseDecoder             ResponseDecoder
 	// 统计字段
 	startTime  time.Time
 	chunkCount int
@@ -131,7 +131,7 @@ func (stream *StreamReader[T]) Recv() (response T, isFinished bool, err error) {
 		return
 	}
 	// 解析数据
-	if err = stream.unmarshaler.Unmarshal(rawLine, &response); err != nil {
+	if err = stream.responseDecoder.Decode(bytes.NewReader(rawLine), &response); err != nil {
 		return
 	}
 	// 更新统计信息
@@ -226,7 +226,7 @@ func (stream *StreamReader[T]) unmarshalError() (errResp map[string]any) {
 		return
 	}
 
-	if err := stream.unmarshaler.Unmarshal(errBytes, &errResp); err != nil {
+	if err := stream.responseDecoder.Decode(bytes.NewReader(errBytes), &errResp); err != nil {
 		errResp = nil
 		return
 	}

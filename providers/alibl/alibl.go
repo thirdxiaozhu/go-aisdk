@@ -2,8 +2,8 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 12:31:10
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-03 01:07:30
- * @Description:
+ * @LastEditTime: 2025-07-03 15:35:50
+ * @Description: AliBL服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */

@@ -1,13 +1,13 @@
 /*
  * @Author: liusuxian 382185882@qq.com
- * @Date: 2025-06-25 17:39:21
+ * @Date: 2025-07-03 15:11:37
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 18:17:20
+ * @LastEditTime: 2025-07-03 15:12:43
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
-package models
+package utils
 
 import (
 	"encoding/json"

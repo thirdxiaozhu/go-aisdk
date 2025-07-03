@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-03 01:08:04
+ * @LastEditTime: 2025-07-03 17:48:46
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/internal/utils"
 	"strings"
 )
 
@@ -827,11 +828,11 @@ func (r ChatRequest) MarshalJSON() (b []byte, err error) {
 		temp.Provider = ""
 		temp.Metadata = nil
 		temp.Stream = nil
-		return NewSerializer(provider).Serialize(temp)
+		return utils.NewSerializer(provider).Serialize(temp)
 	default:
 		// 序列化JSON
 		r.Provider = ""
-		return NewSerializer(provider).Serialize(r)
+		return utils.NewSerializer(provider).Serialize(r)
 	}
 }
 
@@ -966,6 +967,9 @@ type ChatUsage struct {
 
 // ChatBaseResponse 聊天响应基础信息
 type ChatBaseResponse struct {
+	provider   string // 用于反序列化数据时，处理差异化数据
+	streamable bool   // 用于反序列化数据时，处理流式传输数据
+	// 以下字段为响应数据
 	Choices           []ChatChoice            `json:"choices,omitempty"`            // 模型生成的 completion 的选择列表
 	Created           int64                   `json:"created,omitempty"`            // 创建聊天完成时的 Unix 时间戳（以秒为单位）
 	ID                string                  `json:"id,omitempty"`                 // 该对话的唯一标识符
@@ -977,6 +981,16 @@ type ChatBaseResponse struct {
 	StreamStats       *httpclient.StreamStats `json:"stream_stats,omitempty"`       // 流式传输统计信息
 }
 
+// SetProvider 设置提供商
+func (c *ChatBaseResponse) SetProvider(provider string) {
+	c.provider = provider
+}
+
+// SetStreamable 设置流式传输
+func (c *ChatBaseResponse) SetStreamable(streamable bool) {
+	c.streamable = streamable
+}
+
 // SetStreamStats 设置流式传输统计信息
 func (c *ChatBaseResponse) SetStreamStats(stats httpclient.StreamStats) {
 	c.StreamStats = &stats
@@ -984,20 +998,32 @@ func (c *ChatBaseResponse) SetStreamStats(stats httpclient.StreamStats) {
 
 // UnmarshalJSON 反序列化JSON
 func (c *ChatBaseResponse) UnmarshalJSON(data []byte) (err error) {
+	switch consts.Provider(c.provider) {
+	case consts.AliBL:
+		return c.unmarshalAliBL(data)
+	default:
+		// 默认反序列化
+		type Alias ChatBaseResponse
+		temp := (*Alias)(c)
+		return json.Unmarshal(data, temp)
+	}
+}
+
+// unmarshalAliBL 反序列化阿里百炼响应
+func (c *ChatBaseResponse) unmarshalAliBL(data []byte) (err error) {
 	var rawMap map[string]json.RawMessage
 	if err = json.Unmarshal(data, &rawMap); err != nil {
 		return
 	}
-	// 阿里百炼响应
+	// 解析 output 数据
 	if _, ok := rawMap["output"]; ok {
-		// 解析 output 数据
 		var outputMap map[string]json.RawMessage
 		if err = json.Unmarshal(rawMap["output"], &outputMap); err != nil {
 			return
 		}
-		// 处理 choices 数据
+
 		if _, ok := outputMap["choices"]; ok {
-			// 解析 choices 数组
+			// 解析 choices 数据
 			var tmpChoices []struct {
 				FinishReason ChatFinishReason `json:"finish_reason,omitempty"` // 模型停止生成 token 的原因
 				Message      *struct {
@@ -1046,15 +1072,18 @@ func (c *ChatBaseResponse) UnmarshalJSON(data []byte) (err error) {
 				}
 				c.Choices[i] = ChatChoice{
 					FinishReason: tmpChoice.FinishReason,
-					Message:      message,
 					LogProbs:     tmpChoice.LogProbs,
-					Delta:        message,
+				}
+				// 如果流式传输，则设置 Delta 字段，否则设置 Message 字段
+				if c.streamable {
+					c.Choices[i].Delta = message
+				} else {
+					c.Choices[i].Message = message
 				}
 			}
 		}
-		// 处理 search_info 数据
+		// 解析 search_info 数据
 		if _, ok := outputMap["search_info"]; ok {
-			// 解析 search_info 数据
 			var tmpSearchInfo struct {
 				SearchResults []struct {
 					SiteName string `json:"site_name,omitempty"` // 搜索结果来源的网站名称
@@ -1068,37 +1097,32 @@ func (c *ChatBaseResponse) UnmarshalJSON(data []byte) (err error) {
 				return
 			}
 		}
-		// 处理 usage 数据
-		if _, ok := rawMap["usage"]; ok {
-			// 解析 usage 数据
-			var tmpUsage struct {
-				InputTokens        int `json:"input_tokens,omitempty"`  // 用户输入内容转换成Token后的长度
-				OutputTokens       int `json:"output_tokens,omitempty"` // 模型输出内容转换成Token后的长度
-				InputTokensDetails *struct {
-					TextTokens  int `json:"text_tokens,omitempty"`  // 输入的文本转换为Token后的长度
-					ImageTokens int `json:"image_tokens,omitempty"` // 输入的图像转换为Token后的长度
-					VideoTokens int `json:"video_tokens,omitempty"` // 输入的视频文件或图像列表转换为Token后的长度
-				} `json:"input_tokens_details,omitempty"` // 输入内容转换成Token后的长度详情
-				TotalTokens         int `json:"total_tokens,omitempty"` // 当输入为纯文本时返回该字段，为input_tokens与output_tokens之和
-				ImageTokens         int `json:"image_tokens,omitempty"` // 输入内容包含image时返回该字段。为用户输入图片内容转换成Token后的长度
-				VideoTokens         int `json:"video_tokens,omitempty"` // 输入内容包含video时返回该字段。为用户输入视频内容转换成Token后的长度
-				AudioTokens         int `json:"audio_tokens,omitempty"` // 输入内容包含audio时返回该字段。为用户输入音频内容转换成Token后的长度
-				OutputTokensDetails *struct {
-					TextTokens      int `json:"text_tokens,omitempty"`      // 输出的文本转换为Token后的长度
-					ReasoningTokens int `json:"reasoning_tokens,omitempty"` // 模型思考过程转换为Token后的长度
-				} `json:"output_tokens_details,omitempty"` // 输出内容转换成 Token后的长度详情
-				PromptTokensDetails *PromptTokensDetails `json:"prompt_tokens_details,omitempty"` // 输入 Token 的细粒度分类
-			}
-			if err = json.Unmarshal(rawMap["usage"], &tmpUsage); err != nil {
-				return
-			}
-		}
-		return
 	}
-	// 通用响应
-	type Alias ChatBaseResponse
-	temp := (*Alias)(c)
-	return json.Unmarshal(data, temp)
+	// 解析 usage 数据
+	if _, ok := rawMap["usage"]; ok {
+		var tmpUsage struct {
+			InputTokens        int `json:"input_tokens,omitempty"`  // 用户输入内容转换成Token后的长度
+			OutputTokens       int `json:"output_tokens,omitempty"` // 模型输出内容转换成Token后的长度
+			InputTokensDetails *struct {
+				TextTokens  int `json:"text_tokens,omitempty"`  // 输入的文本转换为Token后的长度
+				ImageTokens int `json:"image_tokens,omitempty"` // 输入的图像转换为Token后的长度
+				VideoTokens int `json:"video_tokens,omitempty"` // 输入的视频文件或图像列表转换为Token后的长度
+			} `json:"input_tokens_details,omitempty"` // 输入内容转换成Token后的长度详情
+			TotalTokens         int `json:"total_tokens,omitempty"` // 当输入为纯文本时返回该字段，为input_tokens与output_tokens之和
+			ImageTokens         int `json:"image_tokens,omitempty"` // 输入内容包含image时返回该字段。为用户输入图片内容转换成Token后的长度
+			VideoTokens         int `json:"video_tokens,omitempty"` // 输入内容包含video时返回该字段。为用户输入视频内容转换成Token后的长度
+			AudioTokens         int `json:"audio_tokens,omitempty"` // 输入内容包含audio时返回该字段。为用户输入音频内容转换成Token后的长度
+			OutputTokensDetails *struct {
+				TextTokens      int `json:"text_tokens,omitempty"`      // 输出的文本转换为Token后的长度
+				ReasoningTokens int `json:"reasoning_tokens,omitempty"` // 模型思考过程转换为Token后的长度
+			} `json:"output_tokens_details,omitempty"` // 输出内容转换成 Token后的长度详情
+			PromptTokensDetails *PromptTokensDetails `json:"prompt_tokens_details,omitempty"` // 输入 Token 的细粒度分类
+		}
+		if err = json.Unmarshal(rawMap["usage"], &tmpUsage); err != nil {
+			return
+		}
+	}
+	return
 }
 
 // ChatResponse 聊天响应

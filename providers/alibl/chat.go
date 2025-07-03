@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 12:47:24
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-02 22:15:16
+ * @LastEditTime: 2025-07-03 15:32:33
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -25,14 +25,31 @@ const (
 
 // CreateChatCompletion 创建聊天
 func (s *aliblProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
-	err = common.ExecuteRequest(ctx, http.MethodPost, s.providerConfig.BaseURL, s.apiChatCompletions(request.Model), opts, s.lb, nil, &response, withRequestOptions(request)...)
+	err = common.ExecuteRequest(ctx, &common.ExecuteRequestContext{
+		Provider:   consts.AliBL,
+		Method:     http.MethodPost,
+		BaseURL:    s.providerConfig.BaseURL,
+		ApiPath:    s.apiChatCompletions(request.Model),
+		Opts:       opts,
+		LB:         s.lb,
+		Response:   &response,
+		ReqSetters: withRequestOptions(request),
+	})
 	return
 }
 
 // CreateChatCompletionStream 创建流式聊天
 func (s *aliblProvider) CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponseStream, err error) {
 	var stream *httpclient.StreamReader[models.ChatBaseResponse]
-	if stream, err = common.ExecuteStreamRequest[models.ChatBaseResponse](ctx, http.MethodPost, s.providerConfig.BaseURL, s.apiChatCompletions(request.Model), opts, s.lb, withRequestOptions(request)...); err != nil {
+	if stream, err = common.ExecuteStreamRequest[models.ChatBaseResponse](ctx, &common.ExecuteRequestContext{
+		Provider:   consts.AliBL,
+		Method:     http.MethodPost,
+		BaseURL:    s.providerConfig.BaseURL,
+		ApiPath:    s.apiChatCompletions(request.Model),
+		Opts:       opts,
+		LB:         s.lb,
+		ReqSetters: withRequestOptions(request),
+	}); err != nil {
 		return
 	}
 	response = models.ChatResponseStream{

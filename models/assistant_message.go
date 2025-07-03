@@ -2,12 +2,14 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-30 18:03:43
+ * @LastEditTime: 2025-07-01 14:55:52
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
 package models
+
+import "github.com/liusuxian/go-aisdk/internal/utils"
 
 // ChatAssistantMsgAudio 音频
 type ChatAssistantMsgAudio struct {
@@ -53,8 +55,8 @@ type AssistantMessage struct {
 	Audio *ChatAssistantMsgAudio `json:"audio,omitempty" providers:"openai"`
 	// 文本内容
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
-	Content string `json:"content,omitempty" providers:"openai,deepseek,alibl,ark"`
+	// 提供商支持: OpenAI | DeepSeek | AliBL
+	Content string `json:"content,omitempty" providers:"openai,deepseek,alibl"`
 	// 多模态内容
 	//
 	// 提供商支持: OpenAI
@@ -92,5 +94,5 @@ func (m *AssistantMessage) SetProvider(provider string) {
 
 // MarshalJSON 序列化JSON
 func (m AssistantMessage) MarshalJSON() (b []byte, err error) {
-	return NewSerializer(m.provider).Serialize(m)
+	return utils.NewSerializer(m.provider).Serialize(m)
 }

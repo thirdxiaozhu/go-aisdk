@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-19 17:37:53
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 00:28:45
+ * @LastEditTime: 2025-07-03 15:42:47
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,6 +11,7 @@ package openai
 
 import (
 	"context"
+	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"github.com/liusuxian/go-aisdk/providers/common"
@@ -26,7 +27,18 @@ const (
 
 // CreateImage 创建图像
 func (s *openAIProvider) CreateImage(ctx context.Context, request models.ImageRequest, opts ...httpclient.HTTPClientOption) (response models.ImageResponse, err error) {
-	err = common.ExecuteRequest(ctx, http.MethodPost, s.providerConfig.BaseURL, apiImagesGenerations, opts, s.lb, nil, &response, httpclient.WithBody(request))
+	err = common.ExecuteRequest(ctx, &common.ExecuteRequestContext{
+		Provider: consts.OpenAI,
+		Method:   http.MethodPost,
+		BaseURL:  s.providerConfig.BaseURL,
+		ApiPath:  apiImagesGenerations,
+		Opts:     opts,
+		LB:       s.lb,
+		Response: &response,
+		ReqSetters: []httpclient.RequestOption{
+			httpclient.WithBody(request),
+		},
+	})
 	return
 }
 
@@ -106,7 +118,16 @@ func (s *openAIProvider) CreateImageEdit(ctx context.Context, request models.Ima
 		// 关闭构建器
 		return builder.Close()
 	}
-	err = common.ExecuteRequest(ctx, http.MethodPost, s.providerConfig.BaseURL, apiImagesEdits, opts, s.lb, formHandler, &response)
+	err = common.ExecuteRequest(ctx, &common.ExecuteRequestContext{
+		Provider:    consts.OpenAI,
+		Method:      http.MethodPost,
+		BaseURL:     s.providerConfig.BaseURL,
+		ApiPath:     apiImagesEdits,
+		Opts:        opts,
+		LB:          s.lb,
+		FormHandler: formHandler,
+		Response:    &response,
+	})
 	return
 }
 
@@ -152,6 +173,15 @@ func (s *openAIProvider) CreateImageVariation(ctx context.Context, request model
 		// 关闭构建器
 		return builder.Close()
 	}
-	err = common.ExecuteRequest(ctx, http.MethodPost, s.providerConfig.BaseURL, apiImagesVariations, opts, s.lb, formHandler, &response)
+	err = common.ExecuteRequest(ctx, &common.ExecuteRequestContext{
+		Provider:    consts.OpenAI,
+		Method:      http.MethodPost,
+		BaseURL:     s.providerConfig.BaseURL,
+		ApiPath:     apiImagesVariations,
+		Opts:        opts,
+		LB:          s.lb,
+		FormHandler: formHandler,
+		Response:    &response,
+	})
 	return
 }
