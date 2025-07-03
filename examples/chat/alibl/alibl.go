@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 13:01:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-03 01:07:40
+ * @LastEditTime: 2025-07-03 22:42:03
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -56,6 +56,17 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 					{
 						Type: models.ChatUserMsgPartTypeText, // 不会被序列化
 						Text: "这些是什么?",
+					},
+					{
+						InputVideo: &models.ChatUserMsgInputVideo{
+							VideoImgList: []string{
+								"https://www.gstatic.com/webp/gallery/1.webp",
+								"https://www.gstatic.com/webp/gallery/2.webp",
+								"https://www.gstatic.com/webp/gallery/3.webp",
+								"https://www.gstatic.com/webp/gallery/4.webp",
+								"https://www.gstatic.com/webp/gallery/5.webp",
+							},
+						},
 					},
 				},
 			},
