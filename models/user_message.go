@@ -54,8 +54,7 @@ type ChatUserMsgImageURL struct {
 	// 图像URL，支持url和base64编码
 	//
 	// 提供商支持: OpenAI | AliBL | Ark
-	//URL string `json:"url,omitempty" providers:"openai,alibl,ark" mapping:"alibl:image"`
-	URL string `json:"url,omitempty" providers:"openai,alibl,ark"`
+	URL string `json:"url,omitempty" providers:"openai,alibl,ark" mapping:"alibl:image"`
 	// 图像质量
 	//
 	// 提供商支持: OpenAI | Ark
@@ -145,8 +144,8 @@ type ChatUserMsgVideoURL struct {
 type ChatUserMsgPart struct {
 	// 内容类型
 	//
-	// 提供商支持: OpenAI | AliBL | Ark
-	Type ChatUserMsgPartType `json:"type,omitempty" providers:"openai,alibl,ark"`
+	// 提供商支持: OpenAI | Ark
+	Type ChatUserMsgPartType `json:"type,omitempty" providers:"openai,ark"`
 	// 文本内容
 	//
 	// 提供商支持: OpenAI | AliBL | Ark
@@ -154,7 +153,7 @@ type ChatUserMsgPart struct {
 	// 图像URL
 	//
 	// 提供商支持: OpenAI | AliBL | Ark
-	ImageURL *ChatUserMsgImageURL `json:"image_url,omitempty" providers:"openai,alibl,ark" `
+	ImageURL *ChatUserMsgImageURL `json:"image_url,omitempty" providers:"openai,alibl,ark" flatten:"alibl"`
 	// 输入音频
 	//
 	// 提供商支持: OpenAI | AliBL

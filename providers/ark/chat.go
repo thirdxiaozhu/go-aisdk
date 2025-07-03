@@ -32,15 +32,8 @@ func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request mo
 
 // withRequestOptions 添加请求选项
 func withRequestOptions(request models.ChatRequest) (reqSetters []httpclient.RequestOption) {
-	if request.XDashScopeDataInspection != "" {
-		reqSetters = []httpclient.RequestOption{
-			httpclient.WithKeyValue("X-DashScope-DataInspection", request.XDashScopeDataInspection),
-			httpclient.WithBody(request),
-		}
-	} else {
-		reqSetters = []httpclient.RequestOption{
-			httpclient.WithBody(request),
-		}
+	reqSetters = []httpclient.RequestOption{
+		httpclient.WithBody(request),
 	}
 	return
 }

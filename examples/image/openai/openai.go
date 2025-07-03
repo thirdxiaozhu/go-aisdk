@@ -115,7 +115,7 @@ func main() {
 	configData := `{
   "providers": {
     "openai": {
-      "base_url": "https://niubi.zeabur.app/v1",
+      "base_url": "https://poloai.top/v1",
 			"api_keys": [%v]
     }
   }

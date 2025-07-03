@@ -20,7 +20,7 @@ import (
 // arkProvider 火山大模型提供商
 type arkProvider struct {
 	core.DefaultProviderService
-	supportedModels map[fmt.Stringer]map[string]bool // 支持的模型
+	supportedModels map[fmt.Stringer]map[string]uint // 支持的模型
 	providerConfig  *conf.ProviderConfig             // 提供商配置
 	lb              *loadbalancer.LoadBalancer       // 负载均衡器
 }
@@ -32,13 +32,13 @@ var (
 // init 包初始化时创建 deepseekProvider 实例并注册到工厂
 func init() {
 	arkService = &arkProvider{
-		supportedModels: map[fmt.Stringer]map[string]bool{
+		supportedModels: map[fmt.Stringer]map[string]uint{
 			consts.ChatModel: {
 				// chat
-				consts.Doubaoseed1_6: true,
+				consts.Doubaoseed1_6: 1,
 			},
 			consts.ImageModel: {
-				consts.Doubaoseedream3: true,
+				consts.Doubaoseedream3: 1,
 			},
 		},
 	}
@@ -46,7 +46,7 @@ func init() {
 }
 
 // GetSupportedModels 获取支持的模型
-func (s *arkProvider) GetSupportedModels() (supportedModels map[fmt.Stringer]map[string]bool) {
+func (s *arkProvider) GetSupportedModels() (supportedModels map[fmt.Stringer]map[string]uint) {
 	return s.supportedModels
 }
 

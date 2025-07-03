@@ -11,6 +11,7 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"slices"
@@ -166,6 +167,7 @@ func (s *Serializer) serializeStruct(v reflect.Value, visited *map[uintptr]bool,
 			s.handleCopyToField,            // 处理copyto标签字段
 			s.handleFlattenField,           // 处理flatten标签字段
 			s.handleGroupField,             // 处理group标签字段
+			s.handleParametersField,        // 处理parameter标签字段
 			s.handleDefaultField,           // 处理default标签字段
 		} {
 			if isSkip, err = handler(&specialFieldContext{
@@ -418,6 +420,59 @@ func (s *Serializer) handleDefaultField(ctx *specialFieldContext) (isSkip bool, 
 			isSkip = true
 			return
 		}
+	}
+	return
+}
+
+func (s *Serializer) handleParametersField(ctx *specialFieldContext) (isSkip bool, err error) {
+	if parameterTag := ctx.field.Tag.Get("parameters"); parameterTag != "" {
+		// 应用字段映射
+		var parametersField reflect.Value
+		for mapping := range strings.SplitSeq(parameterTag, ",") {
+			if parts := strings.Split(mapping, ":"); len(parts) == 2 {
+				if parts[0] != s.provider {
+					continue
+				}
+				parametersField = ctx.structValue.FieldByName(parts[1])
+			}
+		}
+		if !parametersField.IsValid() || parametersField.IsNil() {
+			err = fmt.Errorf("parameter field name is empty")
+			return
+		}
+
+		// 将参数转换为文本命令 （Ark）
+		parametersString := ""
+		if parametersField.Kind() == reflect.Ptr {
+			parametersField = parametersField.Elem()
+		}
+
+		for i := 0; i < parametersField.NumField(); i++ {
+			field := parametersField.Field(i)
+			fieldType := parametersField.Type().Field(i)
+			parameterJsonTag := strings.Split(fieldType.Tag.Get("json"), ",")[0]
+			switch field.Kind() {
+			case reflect.String:
+				para := field.String()
+				if para != "" {
+					parametersString = fmt.Sprintf("%s --%s %v", parametersString, parameterJsonTag, para)
+				}
+			case reflect.Bool:
+				parametersString = fmt.Sprintf("%s --%s %v", parametersString, parameterJsonTag, field.Bool())
+			case reflect.Int:
+				para := field.Int()
+				if para != 0 {
+					parametersString = fmt.Sprintf("%s --%s %v", parametersString, parameterJsonTag, para)
+				}
+			default:
+				err = errors.New("unsupported type")
+				return
+			}
+
+		}
+		(*ctx.result)[ctx.jsonFieldName] = ctx.fieldValue.String() + parametersString
+		isSkip = true
+		return
 	}
 	return
 }

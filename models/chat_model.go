@@ -146,7 +146,7 @@ const (
 type ChatResponseFormatJSONSchema struct {
 	// 响应格式名称，必须是 a-z、A-Z、0-9 或包含下划线和破折号，最大长度为 64
 	//
-	// 提供商支持: OpenAI | ARK
+	// 提供商支持: OpenAI | Ark
 	Name string `json:"name,omitempty" providers:"openai,ark"`
 	// 响应格式的描述，用于指导模型如何响应
 	//
@@ -166,11 +166,11 @@ type ChatResponseFormatJSONSchema struct {
 type ChatResponseFormat struct {
 	// 响应格式的类型
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | ARK
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Type ChatResponseFormatType `json:"type,omitempty" providers:"openai,deepseek,alibl,ark"`
 	// JSON Schema 配置，仅当 Type 为 "json_schema" 时使用
 	//
-	// 提供商支持: OpenAI | ARK
+	// 提供商支持: OpenAI | Ark
 	JSONSchema *ChatResponseFormatJSONSchema `json:"json_schema,omitempty" providers:"openai,ark"`
 }
 
@@ -252,15 +252,15 @@ func (c ChatToolChoice) MarshalJSON() (b []byte, err error) {
 type ChatToolFunction struct {
 	// 函数名称，必须是 a-z, A-Z, 0-9 或者包含下划线和破折号，最大长度为 64
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | ARK
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Name string `json:"name,omitempty" providers:"openai,deepseek,alibl,ark"`
 	// 函数描述，用于帮助模型决定何时以及如何调用函数
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | ARK
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Description string `json:"description,omitempty" providers:"openai,deepseek,alibl,ark"`
 	// 函数接受的参数，描述为一个 JSON Schema 对象
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | ARK
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Parameters map[string]any `json:"parameters,omitempty" providers:"openai,deepseek,alibl,ark"`
 	// 是否启用严格模式，默认为 false
 	//
@@ -272,11 +272,11 @@ type ChatToolFunction struct {
 type ChatTool struct {
 	// 工具类型
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | ARK
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Type ToolType `json:"type,omitempty" providers:"openai,deepseek,alibl,ark"`
 	// 工具函数
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | ARK
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Function *ChatToolFunction `json:"function,omitempty" providers:"openai,deepseek,alibl,ark"`
 }
 
@@ -646,11 +646,11 @@ type ChatRequest struct {
 	Provider consts.Provider `json:"provider,omitempty"` // 提供商
 	// 消息数组
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | ARK
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Messages []ChatMessage `json:"messages,omitempty" providers:"openai,deepseek,alibl,ark" group:"alibl:input"`
 	// 模型名称
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | ARK
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Model string `json:"model,omitempty" providers:"openai,deepseek,alibl,ark"`
 	// 输出音频的音色与格式
 	//
@@ -658,15 +658,15 @@ type ChatRequest struct {
 	Audio *ChatAudioOutputArgs `json:"audio,omitempty" providers:"openai"`
 	// 介于 -2.0 和 2.0 之间的数字。如果该值为正，那么新 token 会根据其在已有文本中的出现频率受到相应的惩罚，降低模型重复相同内容的可能性
 	//
-	// 提供商支持: OpenAI | DeepSeek | ARK
+	// 提供商支持: OpenAI | DeepSeek | Ark
 	FrequencyPenalty *float32 `json:"frequency_penalty,omitempty" providers:"openai,deepseek,ark"`
 	// 修改指定标记在补全中出现的可能性
 	//
-	// 提供商支持: OpenAI | ARK
+	// 提供商支持: OpenAI | Ark
 	LogitBias map[string]int `json:"logit_bias,omitempty" providers:"openai,ark"`
 	// 是否返回输出 Token 的对数概率
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | ARK
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	LogProbs *bool `json:"logprobs,omitempty" providers:"openai,deepseek,alibl,ark"`
 	// 生成补全内容的最大令牌数上限
 	//
@@ -694,7 +694,7 @@ type ChatRequest struct {
 	Prediction *ChatPrediction `json:"prediction,omitempty" providers:"openai"`
 	// 介于 -2.0 和 2.0 之间的数字。如果该值为正，那么新 token 会根据其是否已在已有文本中出现受到相应的惩罚，从而增加模型谈论新主题的可能性
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | ARK
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	PresencePenalty *float32 `json:"presence_penalty,omitempty" providers:"openai,deepseek,alibl,ark" group:"alibl:parameters"`
 	// 仅适用于 o 系列模型，约束推理模型的推理努力程度
 	//
@@ -702,7 +702,7 @@ type ChatRequest struct {
 	ReasoningEffort ChatReasoningEffortType `json:"reasoning_effort,omitempty" providers:"openai"`
 	// 响应格式
 	//
-	// 提供商支持: OpenAI | DeepSeek | AliBL | ARK
+	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	ResponseFormat *ChatResponseFormat `json:"response_format,omitempty" providers:"openai,deepseek,alibl,ark" group:"alibl:parameters"`
 	// 随机种子
 	//

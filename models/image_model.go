@@ -309,7 +309,6 @@ func (r ImageRequest) MarshalJSON() (b []byte, err error) {
 	if !ok {
 		return nil, fmt.Errorf("unsupported provider: %s", r.Provider)
 	}
-
 	return strategy(r)
 }
 

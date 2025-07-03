@@ -31,7 +31,7 @@ func getApiKeys(envKey string) (apiKeys string) {
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
 	return client.CreateChatCompletion(ctx, models.ChatRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.Ark,
 		Messages: []models.ChatMessage{
@@ -40,14 +40,14 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 			},
 		},
 		Model:               consts.Doubaoseed1_6,
-		MaxCompletionTokens: 4096,
+		MaxCompletionTokens: models.Int(4096),
 	}, httpclient.WithTimeout(time.Minute*2))
 }
 
 func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponseStream, err error) {
 	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
 		UserInfo: models.UserInfo{
-			UserID: "123456",
+			User: "123456",
 		},
 		Provider: consts.Ark,
 		Messages: []models.ChatMessage{
@@ -56,10 +56,10 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 			},
 		},
 		Model:               consts.Doubaoseed1_6,
-		MaxCompletionTokens: 4096,
-		Stream:              true,
+		MaxCompletionTokens: models.Int(4096),
+		Stream:              models.Bool(true),
 		StreamOptions: &models.ChatStreamOptions{
-			IncludeUsage: true,
+			IncludeUsage: models.Bool(true),
 		},
 	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*5))
 }
