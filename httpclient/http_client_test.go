@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 23:03:59
+ * @LastEditTime: 2025-07-03 16:46:08
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -153,7 +153,7 @@ func TestClient_handleErrorResp(t *testing.T) {
 			name:          "non-json error response",
 			statusCode:    http.StatusInternalServerError,
 			responseBody:  "internal server error",
-			expectedError: "invalid character 'i' looking for beginning of value",
+			expectedError: "failed to parse error response",
 		},
 	}
 

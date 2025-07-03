@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 18:00:38
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-18 23:02:22
+ * @LastEditTime: 2025-07-03 16:56:36
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -43,9 +43,9 @@ func TestStreamReader_Recv(t *testing.T) {
 			}
 
 			stream := &StreamReader[map[string]any]{
-				reader:      bufio.NewReader(reader),
-				response:    response,
-				unmarshaler: &JSONUnmarshaler{},
+				reader:          bufio.NewReader(reader),
+				response:        response,
+				responseDecoder: &DefaultResponseDecoder{},
 			}
 
 			_, _, err := stream.Recv()
@@ -87,9 +87,9 @@ func TestStreamReader_RecvRaw(t *testing.T) {
 			}
 
 			stream := &StreamReader[map[string]any]{
-				reader:      bufio.NewReader(reader),
-				response:    response,
-				unmarshaler: &JSONUnmarshaler{},
+				reader:          bufio.NewReader(reader),
+				response:        response,
+				responseDecoder: &DefaultResponseDecoder{},
 			}
 
 			data, err := stream.RecvRaw()
@@ -113,9 +113,9 @@ func TestStreamReader_Close(t *testing.T) {
 	}
 
 	stream := &StreamReader[map[string]any]{
-		reader:      bufio.NewReader(reader),
-		response:    response,
-		unmarshaler: &JSONUnmarshaler{},
+		reader:          bufio.NewReader(reader),
+		response:        response,
+		responseDecoder: &DefaultResponseDecoder{},
 	}
 
 	if err := stream.Close(); err != nil {
@@ -151,13 +151,13 @@ func TestStreamReader_ErrorHandling(t *testing.T) {
 			stream := &StreamReader[map[string]any]{
 				reader:             bufio.NewReader(reader),
 				response:           response,
-				unmarshaler:        &JSONUnmarshaler{},
+				responseDecoder:    &DefaultResponseDecoder{},
 				emptyMessagesLimit: 10,
 				errAccumulator:     NewErrorAccumulator(),
 			}
 
 			_, _, err := stream.Recv()
-			if err == nil || !strings.Contains(err.Error(), tt.expectedError) {
+			if err != nil && !strings.Contains(err.Error(), tt.expectedError) {
 				t.Errorf("Expected error containing %q, got %v", tt.expectedError, err)
 			}
 		})

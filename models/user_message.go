@@ -2,12 +2,14 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 14:59:04
+ * @LastEditTime: 2025-07-03 15:17:08
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
 package models
+
+import "github.com/liusuxian/go-aisdk/internal/utils"
 
 // ChatUserMsgPartType 多模态内容类型
 type ChatUserMsgPartType string
@@ -170,5 +172,5 @@ func (m *UserMessage) SetProvider(provider string) {
 
 // MarshalJSON 序列化JSON
 func (m UserMessage) MarshalJSON() (b []byte, err error) {
-	return NewSerializer(m.provider).Serialize(m)
+	return utils.NewSerializer(m.provider).Serialize(m)
 }

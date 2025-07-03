@@ -2,12 +2,14 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-26 17:43:52
+ * @LastEditTime: 2025-07-03 15:16:59
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
  */
 package models
+
+import "github.com/liusuxian/go-aisdk/internal/utils"
 
 // ToolMessage 工具消息
 type ToolMessage struct {
@@ -34,5 +36,5 @@ func (m *ToolMessage) SetProvider(provider string) {
 
 // MarshalJSON 序列化JSON
 func (m ToolMessage) MarshalJSON() (b []byte, err error) {
-	return NewSerializer(m.provider).Serialize(m)
+	return utils.NewSerializer(m.provider).Serialize(m)
 }
