@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-15 18:42:36
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-03 17:48:46
+ * @LastEditTime: 2025-07-03 22:36:41
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -886,14 +886,17 @@ const (
 
 // ChatAnnotationURLCitation 网络搜索工具的 URL 引用
 type ChatAnnotationURLCitation struct {
-	EndIndex   int    `json:"end_index,omitempty"`   // 消息中URL引用的最后一个字符的索引
-	StartIndex int    `json:"start_index,omitempty"` // 消息中URL引用的第一个字符的索引
-	Title      string `json:"title,omitempty"`       // 网络资源的标题
-	URL        string `json:"url,omitempty"`         // 网络资源的URL
+	EndIndex   int    `json:"end_index,omitempty"`   // URL引用在消息中的结束位置索引
+	StartIndex int    `json:"start_index,omitempty"` // URL引用在消息中的起始位置索引
+	SiteName   string `json:"site_name,omitempty"`   // 搜索结果来源的网站名称
+	Icon       string `json:"icon,omitempty"`        // 来源网站的图标URL，如果没有图标则为空字符串
+	Title      string `json:"title,omitempty"`       // 被引用网页的标题
+	URL        string `json:"url,omitempty"`         // 被引用网页的URL地址
 }
 
 // ChatAnnotation 消息的注释
 type ChatAnnotation struct {
+	Index       int                        `json:"index,omitempty"`        // 搜索结果的序号，表示该搜索结果在 []ChatAnnotation 中的索引
 	Type        ChatAnnotationType         `json:"type,omitempty"`         // 注释的类型
 	URLCitation *ChatAnnotationURLCitation `json:"url_citation,omitempty"` // 网络搜索工具的 URL 引用
 }
@@ -942,7 +945,8 @@ type ChatChoice struct {
 
 // CompletionTokensDetails completion tokens 的详细信息
 type CompletionTokensDetails struct {
-	AudioTokens              int `json:"audio_tokens,omitempty"`               // 模型生成的音频输入 token 数量
+	TextTokens               int `json:"text_tokens,omitempty"`                // 模型生成的文本 token 数量
+	AudioTokens              int `json:"audio_tokens,omitempty"`               // 模型生成的音频 token 数量
 	ReasoningTokens          int `json:"reasoning_tokens,omitempty"`           // 模型用于推理而生成的 token 数量
 	AcceptedPredictionTokens int `json:"accepted_prediction_tokens,omitempty"` // 使用预测输出时，预测中出现在完成结果中的 token 数量
 	RejectedPredictionTokens int `json:"rejected_prediction_tokens,omitempty"` // 使用预测输出时，预测中未出现在完成结果中的 token 数量
@@ -952,6 +956,9 @@ type CompletionTokensDetails struct {
 type PromptTokensDetails struct {
 	AudioTokens  int `json:"audio_tokens,omitempty"`  // prompt 中存在的音频输入 token 数
 	CachedTokens int `json:"cached_tokens,omitempty"` // prompt 中存在的缓存 token 数
+	TextTokens   int `json:"text_tokens,omitempty"`   // prompt 中存在的文本 token 数
+	ImageTokens  int `json:"image_tokens,omitempty"`  // prompt 中存在的图像 token 数
+	VideoTokens  int `json:"video_tokens,omitempty"`  // prompt 中存在的视频 token 数
 }
 
 // ChatUsage 该对话补全请求的用量信息
@@ -1021,9 +1028,37 @@ func (c *ChatBaseResponse) unmarshalAliBL(data []byte) (err error) {
 		if err = json.Unmarshal(rawMap["output"], &outputMap); err != nil {
 			return
 		}
-
+		// 解析 search_info 数据
+		var annotations []ChatAnnotation
+		if _, ok := outputMap["search_info"]; ok {
+			var tmpSearchInfo struct {
+				SearchResults []struct {
+					SiteName string `json:"site_name,omitempty"` // 搜索结果来源的网站名称
+					Icon     string `json:"icon,omitempty"`      // 来源网站的图标URL，如果没有图标则为空字符串
+					Index    int    `json:"index,omitempty"`     // 搜索结果的序号，表示该搜索结果在search_results中的索引
+					Title    string `json:"title,omitempty"`     // 搜索结果的标题
+					URL      string `json:"url,omitempty"`       // 搜索结果的链接地址
+				} `json:"search_results,omitempty"` // 联网搜索到的结果
+			}
+			if err = json.Unmarshal(outputMap["search_info"], &tmpSearchInfo); err != nil {
+				return
+			}
+			// 创建 annotations 数组
+			annotations = make([]ChatAnnotation, len(tmpSearchInfo.SearchResults))
+			for i, searchResult := range tmpSearchInfo.SearchResults {
+				annotations[i] = ChatAnnotation{
+					Index: searchResult.Index,
+					URLCitation: &ChatAnnotationURLCitation{
+						SiteName: searchResult.SiteName,
+						Icon:     searchResult.Icon,
+						Title:    searchResult.Title,
+						URL:      searchResult.URL,
+					},
+				}
+			}
+		}
+		// 解析 choices 数据
 		if _, ok := outputMap["choices"]; ok {
-			// 解析 choices 数据
 			var tmpChoices []struct {
 				FinishReason ChatFinishReason `json:"finish_reason,omitempty"` // 模型停止生成 token 的原因
 				Message      *struct {
@@ -1068,6 +1103,7 @@ func (c *ChatBaseResponse) unmarshalAliBL(data []byte) (err error) {
 						return ""
 					}(),
 					ReasoningContent: tmpChoice.Message.ReasoningContent,
+					Annotations:      annotations,
 					ToolCalls:        tmpChoice.Message.ToolCalls,
 				}
 				c.Choices[i] = ChatChoice{
@@ -1080,21 +1116,6 @@ func (c *ChatBaseResponse) unmarshalAliBL(data []byte) (err error) {
 				} else {
 					c.Choices[i].Message = message
 				}
-			}
-		}
-		// 解析 search_info 数据
-		if _, ok := outputMap["search_info"]; ok {
-			var tmpSearchInfo struct {
-				SearchResults []struct {
-					SiteName string `json:"site_name,omitempty"` // 搜索结果来源的网站名称
-					Icon     string `json:"icon,omitempty"`      // 来源网站的图标URL，如果没有图标则为空字符串
-					Index    int    `json:"index,omitempty"`     // 搜索结果的序号，表示该搜索结果在search_results中的索引
-					Title    string `json:"title,omitempty"`     // 搜索结果的标题
-					URL      string `json:"url,omitempty"`       // 搜索结果的链接地址
-				} `json:"search_results,omitempty"` // 联网搜索到的结果
-			}
-			if err = json.Unmarshal(outputMap["search_info"], &tmpSearchInfo); err != nil {
-				return
 			}
 		}
 	}
@@ -1120,6 +1141,29 @@ func (c *ChatBaseResponse) unmarshalAliBL(data []byte) (err error) {
 		}
 		if err = json.Unmarshal(rawMap["usage"], &tmpUsage); err != nil {
 			return
+		}
+		// 创建 Usage 对象
+		c.Usage = &ChatUsage{
+			CompletionTokens: tmpUsage.OutputTokens,
+			PromptTokens:     tmpUsage.InputTokens,
+			TotalTokens:      tmpUsage.TotalTokens,
+		}
+		if tmpUsage.OutputTokensDetails != nil {
+			c.Usage.CompletionTokensDetails = &CompletionTokensDetails{
+				TextTokens:      tmpUsage.OutputTokensDetails.TextTokens,
+				ReasoningTokens: tmpUsage.OutputTokensDetails.ReasoningTokens,
+			}
+		}
+		if tmpUsage.PromptTokensDetails != nil {
+			c.Usage.PromptTokensDetails = tmpUsage.PromptTokensDetails
+		}
+		if tmpUsage.InputTokensDetails != nil {
+			if c.Usage.PromptTokensDetails == nil {
+				c.Usage.PromptTokensDetails = &PromptTokensDetails{}
+			}
+			c.Usage.PromptTokensDetails.TextTokens = tmpUsage.InputTokensDetails.TextTokens
+			c.Usage.PromptTokensDetails.ImageTokens = tmpUsage.InputTokensDetails.ImageTokens
+			c.Usage.PromptTokensDetails.VideoTokens = tmpUsage.InputTokensDetails.VideoTokens
 		}
 	}
 	return
