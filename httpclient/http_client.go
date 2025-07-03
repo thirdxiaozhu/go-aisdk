@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-20 00:59:51
+ * @LastEditTime: 2025-07-01 16:40:51
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -359,23 +359,25 @@ func (c *HTTPClient) handleErrorResp(resp *http.Response) (err error) {
 	if body, err = io.ReadAll(resp.Body); err != nil {
 		return fmt.Errorf("error, reading response body: %w", err)
 	}
-	// 尝试将响应体解析为 JSON
+	// 尝试解析为 ErrorResponse
 	var errRes ErrorResponse
-	err = json.Unmarshal(body, &errRes)
-	if err != nil || errRes.Error == nil {
-		reqErr := &RequestError{
-			HTTPStatus:     resp.Status,
-			HTTPStatusCode: resp.StatusCode,
-			Err:            err,
-			Body:           body,
-		}
-		if errRes.Error != nil {
-			reqErr.Err = errRes.Error
-		}
-		return reqErr
+	if err = json.Unmarshal(body, &errRes); err == nil && errRes.Error != nil {
+		errRes.Error.HTTPStatus = resp.Status
+		errRes.Error.HTTPStatusCode = resp.StatusCode
+		return errRes.Error
 	}
-	// 设置错误响应的 HTTP 状态和状态码
-	errRes.Error.HTTPStatus = resp.Status
-	errRes.Error.HTTPStatusCode = resp.StatusCode
-	return errRes.Error
+	// 尝试解析为 APIError
+	var apiErr *APIError
+	if err = json.Unmarshal(body, &apiErr); err == nil && apiErr != nil {
+		apiErr.HTTPStatus = resp.Status
+		apiErr.HTTPStatusCode = resp.StatusCode
+		return apiErr
+	}
+	// 如果都解析失败，返回包含解析错误的 RequestError
+	return &RequestError{
+		HTTPStatus:     resp.Status,
+		HTTPStatusCode: resp.StatusCode,
+		Err:            fmt.Errorf("failed to parse error response"),
+		Body:           body,
+	}
 }

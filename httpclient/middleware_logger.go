@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-30 15:14:39
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 11:12:52
+ * @LastEditTime: 2025-07-01 18:30:23
  * @Description: 日志中间件
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -13,7 +13,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/liusuxian/go-aisdk/internal/utils"
 	"log"
 	"os"
 	"runtime"
@@ -184,7 +183,7 @@ func (m *LoggingMiddleware) logRequestStart(ctx context.Context, request any, re
 		if reqData := m.sanitizeData(request); reqData != nil {
 			startTemp.Request = reqData
 		}
-		m.config.Logger.Info(ctx, "request started: %s", utils.MustString(startTemp))
+		m.config.Logger.Info(ctx, "request started: %s", MustString(startTemp))
 	}
 }
 
@@ -206,7 +205,7 @@ func (m *LoggingMiddleware) logRequestEnd(ctx context.Context, processingStartTi
 				Error:           requestInfo.Error.Error(),
 				Alias:           Alias(*requestInfo),
 			}
-			m.config.Logger.Error(ctx, "request failed: %s", utils.MustString(endTemp))
+			m.config.Logger.Error(ctx, "request failed: %s", MustString(endTemp))
 		}
 	} else {
 		// 是否跳过成功请求的日志
@@ -233,7 +232,7 @@ func (m *LoggingMiddleware) logRequestEnd(ctx context.Context, processingStartTi
 					endTemp.Response = &respData
 				}
 			}
-			m.config.Logger.Info(ctx, "request completed: %s", utils.MustString(endTemp))
+			m.config.Logger.Info(ctx, "request completed: %s", MustString(endTemp))
 		}
 	}
 }

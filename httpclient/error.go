@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-19 18:25:25
+ * @LastEditTime: 2025-07-01 16:16:11
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -19,6 +19,7 @@ import (
 type APIError struct {
 	Code           any         `json:"code,omitempty"`
 	Message        string      `json:"message"`
+	RequestId      string      `json:"request_id,omitempty"`
 	Param          *string     `json:"param,omitempty"`
 	Type           string      `json:"type"`
 	HTTPStatus     string      `json:"-"`
@@ -94,6 +95,9 @@ type ErrorResponse struct {
 // Error 实现 error 接口的方法
 func (e *APIError) Error() (s string) {
 	if e.HTTPStatusCode > 0 {
+		if e.RequestId != "" {
+			return fmt.Sprintf("error, status code: %d, status: %s, message: %s, request id: %s", e.HTTPStatusCode, e.HTTPStatus, e.Message, e.RequestId)
+		}
 		return fmt.Sprintf("error, status code: %d, status: %s, message: %s", e.HTTPStatusCode, e.HTTPStatus, e.Message)
 	}
 	return e.Message
@@ -122,6 +126,12 @@ func (e *APIError) UnmarshalJSON(data []byte) (err error) {
 
 	if _, ok := rawMap["innererror"]; ok {
 		if err = json.Unmarshal(rawMap["innererror"], &e.InnerError); err != nil {
+			return
+		}
+	}
+
+	if _, ok := rawMap["request_id"]; ok {
+		if err = json.Unmarshal(rawMap["request_id"], &e.RequestId); err != nil {
 			return
 		}
 	}

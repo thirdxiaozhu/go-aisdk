@@ -56,15 +56,18 @@ type SystemMessage struct {
 	// 用于序列化参数时，处理差异化参数
 	provider string
 	// 文本内容
+	//
 	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Content string `json:"content,omitempty" providers:"openai,deepseek,alibl,ark"`
 	// 多模态内容
 	// 提供商支持: Ark
 	MultimodalContent []ChatSystemMsgPart `json:"multimodal_content,omitempty" providers:"ark" copyto:"Content"`
 	// 消息角色
+	//
 	// 提供商支持: OpenAI | DeepSeek | AliBL | Ark
 	Role string `json:"role,omitempty" providers:"openai,deepseek,alibl,ark" default:"system"`
 	// 参与者名称
+	//
 	// 提供商支持: OpenAI | DeepSeek
 	Name string `json:"name,omitempty" providers:"openai,deepseek"`
 }

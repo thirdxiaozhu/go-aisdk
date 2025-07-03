@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 18:00:38
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-06-20 22:58:27
+ * @LastEditTime: 2025-07-02 01:26:49
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -20,8 +20,10 @@ import (
 )
 
 var (
-	headerData  = []byte("data: ")
-	errorPrefix = []byte(`data: {"error":`)
+	headerData   = []byte("data: ")
+	headerData2  = []byte("data:")
+	errorPrefix  = []byte(`data: {"error":`)
+	errorPrefix2 = []byte(`data:{"error":`)
 )
 
 // Streamable 可流式传输的类型
@@ -163,19 +165,31 @@ func (stream *StreamReader[T]) processLines() (b []byte, err error) {
 	for {
 		rawLine, readErr := stream.reader.ReadBytes('\n')
 		if readErr != nil || hasErrorPrefix {
+			if readErr == io.EOF {
+				stream.isFinished = true
+				return nil, io.EOF
+			}
 			if respErr := stream.unmarshalError(); respErr != nil {
 				return nil, fmt.Errorf("error, %v", respErr)
 			}
 			return nil, readErr
 		}
 
-		noSpaceLine := bytes.TrimSpace(rawLine)
+		var (
+			noSpaceLine     = bytes.TrimSpace(rawLine)
+			headerDataBytes []byte
+		)
 		if bytes.HasPrefix(noSpaceLine, errorPrefix) {
+			headerDataBytes = headerData
+			hasErrorPrefix = true
+		} else if bytes.HasPrefix(noSpaceLine, errorPrefix2) {
+			headerDataBytes = headerData2
 			hasErrorPrefix = true
 		}
-		if !bytes.HasPrefix(noSpaceLine, headerData) || hasErrorPrefix {
+		// 如果不是数据行（既不是"data: "也不是"data:"开头）或者有错误
+		if (!bytes.HasPrefix(noSpaceLine, headerData) && !bytes.HasPrefix(noSpaceLine, headerData2)) || hasErrorPrefix {
 			if hasErrorPrefix {
-				noSpaceLine = bytes.TrimPrefix(noSpaceLine, headerData)
+				noSpaceLine = bytes.TrimPrefix(noSpaceLine, headerDataBytes)
 			}
 			if writeErr := stream.errAccumulator.Write(noSpaceLine); writeErr != nil {
 				return nil, writeErr
@@ -186,14 +200,22 @@ func (stream *StreamReader[T]) processLines() (b []byte, err error) {
 			}
 			continue
 		}
-
-		noPrefixLine := bytes.TrimPrefix(noSpaceLine, headerData)
-		if string(noPrefixLine) == "[DONE]" {
-			stream.isFinished = true
-			return nil, io.EOF
+		// 处理"data: "格式
+		if noPrefixLine, ok := bytes.CutPrefix(noSpaceLine, headerData); ok {
+			if string(noPrefixLine) == "[DONE]" {
+				stream.isFinished = true
+				return nil, io.EOF
+			}
+			return noPrefixLine, nil
 		}
-
-		return noPrefixLine, nil
+		// 处理"data:"格式
+		if noPrefixLine, ok := bytes.CutPrefix(noSpaceLine, headerData2); ok {
+			if string(noPrefixLine) == "[DONE]" {
+				stream.isFinished = true
+				return nil, io.EOF
+			}
+			return noPrefixLine, nil
+		}
 	}
 }
 
