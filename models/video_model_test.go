@@ -36,7 +36,7 @@ func TestVideoModel_MarshalJSON(t *testing.T) {
 					{
 						Type: VideoTypeText,
 						Text: "生成一个小朋友玩玩具的视频",
-						ArkParameters: &VideoParameters{
+						Parameters: &VideoParameters{
 							Resolution:     VideoParametersResolution720P,
 							Ratio:          VideoParametersRatio9_16,
 							Duration:       VideoParametersDuration10,
@@ -59,7 +59,7 @@ func TestVideoModel_MarshalJSON(t *testing.T) {
 					{
 						Type: VideoTypeText,
 						Text: "生成一个小朋友玩玩具的视频",
-						ArkParameters: &VideoParameters{
+						Parameters: &VideoParameters{
 							Resolution:     VideoParametersResolution720P,
 							Ratio:          VideoParametersRatio9_16,
 							Duration:       VideoParametersDuration10,
@@ -89,7 +89,7 @@ func TestVideoModel_MarshalJSON(t *testing.T) {
 					{
 						Type: VideoTypeText,
 						Text: "生成一个小朋友玩玩具的视频",
-						ArkParameters: &VideoParameters{
+						Parameters: &VideoParameters{
 							Resolution:     VideoParametersResolution720P,
 							Ratio:          VideoParametersRatio9_16,
 							Duration:       VideoParametersDuration10,
@@ -117,6 +117,29 @@ func TestVideoModel_MarshalJSON(t *testing.T) {
 			},
 			wantB: []byte(`{"content":[{"text":"生成一个小朋友玩玩具的视频 --resolution 720p --ratio 9:16 --duration 10 --framepersecond 16 --watermark true --seed -1 --camerafixed true","type":"text"},{"image_url":{"url":"https://example.com/image.png"},"role":"first_frame","type":"image_url"},{"image_url":{"url":"https://example.com/image2.png"},"role":"last_frame","type":"image_url"}],"provider":"ark"}
 `),
+			wantErr: false,
+		},
+		{
+			name: "alibl文生视频", // openai
+			fields: fields{
+				provider: "alibl",
+				VideoContent: []VideoContent{
+					{
+						Type: VideoTypeText,
+						Text: "生成一个小朋友玩玩具的视频",
+						Parameters: &VideoParameters{
+							Resolution:     VideoParametersResolution720P,
+							Ratio:          VideoParametersRatio9_16,
+							Duration:       VideoParametersDuration10,
+							FramePerSecond: VideoParametersFPS16,
+							Watermark:      true,
+							Seed:           -1,
+							CameraFixed:    true,
+						},
+					},
+				},
+			},
+			wantB:   []byte(`{"content":[{"text":"生成一个小朋友玩玩具的视频 --resolution 720p --ratio 9:16 --duration 10 --framepersecond 16 --watermark true --seed -1 --camerafixed true","type":"text"}],"provider":"ark"}`),
 			wantErr: false,
 		},
 	}

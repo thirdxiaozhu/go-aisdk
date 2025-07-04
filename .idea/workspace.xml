@@ -5,9 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8df846c7-bb5a-4e5d-ba5b-dc77b78744ed" name="Changes" comment="新增火山大模型对话测试、火山大模型图片生成">
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/image/ark/ark.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/image/ark/ark.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/image_model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/image_model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/utils/serializer.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/utils/serializer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/chat_model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/chat_model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/system_message.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/system_message.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/video_model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/video_model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/video_model_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/video_model_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/providers/ark/chat.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/ark/chat.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/providers/ark/image.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/ark/image.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/providers/ark/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/ark/video.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,36 +73,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
-    &quot;Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl.executor&quot;: &quot;Run&quot;,
-    &quot;Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark.executor&quot;: &quot;Run&quot;,
-    &quot;Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek.executor&quot;: &quot;Run&quot;,
-    &quot;Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai.executor&quot;: &quot;Run&quot;,
-    &quot;Go Build.go build github.com/liusuxian/go-aisdk/examples/image/ark.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestUserMessage_MarshalJSON/AliBL完整多模态 in github.com/liusuxian/go-aisdk/models.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestUserMessage_MarshalJSON/AliBL视频完整配置 in github.com/liusuxian/go-aisdk/models.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;//wsl.localhost/Ubuntu-20.04/home/jiaxv/ego/server/utils/go-aisdk/examples/image/ark&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;fileTemplates&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
+    "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl.executor": "Run",
+    "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark.executor": "Run",
+    "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek.executor": "Run",
+    "Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/openai.executor": "Run",
+    "Go Build.go build github.com/liusuxian/go-aisdk/examples/image/ark.executor": "Run",
+    "Go Test.TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models.executor": "Run",
+    "Go Test.TestUserMessage_MarshalJSON/AliBL完整多模态 in github.com/liusuxian/go-aisdk/models.executor": "Run",
+    "Go Test.TestUserMessage_MarshalJSON/AliBL视频完整配置 in github.com/liusuxian/go-aisdk/models.executor": "Run",
+    "Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models.executor": "Run",
+    "Go Test.TestVideoModel_MarshalJSON/alibl文生视频 in github.com/liusuxian/go-aisdk/models.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "git-widget-placeholder": "dev",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "last_opened_file_path": "//wsl.localhost/Ubuntu-20.04/home/jiaxv/ego/server/utils/go-aisdk/examples/image/ark",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.configurations.included.in.services": "true",
+    "settings.editor.selected.configurable": "fileTemplates",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="\\wsl.localhost\Ubuntu-20.04\home\jiaxv\ego\server\utils\go-aisdk\examples\image\ark" />
@@ -109,25 +117,13 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Go Build.go build github.com/liusuxian/go-aisdk/examples/image/ark">
+  <component name="RunManager" selected="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="go-aisdk" />
       <working_directory value="$PROJECT_DIR$" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <method v="2" />
-    </configuration>
-    <configuration name="go build github.com/liusuxian/go-aisdk/examples/chat/alibl" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
-      <module name="go-aisdk" />
-      <working_directory value="$PROJECT_DIR$" />
-      <envs>
-        <env name="ALIBL_API_KEYS" value="sk-6bb8bcfb06154c82b069f32b3b225a31" />
-      </envs>
-      <kind value="PACKAGE" />
-      <package value="github.com/liusuxian/go-aisdk/examples/chat/alibl" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$/examples/chat/alibl/alibl.go" />
       <method v="2" />
     </configuration>
     <configuration name="go build github.com/liusuxian/go-aisdk/examples/chat/ark" type="GoApplicationRunConfiguration" factoryName="Go Application">
@@ -214,6 +210,18 @@
       <pattern value="^\QTestUserMessage_MarshalJSON\E$/^\QArk完整多模态\E$" />
       <method v="2" />
     </configuration>
+    <configuration name="TestVideoModel_MarshalJSON/alibl文生视频 in github.com/liusuxian/go-aisdk/models" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="go-aisdk" />
+      <working_directory value="$PROJECT_DIR$/models" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/liusuxian/go-aisdk/models" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestVideoModel_MarshalJSON\E$/^\Qalibl文生视频\E$" />
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
       <module name="go-aisdk" />
       <working_directory value="$PROJECT_DIR$" />
@@ -227,18 +235,18 @@
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/deepseek" />
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark" />
       <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/image/ark" />
-      <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
+      <item itemvalue="Go Test.TestVideoModel_MarshalJSON/alibl文生视频 in github.com/liusuxian/go-aisdk/models" />
       <item itemvalue="Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models" />
       <item itemvalue="Go Test.TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models" />
       <item itemvalue="Go Test.TestUserMessage_MarshalJSON/AliBL完整多模态 in github.com/liusuxian/go-aisdk/models" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.TestVideoModel_MarshalJSON/alibl文生视频 in github.com/liusuxian/go-aisdk/models" />
         <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/image/ark" />
         <item itemvalue="Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models" />
         <item itemvalue="Go Test.TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models" />
         <item itemvalue="Go Test.TestUserMessage_MarshalJSON/AliBL完整多模态 in github.com/liusuxian/go-aisdk/models" />
-        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
       </list>
     </recent_temporary>
   </component>
@@ -274,7 +282,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="dev" />
+                        <option value="master" />
                       </list>
                     </value>
                   </entry>

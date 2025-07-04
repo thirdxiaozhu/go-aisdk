@@ -9,6 +9,8 @@
  */
 package models
 
+import "github.com/liusuxian/go-aisdk/internal/utils"
+
 type ChatSystemMsgPartType string
 
 const (

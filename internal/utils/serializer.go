@@ -163,11 +163,11 @@ func (s *Serializer) serializeStruct(v reflect.Value, visited *map[uintptr]bool,
 			isSkip        bool
 		)
 		for _, handler := range []specialFieldHandler{
+			s.handleParametersField,        // 处理parameter标签字段
 			s.handleAnonymousEmbeddedField, // 处理匿名嵌入字段
 			s.handleCopyToField,            // 处理copyto标签字段
 			s.handleFlattenField,           // 处理flatten标签字段
 			s.handleGroupField,             // 处理group标签字段
-			s.handleParametersField,        // 处理parameter标签字段
 			s.handleDefaultField,           // 处理default标签字段
 		} {
 			if isSkip, err = handler(&specialFieldContext{
@@ -471,7 +471,7 @@ func (s *Serializer) handleParametersField(ctx *specialFieldContext) (isSkip boo
 
 		}
 		(*ctx.result)[ctx.jsonFieldName] = ctx.fieldValue.String() + parametersString
-		isSkip = true
+		//isSkip = true
 		return
 	}
 	return

@@ -2,6 +2,7 @@ package ark
 
 import (
 	"context"
+	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"github.com/liusuxian/go-aisdk/providers/common"
@@ -14,14 +15,31 @@ const (
 
 // CreateChatCompletion 创建聊天
 func (s *arkProvider) CreateChatCompletion(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponse, err error) {
-	err = common.ExecuteRequest(ctx, http.MethodPost, s.providerConfig.BaseURL, apiChatCompletions, opts, s.lb, nil, &response, withRequestOptions(request)...)
+	err = common.ExecuteRequest(ctx, &common.ExecuteRequestContext{
+		Provider:   consts.Ark,
+		Method:     http.MethodPost,
+		BaseURL:    s.providerConfig.BaseURL,
+		ApiPath:    apiChatCompletions,
+		Opts:       opts,
+		LB:         s.lb,
+		Response:   &response,
+		ReqSetters: withRequestOptions(request),
+	})
 	return
 }
 
 // CreateChatCompletionStream 创建流式聊天
 func (s *arkProvider) CreateChatCompletionStream(ctx context.Context, request models.ChatRequest, opts ...httpclient.HTTPClientOption) (response models.ChatResponseStream, err error) {
 	var stream *httpclient.StreamReader[models.ChatBaseResponse]
-	if stream, err = common.ExecuteStreamRequest[models.ChatBaseResponse](ctx, http.MethodPost, s.providerConfig.BaseURL, apiChatCompletions, opts, s.lb, withRequestOptions(request)...); err != nil {
+	if stream, err = common.ExecuteStreamRequest[models.ChatBaseResponse](ctx, &common.ExecuteRequestContext{
+		Provider:   consts.AliBL,
+		Method:     http.MethodPost,
+		BaseURL:    s.providerConfig.BaseURL,
+		ApiPath:    apiChatCompletions,
+		Opts:       opts,
+		LB:         s.lb,
+		ReqSetters: withRequestOptions(request),
+	}); err != nil {
 		return
 	}
 	response = models.ChatResponseStream{

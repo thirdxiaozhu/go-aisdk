@@ -2,6 +2,8 @@ package models
 
 import (
 	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/httpclient"
+	"github.com/liusuxian/go-aisdk/internal/utils"
 )
 
 // VideoType 输入内容的类型
@@ -150,6 +152,10 @@ type VideoParameters struct {
 	//
 	// 提供商支持: Ark
 	CameraFixed bool `json:"camerafixed,omitempty" providers:"ark"`
+	// 是否开启prompt智能改写
+	//
+	// 提供商支持: Alibl
+	PromptExtend bool `json:"prompt_extend,omitempty" providers:"alibl"`
 }
 
 type VideoContent struct {
@@ -160,11 +166,11 @@ type VideoContent struct {
 	// 输入给模型的文本内容
 	//
 	// 提供商支持: Ark
-	Text string `json:"text,omitempty" providers:"ark" parameters:"ark:ArkParameters"`
+	Text string `json:"text,omitempty" providers:"ark" parameters:"ark:Parameters"`
 	// 模型文本命令
 	//
 	// 提供商支持: Ark
-	ArkParameters *VideoParameters `json:"-" providers:"ark"`
+	Parameters *VideoParameters `json:"-" providers:"ark"`
 	// 输入给模型的图片对象
 	//
 	// 提供商支持: Ark
@@ -179,17 +185,29 @@ type VideoRequest struct {
 	UserInfo
 	Provider consts.Provider `json:"provider,omitempty"` // 提供商
 	// 模型名称
+	//
 	// 提供商支持: Ark
 	Model string `json:"model,omitempty" providers:"ark"`
+	// 图像处理参数
+	//
+	// 提供商支持: Alibl
+	Parameters VideoParameters `json:"parameters,omitempty" providers:"alibl"`
 	// 输入给模型，生成视频的信息
+	//
 	// 提供商支持: Ark
 	Content []VideoContent `json:"content,omitempty" providers:"ark"`
 	// 回调通知地址
+	//
 	// 提供商支持: Ark
 	CallBackURL string `json:"callback_url,omitempty" providers:"ark"`
 }
 
 // MarshalJSON 序列化JSON
 func (r VideoRequest) MarshalJSON() (b []byte, err error) {
-	return NewSerializer(r.Provider.String()).Serialize(r)
+	return utils.NewSerializer(r.Provider.String()).Serialize(r)
+}
+
+type VideoCreateResponse struct {
+	ID string `json:"id,omitempty"` // 任务ID
+	httpclient.HttpHeader
 }
