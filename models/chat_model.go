@@ -1022,6 +1022,16 @@ func (c *ChatBaseResponse) unmarshalAliBL(data []byte) (err error) {
 	if err = json.Unmarshal(data, &rawMap); err != nil {
 		return
 	}
+
+	// 解析 request_id 数据
+	if _, ok := rawMap["request_id"]; ok {
+		var requestID string
+		if err = json.Unmarshal(rawMap["request_id"], &requestID); err != nil {
+			return err
+		}
+		c.ID = requestID
+	}
+
 	// 解析 output 数据
 	if _, ok := rawMap["output"]; ok {
 		var outputMap map[string]json.RawMessage

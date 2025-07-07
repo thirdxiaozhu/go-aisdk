@@ -54,7 +54,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 		Provider: consts.DeepSeek,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+				Content: "你好",
 				MultimodalContent: []models.ChatUserMsgPart{
 					{
 						Type: models.ChatUserMsgPartTypeImageURL,
@@ -83,7 +83,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		Provider: consts.DeepSeek,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
-				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
+				Content: "你好",
 				MultimodalContent: []models.ChatUserMsgPart{
 					{
 						Type: models.ChatUserMsgPartTypeImageURL,

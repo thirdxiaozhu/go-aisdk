@@ -128,6 +128,36 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*5))
 }
 
+func createChatCompletionStreamSimple(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponseStream, err error) {
+	return client.CreateChatCompletionStream(ctx, models.ChatRequest{
+		UserInfo: models.UserInfo{
+			User: "123456",
+		},
+		Provider: consts.AliBL,
+		Messages: []models.ChatMessage{
+			&models.UserMessage{
+				Content: "你好",
+			},
+		},
+		Model:               consts.AliBLQwqPlusLatest,
+		FrequencyPenalty:    models.Float32(1.0),
+		MaxCompletionTokens: models.Int(4096),
+		// Metadata:            map[string]string{"X-DashScope-DataInspection": "{\"input\": \"cip\", \"output\": \"cip\"}"},
+		WebSearchOptions: &models.ChatWebSearchOptions{
+			EnableSource:   models.Bool(true),
+			EnableCitation: models.Bool(true),
+			CitationFormat: models.ChatCitationFormatRefNumber,
+			ForcedSearch:   models.Bool(true),
+			SearchStrategy: models.ChatSearchStrategyPro,
+		},
+		EnableThinking: models.Bool(true),
+		Stream:         models.Bool(true), // 不会被序列化，会放到请求头中
+		StreamOptions: &models.ChatStreamOptions{
+			IncludeUsage: models.Bool(true),
+		}, // 不会被序列化
+	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*5))
+}
+
 func main() {
 	tempDir, err := os.MkdirTemp("", "config-test")
 	if err != nil {
@@ -169,33 +199,33 @@ func main() {
 
 	ctx := context.Background()
 	// 创建聊天
-	response1, err := createChatCompletion(ctx, client)
-	if err != nil {
-		originalErr := aisdk.Unwrap(err)
-		fmt.Println("originalErr =", originalErr)
-		fmt.Println("Cause Error =", aisdk.Cause(err))
-		switch {
-		case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
-			fmt.Println("ErrProviderNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
-			fmt.Println("ErrModelTypeNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrModelNotSupported):
-			fmt.Println("ErrModelNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
-			fmt.Println("ErrMethodNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
-			fmt.Println("ErrCompletionStreamNotSupported =", true)
-		case errors.Is(originalErr, context.Canceled):
-			fmt.Println("context.Canceled =", true)
-		case errors.Is(originalErr, context.DeadlineExceeded):
-			fmt.Println("context.DeadlineExceeded =", true)
-		}
-		log.Printf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
-		return
-	}
-	log.Printf("createChatCompletion response = %s, request_id = %s", httpclient.MustString(response1), response1.RequestID())
-	// 创建流式聊天
-	response2, err := createChatCompletionStream(ctx, client)
+	//response1, err := createChatCompletion(ctx, client)
+	//if err != nil {
+	//	originalErr := aisdk.Unwrap(err)
+	//	fmt.Println("originalErr =", originalErr)
+	//	fmt.Println("Cause Error =", aisdk.Cause(err))
+	//	switch {
+	//	case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
+	//		fmt.Println("ErrProviderNotSupported =", true)
+	//	case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
+	//		fmt.Println("ErrModelTypeNotSupported =", true)
+	//	case errors.Is(originalErr, aisdk.ErrModelNotSupported):
+	//		fmt.Println("ErrModelNotSupported =", true)
+	//	case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
+	//		fmt.Println("ErrMethodNotSupported =", true)
+	//	case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
+	//		fmt.Println("ErrCompletionStreamNotSupported =", true)
+	//	case errors.Is(originalErr, context.Canceled):
+	//		fmt.Println("context.Canceled =", true)
+	//	case errors.Is(originalErr, context.DeadlineExceeded):
+	//		fmt.Println("context.DeadlineExceeded =", true)
+	//	}
+	//	log.Printf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
+	//	return
+	//}
+	//log.Printf("createChatCompletion response = %s, request_id = %s", httpclient.MustString(response1), response1.RequestID())
+	//// 创建流式聊天
+	response2, err := createChatCompletionStreamSimple(ctx, client)
 	if err != nil {
 		originalErr := aisdk.Unwrap(err)
 		fmt.Println("originalErr =", originalErr)
