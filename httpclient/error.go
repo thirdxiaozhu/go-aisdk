@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 17:56:51
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 16:16:11
+ * @LastEditTime: 2025-07-07 22:22:27
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,8 +11,14 @@ package httpclient
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
+)
+
+var (
+	ErrTooManyEmptyStreamMessages  = errors.New("stream has sent too many empty messages") // 流式传输发送了太多空消息
+	ErrStreamReturnIntervalTimeout = errors.New("stream return interval timeout")          // 流式传输返回间隔超时
 )
 
 // APIError API错误信息

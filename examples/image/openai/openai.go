@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-11 14:53:25
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-01 00:20:14
+ * @LastEditTime: 2025-07-07 23:48:22
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/errors"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"github.com/liusuxian/go-aisdk/utils"
@@ -35,6 +36,42 @@ func getApiKeys(envKey string) (apiKeys string) {
 		}
 	}
 	return
+}
+
+func isError(err error) {
+	if err != nil {
+		originalErr := errors.Unwrap(err)
+		fmt.Println("originalErr =", originalErr)
+		fmt.Println("Cause Error =", errors.Cause(err))
+		switch {
+		case errors.IsFailedToCreateConfigManagerError(originalErr):
+			fmt.Println("IsFailedToCreateConfigManagerError =", true)
+		case errors.IsFailedToCreateFlakeInstanceError(originalErr):
+			fmt.Println("IsFailedToCreateFlakeInstanceError =", true)
+		case errors.IsProviderNotSupportedError(originalErr):
+			fmt.Println("IsProviderNotSupportedError =", true)
+		case errors.IsModelTypeNotSupportedError(originalErr):
+			fmt.Println("IsModelTypeNotSupportedError =", true)
+		case errors.IsModelNotSupportedError(originalErr):
+			fmt.Println("IsModelNotSupportedError =", true)
+		case errors.IsMethodNotSupportedError(originalErr):
+			fmt.Println("IsMethodNotSupportedError =", true)
+		case errors.IsCompletionStreamNotSupportedError(originalErr):
+			fmt.Println("IsCompletionStreamNotSupportedError =", true)
+		case errors.IsTooManyEmptyStreamMessagesError(originalErr):
+			fmt.Println("IsTooManyEmptyStreamMessagesError =", true)
+		case errors.IsStreamReturnIntervalTimeoutError(originalErr):
+			fmt.Println("IsStreamReturnIntervalTimeoutError =", true)
+		case errors.IsCanceledError(originalErr):
+			fmt.Println("IsCanceledError =", true)
+		case errors.IsDeadlineExceededError(originalErr):
+			fmt.Println("IsDeadlineExceededError =", true)
+		case errors.IsNetError(originalErr):
+			fmt.Println("IsNetError =", true)
+		default:
+			fmt.Println("unknown error =", err)
+		}
+	}
 }
 
 func createImage(ctx context.Context, client *aisdk.SDKClient) (response models.ImageResponse, err error) {
@@ -140,8 +177,9 @@ func main() {
 	ctx := context.Background()
 	// 创建图像
 	response1, err := createImage(ctx, client)
+	isError(err)
 	if err != nil {
-		log.Printf("createImage error = %v, request_id = %s", err, aisdk.RequestID(err))
+		log.Printf("createImage error = %v, request_id = %s", err, errors.RequestID(err))
 		return
 	}
 	// 保存每张生成的图片
@@ -159,8 +197,9 @@ func main() {
 	}
 	// 编辑图像
 	response2, err := createImageEdit(ctx, client, filenames)
+	isError(err)
 	if err != nil {
-		log.Printf("createImageEdit error = %v, request_id = %s", err, aisdk.RequestID(err))
+		log.Printf("createImageEdit error = %v, request_id = %s", err, errors.RequestID(err))
 		return
 	}
 	// 保存每张编辑的图片
@@ -175,8 +214,9 @@ func main() {
 	}
 	// 变换图像
 	response3, err := createImageVariation(ctx, client, filenames[0])
+	isError(err)
 	if err != nil {
-		log.Printf("createImageVariation error = %v, request_id = %s", err, aisdk.RequestID(err))
+		log.Printf("createImageVariation error = %v, request_id = %s", err, errors.RequestID(err))
 		return
 	}
 	// 保存每张变换的图片

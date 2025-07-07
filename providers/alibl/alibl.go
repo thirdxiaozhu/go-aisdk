@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 12:31:10
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-03 15:35:50
+ * @LastEditTime: 2025-07-07 20:57:51
  * @Description: AliBL服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -10,7 +10,6 @@
 package alibl
 
 import (
-	"fmt"
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
@@ -20,9 +19,9 @@ import (
 // aliblProvider AliBL提供商
 type aliblProvider struct {
 	core.DefaultProviderService
-	supportedModels map[fmt.Stringer]map[string]uint // 支持的模型
-	providerConfig  *conf.ProviderConfig             // 提供商配置
-	lb              *loadbalancer.LoadBalancer       // 负载均衡器
+	supportedModels map[consts.ModelType]map[string]uint // 支持的模型
+	providerConfig  *conf.ProviderConfig                 // 提供商配置
+	lb              *loadbalancer.LoadBalancer           // 负载均衡器
 }
 
 var (
@@ -32,7 +31,7 @@ var (
 // init 包初始化时创建 deepseekProvider 实例并注册到工厂
 func init() {
 	aliblService = &aliblProvider{
-		supportedModels: map[fmt.Stringer]map[string]uint{
+		supportedModels: map[consts.ModelType]map[string]uint{
 			consts.ChatModel: {
 				// chat
 				consts.AliBLQwqPlus:                       0,
@@ -221,7 +220,7 @@ func init() {
 }
 
 // GetSupportedModels 获取支持的模型
-func (s *aliblProvider) GetSupportedModels() (supportedModels map[fmt.Stringer]map[string]uint) {
+func (s *aliblProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]uint) {
 	return s.supportedModels
 }
 
