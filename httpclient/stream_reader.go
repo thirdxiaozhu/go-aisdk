@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-05-28 18:00:38
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-03 16:54:50
+ * @LastEditTime: 2025-07-07 22:13:49
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -13,7 +13,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/liusuxian/go-aisdk/internal/utils"
 	"io"
 	"net/http"
 	"time"
@@ -101,7 +100,7 @@ func (stream *StreamReader[T]) ForEach(handler StreamDataHandler[T]) (err error)
 	for {
 		select {
 		case <-stream.streamReturnIntervalTimer.C:
-			return utils.ErrStreamReturnIntervalTimeout
+			return ErrStreamReturnIntervalTimeout
 		case err = <-errChan:
 			if err == nil {
 				var empty T
@@ -196,7 +195,7 @@ func (stream *StreamReader[T]) processLines() (b []byte, err error) {
 			}
 			emptyMessagesCount++
 			if emptyMessagesCount > stream.emptyMessagesLimit {
-				return nil, utils.ErrTooManyEmptyStreamMessages
+				return nil, ErrTooManyEmptyStreamMessages
 			}
 			continue
 		}

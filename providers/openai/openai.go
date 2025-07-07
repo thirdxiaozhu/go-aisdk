@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:56:55
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-03 15:38:37
+ * @LastEditTime: 2025-07-07 20:59:08
  * @Description: OpenAI服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -11,7 +11,6 @@ package openai
 
 import (
 	"context"
-	"fmt"
 	"github.com/liusuxian/go-aisdk/conf"
 	"github.com/liusuxian/go-aisdk/consts"
 	"github.com/liusuxian/go-aisdk/core"
@@ -25,9 +24,9 @@ import (
 // openAIProvider OpenAI提供商
 type openAIProvider struct {
 	core.DefaultProviderService
-	supportedModels map[fmt.Stringer]map[string]uint // 支持的模型
-	providerConfig  *conf.ProviderConfig             // 提供商配置
-	lb              *loadbalancer.LoadBalancer       // 负载均衡器
+	supportedModels map[consts.ModelType]map[string]uint // 支持的模型
+	providerConfig  *conf.ProviderConfig                 // 提供商配置
+	lb              *loadbalancer.LoadBalancer           // 负载均衡器
 }
 
 var (
@@ -41,7 +40,7 @@ const (
 // init 包初始化时创建 openAIProvider 实例并注册到工厂
 func init() {
 	openaiService = &openAIProvider{
-		supportedModels: map[fmt.Stringer]map[string]uint{
+		supportedModels: map[consts.ModelType]map[string]uint{
 			consts.ChatModel: {
 				// chat
 				consts.OpenAIO1Mini:                         0,
@@ -161,7 +160,7 @@ func init() {
 }
 
 // GetSupportedModels 获取支持的模型
-func (s *openAIProvider) GetSupportedModels() (supportedModels map[fmt.Stringer]map[string]uint) {
+func (s *openAIProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]uint) {
 	return s.supportedModels
 }
 
@@ -172,7 +171,7 @@ func (s *openAIProvider) InitializeProviderConfig(config *conf.ProviderConfig) {
 }
 
 // ListModels 列出模型
-func (s *openAIProvider) ListModels(ctx context.Context, provider fmt.Stringer, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
+func (s *openAIProvider) ListModels(ctx context.Context, provider consts.Provider, opts ...httpclient.HTTPClientOption) (response models.ListModelsResponse, err error) {
 	err = common.ExecuteRequest(ctx, &common.ExecuteRequestContext{
 		Provider: consts.OpenAI,
 		Method:   http.MethodGet,

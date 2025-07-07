@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 13:01:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-03 22:42:03
+ * @LastEditTime: 2025-07-07 23:32:54
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/errors"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"log"
@@ -35,6 +36,42 @@ func getApiKeys(envKey string) (apiKeys string) {
 		}
 	}
 	return
+}
+
+func isError(err error) {
+	if err != nil {
+		originalErr := errors.Unwrap(err)
+		fmt.Println("originalErr =", originalErr)
+		fmt.Println("Cause Error =", errors.Cause(err))
+		switch {
+		case errors.IsFailedToCreateConfigManagerError(originalErr):
+			fmt.Println("IsFailedToCreateConfigManagerError =", true)
+		case errors.IsFailedToCreateFlakeInstanceError(originalErr):
+			fmt.Println("IsFailedToCreateFlakeInstanceError =", true)
+		case errors.IsProviderNotSupportedError(originalErr):
+			fmt.Println("IsProviderNotSupportedError =", true)
+		case errors.IsModelTypeNotSupportedError(originalErr):
+			fmt.Println("IsModelTypeNotSupportedError =", true)
+		case errors.IsModelNotSupportedError(originalErr):
+			fmt.Println("IsModelNotSupportedError =", true)
+		case errors.IsMethodNotSupportedError(originalErr):
+			fmt.Println("IsMethodNotSupportedError =", true)
+		case errors.IsCompletionStreamNotSupportedError(originalErr):
+			fmt.Println("IsCompletionStreamNotSupportedError =", true)
+		case errors.IsTooManyEmptyStreamMessagesError(originalErr):
+			fmt.Println("IsTooManyEmptyStreamMessagesError =", true)
+		case errors.IsStreamReturnIntervalTimeoutError(originalErr):
+			fmt.Println("IsStreamReturnIntervalTimeoutError =", true)
+		case errors.IsCanceledError(originalErr):
+			fmt.Println("IsCanceledError =", true)
+		case errors.IsDeadlineExceededError(originalErr):
+			fmt.Println("IsDeadlineExceededError =", true)
+		case errors.IsNetError(originalErr):
+			fmt.Println("IsNetError =", true)
+		default:
+			fmt.Println("unknown error =", err)
+		}
+	}
 }
 
 func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (response models.ChatResponse, err error) {
@@ -199,54 +236,18 @@ func main() {
 
 	ctx := context.Background()
 	// 创建聊天
-	//response1, err := createChatCompletion(ctx, client)
-	//if err != nil {
-	//	originalErr := aisdk.Unwrap(err)
-	//	fmt.Println("originalErr =", originalErr)
-	//	fmt.Println("Cause Error =", aisdk.Cause(err))
-	//	switch {
-	//	case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
-	//		fmt.Println("ErrProviderNotSupported =", true)
-	//	case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
-	//		fmt.Println("ErrModelTypeNotSupported =", true)
-	//	case errors.Is(originalErr, aisdk.ErrModelNotSupported):
-	//		fmt.Println("ErrModelNotSupported =", true)
-	//	case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
-	//		fmt.Println("ErrMethodNotSupported =", true)
-	//	case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
-	//		fmt.Println("ErrCompletionStreamNotSupported =", true)
-	//	case errors.Is(originalErr, context.Canceled):
-	//		fmt.Println("context.Canceled =", true)
-	//	case errors.Is(originalErr, context.DeadlineExceeded):
-	//		fmt.Println("context.DeadlineExceeded =", true)
-	//	}
-	//	log.Printf("createChatCompletion error = %v, request_id = %s", err, aisdk.RequestID(err))
-	//	return
-	//}
-	//log.Printf("createChatCompletion response = %s, request_id = %s", httpclient.MustString(response1), response1.RequestID())
-	//// 创建流式聊天
-	response2, err := createChatCompletionStreamSimple(ctx, client)
+	response1, err := createChatCompletion(ctx, client)
+	isError(err)
 	if err != nil {
-		originalErr := aisdk.Unwrap(err)
-		fmt.Println("originalErr =", originalErr)
-		fmt.Println("Cause Error =", aisdk.Cause(err))
-		switch {
-		case errors.Is(originalErr, aisdk.ErrProviderNotSupported):
-			fmt.Println("ErrProviderNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrModelTypeNotSupported):
-			fmt.Println("ErrModelTypeNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrModelNotSupported):
-			fmt.Println("ErrModelNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrMethodNotSupported):
-			fmt.Println("ErrMethodNotSupported =", true)
-		case errors.Is(originalErr, aisdk.ErrCompletionStreamNotSupported):
-			fmt.Println("ErrCompletionStreamNotSupported =", true)
-		case errors.Is(originalErr, context.Canceled):
-			fmt.Println("context.Canceled =", true)
-		case errors.Is(originalErr, context.DeadlineExceeded):
-			fmt.Println("context.DeadlineExceeded =", true)
-		}
-		log.Printf("createChatCompletionStream error = %v, request_id = %s", err, aisdk.RequestID(err))
+		log.Printf("createChatCompletion error = %v, request_id = %s", err, errors.RequestID(err))
+		return
+	}
+	log.Printf("createChatCompletion response = %s, request_id = %s", httpclient.MustString(response1), response1.RequestID())
+	// 创建流式聊天
+	response2, err := createChatCompletionStream(ctx, client)
+	isError(err)
+	if err != nil {
+		log.Printf("createChatCompletionStream error = %v, request_id = %s", err, errors.RequestID(err))
 		return
 	}
 	// 读取流式聊天
@@ -262,17 +263,7 @@ func main() {
 		}
 		return nil
 	}); err != nil {
-		switch {
-		case errors.Is(err, aisdk.ErrTooManyEmptyStreamMessages):
-			fmt.Println("ErrTooManyEmptyStreamMessages =", true)
-		case errors.Is(err, aisdk.ErrStreamReturnIntervalTimeout):
-			fmt.Println("ErrStreamReturnIntervalTimeout =", true)
-		default:
-			var netErr net.Error
-			if errors.As(err, &netErr) {
-				fmt.Println("net.Error =", true)
-			}
-		}
+		isError(err)
 		log.Printf("createChatCompletionStream item error = %v", err)
 		return
 	}
