@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-04-10 13:57:27
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-07 20:58:26
+ * @LastEditTime: 2025-07-09 17:13:03
  * @Description: DeepSeek服务提供商实现，采用单例模式，在包导入时自动注册到提供商工厂
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -24,9 +24,9 @@ import (
 // deepseekProvider DeepSeek提供商
 type deepseekProvider struct {
 	core.DefaultProviderService
-	supportedModels map[consts.ModelType]map[string]uint // 支持的模型
-	providerConfig  *conf.ProviderConfig                 // 提供商配置
-	lb              *loadbalancer.LoadBalancer           // 负载均衡器
+	supportedModels map[consts.ModelType]map[string]consts.ModelFeature // 支持的模型
+	providerConfig  *conf.ProviderConfig                                // 提供商配置
+	lb              *loadbalancer.LoadBalancer                          // 负载均衡器
 }
 
 var (
@@ -40,11 +40,11 @@ const (
 // init 包初始化时创建 deepseekProvider 实例并注册到工厂
 func init() {
 	deepseekService = &deepseekProvider{
-		supportedModels: map[consts.ModelType]map[string]uint{
+		supportedModels: map[consts.ModelType]map[string]consts.ModelFeature{
 			consts.ChatModel: {
 				// chat
-				consts.DeepSeekChat:     0,
-				consts.DeepSeekReasoner: 0,
+				consts.DeepSeekChat:     consts.ModelFeatureNone,
+				consts.DeepSeekReasoner: consts.ModelFeatureReasoning,
 			},
 		},
 	}
@@ -52,7 +52,7 @@ func init() {
 }
 
 // GetSupportedModels 获取支持的模型
-func (s *deepseekProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]uint) {
+func (s *deepseekProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]consts.ModelFeature) {
 	return s.supportedModels
 }
 
