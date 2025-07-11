@@ -220,7 +220,7 @@ func init() {
 }
 
 // GetSupportedModels 获取支持的模型
-func (s *aliblProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]uint) {
+func (s *aliblProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]consts.ModelFeature) {
 	return s.supportedModels
 }
 

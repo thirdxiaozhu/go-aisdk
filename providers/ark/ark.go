@@ -31,7 +31,7 @@ var (
 // init 包初始化时创建 deepseekProvider 实例并注册到工厂
 func init() {
 	arkService = &arkProvider{
-		supportedModels: map[consts.ModelType]map[string]uint{
+		supportedModels: map[consts.ModelType]map[string]consts.ModelFeature{
 			consts.ChatModel: {
 				// chat
 				consts.Doubaoseed1_6: 1,
