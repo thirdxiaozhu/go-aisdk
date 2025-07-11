@@ -2,7 +2,7 @@
  * @Author: liusuxian 382185882@qq.com
  * @Date: 2025-06-25 13:01:00
  * @LastEditors: liusuxian 382185882@qq.com
- * @LastEditTime: 2025-07-07 23:32:54
+ * @LastEditTime: 2025-07-11 18:54:28
  * @Description:
  *
  * Copyright (c) 2025 by liusuxian email: 382185882@qq.com, All Rights Reserved.
@@ -80,6 +80,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 		Provider: consts.AliBL,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
+				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
 				MultimodalContent: []models.ChatUserMsgPart{
 					{
 						Type: models.ChatUserMsgPartTypeImageURL, // 不会被序列化
@@ -106,7 +107,7 @@ func createChatCompletion(ctx context.Context, client *aisdk.SDKClient) (respons
 				},
 			},
 		},
-		Model:               consts.AliBLQwenVlMax,
+		Model:               consts.AliBLQwenLong,
 		FrequencyPenalty:    models.Float32(1.0),
 		MaxCompletionTokens: models.Int(4096),
 		// Metadata:            map[string]string{"X-DashScope-DataInspection": "{\"input\": \"cip\", \"output\": \"cip\"}"},
@@ -129,6 +130,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		Provider: consts.AliBL,
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
+				Content: "你好，我是小明，请帮我写一个关于人工智能的论文",
 				MultimodalContent: []models.ChatUserMsgPart{
 					{
 						Type: models.ChatUserMsgPartTypeImageURL, // 不会被序列化
@@ -144,7 +146,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 				},
 			},
 		},
-		Model:               consts.AliBLQwenVlMax,
+		Model:               consts.AliBLQwenLong,
 		FrequencyPenalty:    models.Float32(1.0),
 		MaxCompletionTokens: models.Int(4096),
 		// Metadata:            map[string]string{"X-DashScope-DataInspection": "{\"input\": \"cip\", \"output\": \"cip\"}"},
