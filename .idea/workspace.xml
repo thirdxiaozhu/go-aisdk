@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8df846c7-bb5a-4e5d-ba5b-dc77b78744ed" name="Changes" comment="修改代码">
+    <list default="true" id="8df846c7-bb5a-4e5d-ba5b-dc77b78744ed" name="Changes" comment="更新代码">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/chat/alibl/alibl.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/chat/alibl/alibl.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/chat/deepseek/deepseek.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/chat/deepseek/deepseek.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/chat_model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/chat_model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/chat/ark/ark.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/chat/ark/ark.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/image/ark/ark.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/image/ark/ark.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/providers/ark/ark.go" beforeDir="false" afterPath="$PROJECT_DIR$/providers/ark/ark.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,7 +112,7 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl">
+  <component name="RunManager" selected="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/ark">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="go-aisdk" />
       <working_directory value="$PROJECT_DIR$" />
@@ -237,9 +238,9 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/image/ark" />
         <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/chat/alibl" />
         <item itemvalue="Go Test.TestVideoModel_MarshalJSON/alibl文生视频 in github.com/liusuxian/go-aisdk/models" />
-        <item itemvalue="Go Build.go build github.com/liusuxian/go-aisdk/examples/image/ark" />
         <item itemvalue="Go Test.TestUserMessage_MarshalJSON/Ark完整多模态 in github.com/liusuxian/go-aisdk/models" />
         <item itemvalue="Go Test.TestSystemMessage_MarshalJSON in github.com/liusuxian/go-aisdk/models" />
       </list>
@@ -298,7 +299,8 @@
     <MESSAGE value="新增火山大模型对话" />
     <MESSAGE value="新增火山大模型对话测试、火山大模型图片生成" />
     <MESSAGE value="修改代码" />
-    <option name="LAST_COMMIT_MESSAGE" value="修改代码" />
+    <MESSAGE value="更新代码" />
+    <option name="LAST_COMMIT_MESSAGE" value="更新代码" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>

@@ -11,7 +11,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
@@ -19,7 +18,6 @@ import (
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"log"
-	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -236,15 +234,15 @@ func main() {
 
 	ctx := context.Background()
 	// 创建聊天
-	response1, err := createChatCompletion(ctx, client)
-	isError(err)
-	if err != nil {
-		log.Printf("createChatCompletion error = %v, request_id = %s", err, errors.RequestID(err))
-		return
-	}
-	log.Printf("createChatCompletion response = %s, request_id = %s", httpclient.MustString(response1), response1.RequestID())
+	//response1, err := createChatCompletion(ctx, client)
+	//isError(err)
+	//if err != nil {
+	//	log.Printf("createChatCompletion error = %v, request_id = %s", err, errors.RequestID(err))
+	//	return
+	//}
+	//log.Printf("createChatCompletion response = %s, request_id = %s", httpclient.MustString(response1), response1.RequestID())
 	// 创建流式聊天
-	response2, err := createChatCompletionStream(ctx, client)
+	response2, err := createChatCompletionStreamSimple(ctx, client)
 	isError(err)
 	if err != nil {
 		log.Printf("createChatCompletionStream error = %v, request_id = %s", err, errors.RequestID(err))

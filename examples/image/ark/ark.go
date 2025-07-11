@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"github.com/liusuxian/go-aisdk"
 	"github.com/liusuxian/go-aisdk/consts"
+	"github.com/liusuxian/go-aisdk/errors"
 	"github.com/liusuxian/go-aisdk/httpclient"
 	"github.com/liusuxian/go-aisdk/models"
 	"github.com/liusuxian/go-aisdk/utils"
@@ -90,7 +91,7 @@ func main() {
 	// 创建图像
 	response1, err := createImage(ctx, client)
 	if err != nil {
-		log.Printf("createImage error = %v, request_id = %s", err, aisdk.RequestID(err))
+		log.Printf("createImage error = %v, request_id = %s", err, errors.RequestID(err))
 		return
 	}
 
