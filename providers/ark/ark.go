@@ -19,9 +19,9 @@ import (
 // arkProvider 火山大模型提供商
 type arkProvider struct {
 	core.DefaultProviderService
-	supportedModels map[consts.ModelType]map[string]uint // 支持的模型
-	providerConfig  *conf.ProviderConfig                 // 提供商配置
-	lb              *loadbalancer.LoadBalancer           // 负载均衡器
+	supportedModels map[consts.ModelType]map[string]consts.ModelFeature // 支持的模型
+	providerConfig  *conf.ProviderConfig                                // 提供商配置
+	lb              *loadbalancer.LoadBalancer                          // 负载均衡器
 }
 
 var (
@@ -45,7 +45,7 @@ func init() {
 }
 
 // GetSupportedModels 获取支持的模型
-func (s *arkProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]uint) {
+func (s *arkProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]consts.ModelFeature) {
 	return s.supportedModels
 }
 

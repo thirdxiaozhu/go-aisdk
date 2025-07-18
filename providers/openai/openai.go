@@ -24,9 +24,9 @@ import (
 // openAIProvider OpenAI提供商
 type openAIProvider struct {
 	core.DefaultProviderService
-	supportedModels map[consts.ModelType]map[string]uint // 支持的模型
-	providerConfig  *conf.ProviderConfig                 // 提供商配置
-	lb              *loadbalancer.LoadBalancer           // 负载均衡器
+	supportedModels map[consts.ModelType]map[string]consts.ModelFeature // 支持的模型
+	providerConfig  *conf.ProviderConfig                                // 提供商配置
+	lb              *loadbalancer.LoadBalancer                          // 负载均衡器
 }
 
 var (
@@ -40,7 +40,7 @@ const (
 // init 包初始化时创建 openAIProvider 实例并注册到工厂
 func init() {
 	openaiService = &openAIProvider{
-		supportedModels: map[consts.ModelType]map[string]uint{
+		supportedModels: map[consts.ModelType]map[string]consts.ModelFeature{
 			consts.ChatModel: {
 				// chat
 				consts.OpenAIO1Mini:                         0,
@@ -160,7 +160,7 @@ func init() {
 }
 
 // GetSupportedModels 获取支持的模型
-func (s *openAIProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]uint) {
+func (s *openAIProvider) GetSupportedModels() (supportedModels map[consts.ModelType]map[string]consts.ModelFeature) {
 	return s.supportedModels
 }
 

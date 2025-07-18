@@ -19,9 +19,9 @@ import (
 // aliblProvider AliBL提供商
 type aliblProvider struct {
 	core.DefaultProviderService
-	supportedModels map[consts.ModelType]map[string]uint // 支持的模型
-	providerConfig  *conf.ProviderConfig                 // 提供商配置
-	lb              *loadbalancer.LoadBalancer           // 负载均衡器
+	supportedModels map[consts.ModelType]map[string]consts.ModelFeature // 支持的模型
+	providerConfig  *conf.ProviderConfig                                // 提供商配置
+	lb              *loadbalancer.LoadBalancer                          // 负载均衡器
 }
 
 var (
@@ -31,7 +31,7 @@ var (
 // init 包初始化时创建 deepseekProvider 实例并注册到工厂
 func init() {
 	aliblService = &aliblProvider{
-		supportedModels: map[consts.ModelType]map[string]uint{
+		supportedModels: map[consts.ModelType]map[string]consts.ModelFeature{
 			consts.ChatModel: {
 				// chat
 				consts.AliBLQwqPlus:                       0,

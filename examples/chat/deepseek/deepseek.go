@@ -119,19 +119,19 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		Messages: []models.ChatMessage{
 			&models.UserMessage{
 				Content: "你好",
-				MultimodalContent: []models.ChatUserMsgPart{
-					{
-						Type: models.ChatUserMsgPartTypeImageURL,
-						ImageURL: &models.ChatUserMsgImageURL{
-							URL:    "https://www.gstatic.com/webp/gallery/1.webp",
-							Detail: models.ChatUserMsgImageURLDetailHigh,
-						},
-					},
-					{
-						Type: models.ChatUserMsgPartTypeText,
-						Text: "这些是什么?",
-					},
-				}, // 不会被序列化，也不会复制到Content字段，因为deepseek不支持多模态
+				//MultimodalContent: []models.ChatUserMsgPart{
+				//	{
+				//		Type: models.ChatUserMsgPartTypeImageURL,
+				//		ImageURL: &models.ChatUserMsgImageURL{
+				//			URL:    "https://www.gstatic.com/webp/gallery/1.webp",
+				//			Detail: models.ChatUserMsgImageURLDetailHigh,
+				//		},
+				//	},
+				//	{
+				//		Type: models.ChatUserMsgPartTypeText,
+				//		Text: "这些是什么?",
+				//	},
+				//}, // 不会被序列化，也不会复制到Content字段，因为deepseek不支持多模态
 			},
 		},
 		Model:               consts.DeepSeekReasoner,
@@ -140,7 +140,7 @@ func createChatCompletionStream(ctx context.Context, client *aisdk.SDKClient) (r
 		StreamOptions: &models.ChatStreamOptions{
 			IncludeUsage: models.Bool(true),
 		},
-	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*5))
+	}, httpclient.WithTimeout(time.Minute*5), httpclient.WithStreamReturnIntervalTimeout(time.Second*50))
 }
 
 func main() {
@@ -184,21 +184,21 @@ func main() {
 
 	ctx := context.Background()
 	// 列出模型
-	response1, err := listModels(ctx, client)
-	isError(err)
-	if err != nil {
-		log.Printf("listModels error = %v, request_id = %s", err, errors.RequestID(err))
-		return
-	}
-	log.Printf("listModels response = %s, request_id = %s", httpclient.MustString(response1), response1.RequestID())
-	// 创建聊天
-	response2, err := createChatCompletion(ctx, client)
-	isError(err)
-	if err != nil {
-		log.Printf("createChatCompletion error = %v, request_id = %s", err, errors.RequestID(err))
-		return
-	}
-	log.Printf("createChatCompletion response = %s, request_id = %s", httpclient.MustString(response2), response2.RequestID())
+	//response1, err := listModels(ctx, client)
+	//isError(err)
+	//if err != nil {
+	//	log.Printf("listModels error = %v, request_id = %s", err, errors.RequestID(err))
+	//	return
+	//}
+	//log.Printf("listModels response = %s, request_id = %s", httpclient.MustString(response1), response1.RequestID())
+	//// 创建聊天
+	//response2, err := createChatCompletion(ctx, client)
+	//isError(err)
+	//if err != nil {
+	//	log.Printf("createChatCompletion error = %v, request_id = %s", err, errors.RequestID(err))
+	//	return
+	//}
+	//log.Printf("createChatCompletion response = %s, request_id = %s", httpclient.MustString(response2), response2.RequestID())
 	// 创建流式聊天
 	response3, err := createChatCompletionStream(ctx, client)
 	isError(err)
