@@ -134,7 +134,7 @@ type VideoParameters struct {
 	Ratio VideoParametersRatio `json:"ratio,omitempty" providers:"ark"`
 	// 视频时长
 	//
-	// 提供商支持: Ark
+	// 提供商支持: Ark | Alibl
 	Duration VideoParametersDuration `json:"duration,omitempty" providers:"ark"`
 	// 视频帧率
 	//
@@ -146,8 +146,8 @@ type VideoParameters struct {
 	Watermark bool `json:"watermark,omitempty" providers:"ark"`
 	// 种子值
 	//
-	// 提供商支持: Ark
-	Seed int `json:"seed,omitempty" providers:"ark" default:"-1"`
+	// 提供商支持: Ark | Alibl
+	Seed int `json:"seed,omitempty" providers:"ark,alibl" default:"-1"`
 	// 相机是否固定
 	//
 	// 提供商支持: Ark

@@ -272,7 +272,7 @@ type ImageRequest struct {
 	// 提示词
 	//
 	// 提供商支持: OpenAI | Ark
-	Prompt string `json:"prompt,omitempty" providers:"openai"`
+	Prompt string `json:"prompt,omitempty" providers:"openai,ark"`
 	// 设置生成图像的背景透明度
 	//
 	// 提供商支持: OpenAI
@@ -280,7 +280,7 @@ type ImageRequest struct {
 	// 模型名称
 	//
 	// 提供商支持: OpenAI | Ark
-	Model string `json:"model,omitempty" providers:"openai"`
+	Model string `json:"model,omitempty" providers:"openai,ark"`
 	// 内容审核级别
 	//
 	// 提供商支持: OpenAI
@@ -304,24 +304,24 @@ type ImageRequest struct {
 	// 响应格式
 	//
 	// 提供商支持: OpenAI | Ark
-	ResponseFormat ImageResponseFormat `json:"response_format,omitempty" providers:"openai"`
+	ResponseFormat ImageResponseFormat `json:"response_format,omitempty" providers:"openai,ark"`
 	// 图像尺寸
 	//
 	// 提供商支持: OpenAI | Ark
-	Size ImageSize `json:"size,omitempty" providers:"openai"`
+	Size ImageSize `json:"size,omitempty" providers:"openai,ark"`
 	// 图像风格
 	//
 	// 提供商支持: OpenAI
 	Style ImageStyle `json:"style,omitempty" providers:"openai"`
 	// 随机数种子 用于控制模型生成内容的随机性
 	// 提供商支持: Ark
-	Seed int `json:"seed,omitempty"`
+	Seed int `json:"seed,omitempty" providers:"ark"`
 	// 模型输出结果与prompt的一致程度
 	// 提供商支持: Ark
-	GuidanceScale float64 `json:"guidance_scale,omitempty"`
+	GuidanceScale float64 `json:"guidance_scale,omitempty" providers:"ark"`
 	// 是否添加水印
 	// 提供商支持: Ark
-	Watermark bool `json:"watermark,omitempty"`
+	Watermark bool `json:"watermark,omitempty" providers:"ark"`
 }
 
 // MarshalJSON 序列化JSON

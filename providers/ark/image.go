@@ -19,7 +19,7 @@ func (s *arkProvider) CreateImage(ctx context.Context, request models.ImageReque
 		Provider: consts.Ark,
 		Method:   http.MethodPost,
 		BaseURL:  s.providerConfig.BaseURL,
-		ApiPath:  apiChatCompletions,
+		ApiPath:  apiImagesGenerations,
 		Opts:     opts,
 		LB:       s.lb,
 		Response: &response,

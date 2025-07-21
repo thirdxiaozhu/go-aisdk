@@ -37,7 +37,7 @@ func init() {
 				consts.Doubaoseed1_6: 1,
 			},
 			consts.ImageModel: {
-				consts.Doubaoseedream3: 1,
+				consts.Doubaoseedream3: 0,
 			},
 		},
 	}
